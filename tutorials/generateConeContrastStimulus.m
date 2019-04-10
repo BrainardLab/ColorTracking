@@ -20,7 +20,7 @@ function  generateConeContrastStimulus()
     backgroundPrimaries = [0.5 0.5 0.45]';
     
     % Speficy LMS contrast vector
-    LMScontrastModulation = [0.0 0.0 0.5];
+    LMScontrastModulation = [0.1 -0.1 0];
     
     % Compute cone excitations for these primaries and displaySPD
     backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);
@@ -59,12 +59,12 @@ function  stimSettingsImage = stimSettingsFromContrastImageForDesiredConeContras
     % check for gamut
     idx = find(primaries<0);
     if  (numel(idx)>0)
-        fprintf(2,'Warning: %d pixels have primary value < 0\n',  numel(idx));
+        fprintf(2,'Warning: %d pixels (%2.3f%%) have primary value < 0\n',  numel(idx), numel(idx)/numel(primaries)*100);
         primaries(idx) = 0;
     end
     idx = find(primaries>1);
     if  (numel(idx)>0)
-        fprintf(2,'Warning: %d pixels have primary value > 1\n',  numel(idx));
+        fprintf(2,'Warning: %d pixels (%2.3f%%) have primary value > 1\n',  numel(idx), numel(idx)/numel(primaries)*100);
         primaries(idx) = 1;
     end
     

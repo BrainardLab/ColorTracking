@@ -10,7 +10,7 @@ bg = [mean(mean(LMSimage(:,:,1))), mean(mean(LMSimage(:,:,2))), mean(mean(LMSima
 
 deltaLMSimage = cat(3,LMSimage(:,:,1)-bg(1),LMSimage(:,:,2)-bg(2),LMSimage(:,:,3)-bg(3));
 
-[calFormatScaledLMSimage,nCols,mRows] = ImageToCalFormat(LMSimage);
+[calFormatScaledLMSimage,nCols,mRows] = ImageToCalFormat(deltaLMSimage);
 
 subplot(4, 1, 2);
 imshow(deltaLMSimage, []);title('Delta LMS')
@@ -67,12 +67,44 @@ scaledDKLimage  = CalFormatToImage(scaledDKLcoords, nCols,mRows);
 subplot(4, 1, 4);
 imshow(scaledDKLimage,[]); title('DKL image')
 
-
 figure
 scatter3(DKL_coords(1,:),DKL_coords(2,:),DKL_coords(3,:))
 
 figure
 scatter3(scaledDKLcoords(1,:),scaledDKLcoords(2,:),scaledDKLcoords(3,:))
+
+
+%% go back 
+lumImg = scaledDKLcoords;
+lumImg(2:3,:) = zeros(size(lumImg(2:3,:)));
+lumImg = lumImg./max(abs(lumImg(:)))*.5;
+
+rgImg = scaledDKLcoords;
+rgImg([1,3],:) = zeros(size(rgImg([1,3],:)));
+rgImg = rgImg./max(abs(rgImg(:)))*.5;
+
+blImg = scaledDKLcoords;
+blImg(1:2,:) = zeros(size(blImg(1:2,:)));
+blImg = rgImg./max(abs(blImg(:)))*.5;
+
+
+lum_resp_scaled     = M_inv*lumImg;
+lminM_resp_scaled   = M_inv*rgImg;
+SminLum_resp_scaled = M_inv*blImg;
+
+
+[backProjLumImage] = CalFormatToImage(scaledDKLcoords, nCols,mRows);
+[backProjLMimage]  = CalFormatToImage(scaledDKLcoords, nCols,mRows);
+[backProjSimage]   = CalFormatToImage(scaledDKLcoords, nCols,mRows);
+
+figure 
+subplot(3, 1, 1);
+imshow(backProjLumImage,[]); title('Lum')
+subplot(3, 1, 2);
+imshow(backProjLMimage,[]); title('rg')
+subplot(3, 1, 3);
+imshow(backProjSimage,[]); title('bl')
+
 
 
 

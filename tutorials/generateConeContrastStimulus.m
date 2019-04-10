@@ -1,7 +1,5 @@
 function  generateConeContrastStimulus()
 
-    %tbUse('BrainardLabBase')
-    
     % Determine location of resourcesDir
     [rootDir,~] = fileparts(which(mfilename));
     resourcesDir = sprintf('%s/resources',rootDir);
@@ -19,11 +17,10 @@ function  generateConeContrastStimulus()
     [displaySPDs, coneFundamentals] = loadDisplaySPDsAndConeFundamentals(calStructOBJ);
 
     % Speficy primary values for background
-    backgroundPrimaries = [0.5 0.5 0.5]';
+    backgroundPrimaries = [0.5 0.5 0.45]';
     
-    % Speficy LMS contrast vector (-M)
-    stimLMScontrast = [0 -0.17 0];
-    
+    % Speficy LMS contrast vector
+    LMScontrastModulation = [0.0 0.0 0.5];
     
     % Compute cone excitations for these primaries and displaySPD
     backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);
@@ -31,23 +28,18 @@ function  generateConeContrastStimulus()
     % Generate the spatial contrast profile of the stimulus
     type = 'sin';
     type = 'flower';
-    stimContrastSpatialProfile = generateStimContrastProfile(type, resourcesDir);
+    [contrastImage, sRGBimage] = generateStimContrastProfile(type, resourcesDir);
     
     % Generate stimulus settings
-    stimSettingsImage = stimSettings(stimContrastSpatialProfile, stimLMScontrast, backgroundConeExcitations, ...
+    stimSettingsLMSImage = stimSettingsFromContrastImageForDesiredConeContrastModulation(...
+        contrastImage, LMScontrastModulation, backgroundConeExcitations, ...
         displaySPDs, calStructOBJ, coneFundamentals);
     
-    figure(1);
-    subplot(1,2,1)
-    imagesc(stimContrastSpatialProfile); axis 'image'
-    colormap(gray);
-    
-    subplot(1,2,2)
-    image(stimSettingsImage); axis 'image'
+    plotInputAndCorrespondingLMSimage(sRGBimage, contrastImage, stimSettingsLMSImage, LMScontrastModulation, backgroundPrimaries)
+
 end
 
-
-function  stimSettingsImage = stimSettings(stimContrastSpatialProfile, stimLMScontrast, backgroundConeExcitations, ...
+function  stimSettingsImage = stimSettingsFromContrastImageForDesiredConeContrastModulation(stimContrastSpatialProfile, stimLMScontrast, backgroundConeExcitations, ...
         displaySPDs, calStructOBJ, coneFundamentals)
     % from image format to 1D
     rows = size(stimContrastSpatialProfile,1);
@@ -67,12 +59,12 @@ function  stimSettingsImage = stimSettings(stimContrastSpatialProfile, stimLMSco
     % check for gamut
     idx = find(primaries<0);
     if  (numel(idx)>0)
-        fprintf(2,'Warning: %d pixels have primary value < 0',  numel(idx));
+        fprintf(2,'Warning: %d pixels have primary value < 0\n',  numel(idx));
         primaries(idx) = 0;
     end
     idx = find(primaries>1);
     if  (numel(idx)>0)
-        fprintf(2,'Warning: %d pixels have primary value > 1',  numel(idx));
+        fprintf(2,'Warning: %d pixels have primary value > 1\n',  numel(idx));
         primaries(idx) = 1;
     end
     
@@ -85,7 +77,40 @@ function  stimSettingsImage = stimSettings(stimContrastSpatialProfile, stimLMSco
     stimSettingsImage = reshape(settings', [rows  cols 3]);
 end
 
-function stimContrastProfile = generateStimContrastProfile(type, resourcesDir)
+function  plotInputAndCorrespondingLMSimage(sRGBimage, contrastImage, stimSettingsLMSImage, stimLMScontrast, backgroundPrimaries)
+    hFig = figure(1); clf;
+    set(hFig, 'Position', [10 10  400 500]); 
+    imagesc(sRGBimage); axis 'image'; axis 'ij'
+    title('input image');
+    set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
+    box off
+    lRGBimage = rgb2lin(sRGBimage);
+    meanColor = mean(mean(lRGBimage,1),2);
+    set(hFig, 'Color', lin2rgb(meanColor));
+    
+    hFig = figure(2); clf;
+    set(hFig, 'Position', [400 10  400 500]); 
+    imagesc(contrastImage); axis 'image'; axis 'ij'
+    title('contrast image');
+    set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'CLim', [-1 1], 'FontSize', 14);
+    box off
+    hb = colorbar();
+    hb.Label.String = 'contrast';
+    cMap = brewermap(1024, '*RdBu');
+    colormap(cMap);
+    set(hFig, 'Color', [1 1 1]);
+    
+    hFig = figure(3); clf;
+    set(hFig, 'Position', [800 10  400 500]); 
+    image(stimSettingsLMSImage); axis 'image'; axis 'ij'
+    title(sprintf('LMS cone contrast image\n(%2.2f, %2.2f, %2.2f)', stimLMScontrast(1), stimLMScontrast(2), stimLMScontrast(3)));
+    set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
+    box off
+    set(hFig, 'Color', lin2rgb(backgroundPrimaries));
+end
+
+
+function [stimContrastProfile, sRGBimage] = generateStimContrastProfile(type, resourcesDir)
     
     switch (type)
         case 'sin'
@@ -96,6 +121,8 @@ function stimContrastProfile = generateStimContrastProfile(type, resourcesDir)
             fx = 3.0;
             angle = 60;
             stimContrastProfile = sin(2*pi*(fx*cosd(angle)*x + fx*sind(angle)*y));
+            sRGBimage = lin2rgb(stimContrastProfile);
+            
             
         case 'flower'
             % Load a random image downloaded off the internet (sRGB format in 0-255 8-bit format)
@@ -168,8 +195,7 @@ function primaries = primaryModulationsForConeExcitationsAndDisplaySPDs(coneExci
     computeMethod = 'educational';
     computeMethod = 'fast';
     
-    if (strcmp(computeMethod, 'educational'))
-        
+    if (strcmp(computeMethod, 'educational'))   
         LconeFundamental = squeeze(coneFundamentals(1,:));
         MconeFundamental = squeeze(coneFundamentals(2,:));
         SconeFundamental = squeeze(coneFundamentals(3,:));
@@ -220,6 +246,8 @@ function primaries = primaryModulationsForConeExcitationsAndDisplaySPDs(coneExci
     else
         % COMPACT WAY WAY OF DOING THE ABOVE
         M = coneFundamentals * displaySPDs';
+        
+        % Least squares solution to the system of linear equations M*primaries = [Lcone Mcone Scone]. 
         primaries = M\coneExcitations;
     end
     

@@ -2,8 +2,7 @@ function stimGenerationTutorial
 % Tutorial showing how to simulate the rendering of an sRGB image onto a
 % particular display, given that display's calibration file
 
-    %tbUse('BrainardLabBase')
-    
+ 
     % Determine location of resourcesDir
     [rootDir,~] = fileparts(which(mfilename));
     resourcesDir = sprintf('%s/resources',rootDir);

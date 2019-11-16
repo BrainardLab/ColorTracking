@@ -1,5 +1,4 @@
 function  generateConeContrastStimulus()
-
     % Determine location of resourcesDir
     [rootDir,~] = fileparts(which(mfilename));
     resourcesDir = sprintf('%s/resources',rootDir);
@@ -17,10 +16,10 @@ function  generateConeContrastStimulus()
     [displaySPDs, coneFundamentals] = loadDisplaySPDsAndConeFundamentals(calStructOBJ);
 
     % Speficy primary values for background
-    backgroundPrimaries = [0.5 0.5 0.45]';
+    backgroundPrimaries = [.3 .3 .3]';
     
     % Speficy LMS contrast vector
-    LMScontrastModulation = [0.1 -0.1 0];
+    LMScontrastModulation = [-.4 0 0];
     
     % Compute cone excitations for these primaries and displaySPD
     backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);
@@ -141,6 +140,25 @@ function [stimContrastProfile, sRGBimage] = generateStimContrastProfile(type, re
             contrastImage = (grayScaleImage - meanGray)/meanGray;
             stimContrastProfile = contrastImage / max(abs(contrastImage(:)));
             
+                        
+        case 'xp'
+            % Load a random image downloaded off the internet (sRGB format in 0-255 8-bit format)
+            load(sprintf('%s/xp.mat',resourcesDir), 'xp');
+
+            % Normalize to [0 1] and make it a double
+            sRGBimage = double(xp)/255;
+            
+            % Undo gamma  correction
+            linearRGBimage  = rgb2lin(sRGBimage);
+            
+            % Make it gray scale
+            grayScaleImage = mean(linearRGBimage,3);
+            
+            % Compute contrast
+            meanGray = mean(grayScaleImage(:));
+            contrastImage = (grayScaleImage - meanGray)/meanGray;
+            stimContrastProfile = contrastImage / max(abs(contrastImage(:)));
+            
     end
 end
 
@@ -190,9 +208,9 @@ end
 function primaries = primaryModulationsForConeExcitationsAndDisplaySPDs(coneExcitations, coneFundamentals, displaySPDs)
 
     assert(size(coneExcitations,1) == 3, 'Cone excitations must have 3 rows');
-    
-    computeMethod = 'educational';
     computeMethod = 'fast';
+    computeMethod = 'educational';
+
     
     if (strcmp(computeMethod, 'educational'))   
         LconeFundamental = squeeze(coneFundamentals(1,:));

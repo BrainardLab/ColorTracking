@@ -17,10 +17,10 @@ load(displayCalFileName, 'cals');
 [displaySPDs, coneFundamentals,wavelengthAxis] = loadDisplaySPDsAndConeFundamentals(calStructOBJ);
 
 % Speficy primary values for background
-backgroundPrimaries = [1 1 0.57]';
+backgroundPrimaries = [.9 .9 0.57]';
 
 % Speficy LMS contrast vector
-LMScontrastModulation = [0.2 0 0];
+LMScontrastModulation = [0 0 0.05];
 
 backgroundSPD = ...
     backgroundPrimaries(1) * displaySPDs(1,:) + ...
@@ -42,47 +42,30 @@ targetSPD = ...
     targetPrimaries(3) * displaySPDs(3,:);
 
 
-plotSDPandConeExcitations(sRGBimage, contrastImage, stimSettingsLMSImage, LMScontrastModulation, backgroundPrimaries)
+plotSDPandConeExcitations(wavelengthAxis, backgroundSPD, targetSPD, backgroundConeExcitations, targetExcitations)
 
 end
 
 
-function  plotSDPandConeExcitations(sRGBimage, contrastImage, stimSettingsLMSImage, stimLMScontrast, backgroundPrimaries)
-hFig = figure(1); clf;
+function  plotSDPandConeExcitations(wavelengthAxis, backgroundSPD, targetSPD, backgroundConeExcitations, targetExcitations)
 
-figure; hold on 
+figure;
+subplot(1,2,1)
+hold on
 plot(wavelengthAxis,backgroundSPD,'r')
 plot(wavelengthAxis,targetSPD,'b')
+xlabel('Wavelength (nm)')
 
 
-set(hFig, 'Position', [10 10  400 500]);
-imagesc(sRGBimage); axis 'image'; axis 'ij'
-title('input image');
-set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
-box off
-lRGBimage = rgb2lin(sRGBimage);
-meanColor = mean(mean(lRGBimage,1),2);
-set(hFig, 'Color', lin2rgb(meanColor));
 
-hFig = figure(2); clf;
-set(hFig, 'Position', [400 10  400 500]);
-imagesc(contrastImage); axis 'image'; axis 'ij'
-title('contrast image');
-set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'CLim', [-1 1], 'FontSize', 14);
-box off
-hb = colorbar();
-hb.Label.String = 'contrast';
-cMap = brewermap(1024, '*RdBu');
-colormap(cMap);
-set(hFig, 'Color', [1 1 1]);
+subplot(1,2,2)
+hold on 
+X = categorical({'L','M','S'});
+X = reordercats(X,{'L','M','S'});
+bar(X,[backgroundConeExcitations,targetExcitations])
+ylabel('Cone Excitations')
 
-hFig = figure(3); clf;
-set(hFig, 'Position', [800 10  400 500]);
-image(stimSettingsLMSImage); axis 'image'; axis 'ij'
-title(sprintf('LMS cone contrast image\n(%2.2f, %2.2f, %2.2f)', stimLMScontrast(1), stimLMScontrast(2), stimLMScontrast(3)));
-set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
-box off
-set(hFig, 'Color', lin2rgb(backgroundPrimaries));
+
 end
 
 function [displaySPDs, coneFundamentals,wavelengthAxis] = loadDisplaySPDsAndConeFundamentals(calStructOBJ)

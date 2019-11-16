@@ -17,13 +17,20 @@ function  generateConeContrastStimulus()
     [displaySPDs, coneFundamentals] = loadDisplaySPDsAndConeFundamentals(calStructOBJ);
 
     % Speficy primary values for background
-    backgroundPrimaries = [0.5 0.5 0.45]';
+    backgroundPrimaries = [1 1 0.57]';
     
     % Speficy LMS contrast vector
-    LMScontrastModulation = [0.1 -0.1 0];
+    LMScontrastModulation = [0.2 0 0];
     
-    % Compute cone excitations for these primaries and displaySPD
-    backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);
+    backgroundSPD = ...
+        backgroundPrimaries(1) * displaySPDs(1,:) + ...
+        backgroundPrimaries(2) * displaySPDs(2,:) + ...
+        backgroundPrimaries(3) * displaySPDs(3,:);
+    
+    backgroundConeExcitations = coneFundamentals * backgroundSPD';
+    
+  
+    
     
     % Generate the spatial contrast profile of the stimulus
     type = 'sin';

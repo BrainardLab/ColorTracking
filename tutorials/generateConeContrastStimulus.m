@@ -25,7 +25,7 @@ function  generateConeContrastStimulus()
     backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);
     
     % Generate the spatial contrast profile of the stimulus
-    type = 'sin';
+    type = 'flower';
     [contrastImage, sRGBimage] = generateStimContrastProfile(type, resourcesDir);
     
     % Generate stimulus settings

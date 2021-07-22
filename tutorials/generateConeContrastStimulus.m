@@ -19,13 +19,13 @@ function  generateConeContrastStimulus()
     backgroundPrimaries = [.3 .3 .3]';
     
     % Speficy LMS contrast vector
-    LMScontrastModulation = [-.4 0 0];
+    LMScontrastModulation = [.1 0 0];
     
     % Compute cone excitations for these primaries and displaySPD
     backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);
     
     % Generate the spatial contrast profile of the stimulus
-    type = 'flower';
+    type = 'gaussian';
     [contrastImage, sRGBimage] = generateStimContrastProfile(type, resourcesDir);
     
     % Generate stimulus settings
@@ -115,13 +115,25 @@ function [stimContrastProfile, sRGBimage] = generateStimContrastProfile(type, re
             stimHalfSize = 32;
             rows = (-stimHalfSize:stimHalfSize)/(2*stimHalfSize+1); 
             cols = rows;
-            [x,y] = meshgrid(cols,rows);
+            [meshX,meshY] = meshgrid(cols,rows);
             fx = 3.0;
             angle = 60;
-            stimContrastProfile = sin(2*pi*(fx*cosd(angle)*x + fx*sind(angle)*y));
-            sRGBimage = lin2rgb(stimContrastProfile);
+            stimContrastProfile = sin(2*pi*(fx*cosd(angle)*meshX + fx*sind(angle)*meshY));
+            sRGBimage = repmat(lin2rgb(stimContrastProfile),[1,1,3]);
             
-            
+        case 'gaussian'
+            stimHalfSize = 32;
+            sig = .13;
+            rows = (-stimHalfSize:stimHalfSize)/(2*stimHalfSize+1); 
+            cols = rows;
+            [meshX,meshY] = meshgrid(cols,rows);
+            fx = 4.0;
+            angle = 45;
+            sineWavePattern = sin(2*pi*(fx*cosd(angle)*meshX + fx*sind(angle)*meshY));
+            gaussPattern = exp(-((meshX).^2+(meshY).^2)/(2*sig^2)); 
+            stimContrastProfile = sineWavePattern.* gaussPattern;
+            sRGBimage = repmat(lin2rgb(stimContrastProfile),[1,1,3]);
+
         case 'flower'
             % Load a random image downloaded off the internet (sRGB format in 0-255 8-bit format)
             load(sprintf('%s/flower.mat',resourcesDir), 'flower');

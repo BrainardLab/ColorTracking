@@ -10,7 +10,7 @@ dt = 1/Fs;                % seconds per sample
 StopTime = 1;             % seconds
 timebase = (0:dt:StopTime-dt)';  % seconds
 %Sine wave:
-Fc = 4;                     % hertz
+Fc = 1;                     % hertz
 % phase 
 p1 = deg2rad(0);
 p2 = deg2rad(50);

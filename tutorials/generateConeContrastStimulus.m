@@ -19,7 +19,7 @@ function  generateConeContrastStimulus()
     backgroundPrimaries = [.3 .3 .3]';
     
     % Speficy LMS contrast vector
-    LMScontrastModulation = [.1 0 0];
+    LMScontrastModulation = [.95 .95 0];
     
     % Compute cone excitations for these primaries and displaySPD
     backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);

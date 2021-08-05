@@ -63,8 +63,7 @@ backgroundSPD = ...
 
 backgroundConeExcitations = coneFundamentals * backgroundSPD';
 
-% Generate the spatial contrast profile of the stimulus
-
+% Generate the Gabor spatial contrast profile of the stimulus
 rows = (-p.Results.stimHalfSize:p.Results.stimHalfSize)/(2*p.Results.stimHalfSize+1);
 cols = rows;
 [meshX,meshY] = meshgrid(cols,rows);

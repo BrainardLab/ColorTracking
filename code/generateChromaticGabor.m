@@ -1,4 +1,4 @@
-function [stimPrimaries,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation, angle, varargin)
+function [stimPrimaries,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation, angle, varargin)
 %% Make a chromatic gabor of specified chormatic direction and orientation
 %
 % Synopsis
@@ -27,7 +27,7 @@ p.addRequired('calStructOBJ',@isobject);
 p.addRequired('backgroundPrimaries',@isvector);
 p.addRequired('LMScontrastModulation',@isvector);
 p.addRequired('angle',@isnumeric);
-p.addParameter('stimHalfSize',128, @isnumeric);
+p.addParameter('stimHalfSize',512, @isnumeric);
 p.addParameter('sigma',.125, @isnumeric);
 p.addParameter('fx',4, @isnumeric);
 p.addParameter('phase',0, @isnumeric);

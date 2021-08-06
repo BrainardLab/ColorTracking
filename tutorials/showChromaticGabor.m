@@ -23,10 +23,10 @@ orientation = 0;
 
 %% GABOR 1
 % Speficy LMS contrast vector
-MaxContrastLMS = [.4 .4 .4];
+MaxContrastLMS = [.1 0 0];
 
 % generate the modualtion around the background
-[stimPrimariesMod1,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS, orientation,'phase',0);
+[stimPrimariesMod1,~,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS, orientation,'phase',0);
 
 % Make the background
 for ii = 1: length(backgroundPrimaries)
@@ -35,7 +35,7 @@ end
 
 %% Add GABOR 2
 % Speficy LMS contrast vector
-MaxContrastLMS = [.1 -.1 0];
+MaxContrastLMS = [0 .1 0];
 
 % set the contrast steps
 contrastSteps = 0.25;
@@ -43,7 +43,7 @@ contrastsRatio = 0:contrastSteps:1;
 
 % set the phase steps
 phaseSteps = 45;
-phases = 0:phaseSteps:360-phaseSteps;
+phases = 0:phaseSteps:180-phaseSteps;
 
 counter = 1;
 
@@ -68,7 +68,7 @@ for mm = 1:length(contrastMod)
     counter = 1;
     for jj = 1:length(phases)
         
-        [stimPrimariesMod2,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS, orientation,'phase',phases(jj));
+        [stimPrimariesMod2,~,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS, orientation,'phase',phases(jj));
         
         for kk = 1:length(contrastsRatio)
             

@@ -1,5 +1,6 @@
 % plot L M and S profiles
-
+clear all 
+close all
 % Determine location of resourcesDir
 [codeDir,~] = fileparts(which(mfilename));
 [rootDir,~] = fileparts(codeDir);
@@ -22,11 +23,11 @@ orientation = 0;
 
 %% GABOR 1
 % Speficy LMS contrast vector
-MaxContrastLMS = [0.3 0.3 0.3];
+MaxContrastLMS1 = [0.4 0.4 0];
 
 % generate the modualtion around the background
-[stimPrimariesMod1,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS, orientation,'phase',0);
-
+[stimPrimariesMod1,coneExcitations1,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS1, orientation,'phase',0);
+ 
 % Make the background
 for ii = 1: length(backgroundPrimaries)
     background(ii,:) =  backgroundPrimaries(ii) .* ones([1 imgInfo.rows*imgInfo.cols]);
@@ -34,10 +35,10 @@ end
 
 %% Add GABOR 2
 % Speficy LMS contrast vector
-MaxContrastLMS = [0.1 -0.1 0.9];
-gaborPhase = 190;
+MaxContrastLMS2 = [0.1 -0.1 0];
+gaborPhase = 180;
 
-[stimPrimariesMod2,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS, orientation,'phase',gaborPhase);
+[stimPrimariesMod2,coneExcitations2,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS2, orientation,'phase',gaborPhase,'fx',4);
 
 stimPrimaries = stimPrimariesMod1 + stimPrimariesMod2 + background;
 
@@ -51,17 +52,18 @@ gaborImage = reshape(settings', [imgInfo.rows  imgInfo.cols 3]);
 
 
 % reshape the modulations
-theModulation = stimPrimariesMod1 + stimPrimariesMod2;
+theLMScontrast= coneExcitations1 + coneExcitations2;
 %  Back to image format
-theModulationImage = reshape(theModulation', [imgInfo.rows  imgInfo.cols 3]);
+theContrastImage = reshape(theLMScontrast', [imgInfo.rows  imgInfo.cols 3]);
 
+overallContrast = norm(MaxContrastLMS1+MaxContrastLMS2,2) 
 
-
-
+figure
 subplot(2,4,1)
 image(gaborImage); axis 'image'; axis 'ij'
-%title(sprintf('LMS cone contrast image\n(%2.2f, %2.2f, %2.2f)', stimLMScontrast(1), stimLMScontrast(2), stimLMScontrast(3)));
-set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
+title({sprintf('Gabor 1 cone contrast \n(%2.2f, %2.2f, %2.2f)', MaxContrastLMS1(1), MaxContrastLMS1(2), MaxContrastLMS1(3)),...
+       sprintf('LMS cone contrast image\n(%2.2f, %2.2f, %2.2f)', MaxContrastLMS2(1), MaxContrastLMS2(2), MaxContrastLMS2(3))}) 
+set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 10);
 box off
 
 imgSize = size(gaborImage);
@@ -81,18 +83,18 @@ plot(sliceR,'b')
 title('B Primary');
 
 
-imgSize = size(theModulationImage);
+imgSize = size(theContrastImage);
 subplot(2,4,5)
-sliceR = theModulationImage(round(imgSize(1)/2),:,1);
+sliceR = theContrastImage(round(imgSize(1)/2),:,1);
 plot(sliceR,'r')
 title('L Contrast Modulation');
 
 subplot(2,4,6)
-sliceR = theModulationImage(round(imgSize(1)/2),:,2);
+sliceR = theContrastImage(round(imgSize(1)/2),:,2);
 plot(sliceR,'g')
 title('M Contrast Modulation');
 
 subplot(2,4,7)
-sliceR = theModulationImage(round(imgSize(1)/2),:,3);
+sliceR = theContrastImage(round(imgSize(1)/2),:,3);
 plot(sliceR,'b')
 title('S Contrast Modulation');

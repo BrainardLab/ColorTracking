@@ -84,7 +84,7 @@ LMScontrastModulation1 = 0.12.*[.7071 -.7071 0];
 LMScontrastModulation2 = 0.12.*[.7071 .7071 0];
 angle = 0;
 
-[stimPrimariesMod1,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation1, angle,'phase',90);
+[stimPrimariesMod1,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation1, angle,'phase',90);
 
 for ii = 1: length(backgroundPrimaries)
     background(ii,:) =  backgroundPrimaries(ii) .* ones([1 imgInfo.rows*imgInfo.cols]);
@@ -101,7 +101,7 @@ contrasts = ones(size(timebase));
 phaseMod2 = 0:360/length(contrasts):360-(360/length(contrasts));
 for jj = 1:length(contrasts)
     
-    [stimPrimariesMod2,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation2, angle,'phase',phaseMod2(jj));
+    [stimPrimariesMod2,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation2, angle,'phase',phaseMod2(jj));
     
     stimPrimaries = (contrasts(jj)*(stimPrimariesMod1+stimPrimariesMod2)) + background;
     

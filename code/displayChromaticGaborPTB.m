@@ -44,7 +44,7 @@ greyScreen = PrimaryToSettings(calStructOBJ,backgroundPrimaries);
 % Get the size of the on screen window
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 
-% Query the frame duration
+% Query the frame dura tion
 ifi = Screen('GetFlipInterval', window);
 
 % Get the centre coordinate of the window
@@ -54,13 +54,13 @@ ifi = Screen('GetFlipInterval', window);
 Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 
 % Grating size in pixels
-gratingSizePix = 600;
+gratingSizePix = 50;
 
 % Grating frequency in cycles / pixel
-freqCyclesPerPix = 0.01;
+freqCyclesPerPix = 8;
 
 % Drift speed cycles per second
-cyclesPerSecond = 1;
+cyclesPerSecond = 12;
 
 % Define Half-Size of the grating image.
 texsize = gratingSizePix / 2;
@@ -80,8 +80,8 @@ x = meshgrid(-texsize:texsize + pixPerCycle, 1);
 grating = backgroundPrimaries * cos(freqRad*x) + backgroundPrimaries;
 
 % Speficy LMS contrast vector
-LMScontrastModulation1 = 0.12.*[.7071 -.7071 0];
-LMScontrastModulation2 = 0.12.*[.7071 .7071 0];
+LMScontrastModulation1 = 0.*[0.5774 0.5774 0.5774];
+LMScontrastModulation2 = 0.8.*[0.5774 0.5774 0.5774];
 angle = 0;
 
 [stimPrimariesMod1,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation1, angle,'phase',90);

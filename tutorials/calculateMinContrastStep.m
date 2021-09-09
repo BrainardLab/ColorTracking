@@ -1,7 +1,7 @@
 %% Calculate contrast steps
 
 %% Clear
-clear; close all;clc;
+clear; close all; clc;
 
 %% Load a test calibration file
 cal = LoadCalFile('ViewSonicG220fb');

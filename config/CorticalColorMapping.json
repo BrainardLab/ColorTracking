@@ -3,7 +3,7 @@
 		"flavor": "",
 		"hook": "",
 		"importance": "",
-		"localHookTemplate": "config/CorticalColorMappingHookTemplate.m",
+		"localHookTemplate": "config/CorticalColorMappingLocalHookTemplate.m",
 		"name": "CorticalColorMapping",
 		"pathPlacement": "append",
 		"subfolder": "",

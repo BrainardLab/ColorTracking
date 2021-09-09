@@ -1,12 +1,22 @@
 %% Calculate contrast steps
 
 %% Clear
-clear; close all;clc;
+clear; close all; clc;
 
 %% Load a test calibration file
-cal = LoadCalFile('ViewSonicG220fb');
+cal = LoadCalFile('ViewSonicG220fb',[],getpref('BrainardLabToolbox','CalDataFolder'));
  
 [calStructOBJ, inputArgIsACalStructOBJ] = ObjectToHandleCalOrCalStruct(cal);
+
+%% Set number of bits for display
+nMonitorBits = 4;
+nInputLevels = 2.^nMonitorBits;
+CalibrateFitGamma(calStructOBJ, nInputLevels);
+
+%     % Update internal data reprentation
+%     obj.processedData.gammaInput  = calStructOBJ.get('gammaInput');
+%     obj.processedData.gammaTable  = calStructOBJ.get('gammaTable');
+%     obj.processedData.gammaFormat = calStructOBJ.get('gammaFormat');
 
 % Get wavelength sampling of functions in cal file.
 S = calStructOBJ.get('S');
@@ -24,7 +34,7 @@ load T_cones_ss2
 
 %% Standard initialization of calibration structure
 SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
-SetGammaMethod(calStructOBJ,0);
+SetGammaMethod(calStructOBJ,2);
 
 %% Choose a target XYZ that is within monitor gamut.
 % 
@@ -66,8 +76,6 @@ coneContrasts_hat = contrastExcitations_hat ./ backgroundLMS_hat;
 fprintf('\n<strong>*Recoverd Modulation*</strong>                 L = %1.4f, M = %1.4f,  S = %1.4f\n',coneContrasts_hat(1),coneContrasts_hat(2),coneContrasts_hat(3))
 
 
-
-nMonitorBits = 8;
 theBitsSettings = round(2^nMonitorBits .* contrastSettings);
 str = 'Estimated %1.0f-Bit Settings:             R = %1.0f, G = %1.0f,  B = %1.0f\n';
 fprintf( str, nMonitorBits,theBitsSettings(1),theBitsSettings(2),theBitsSettings(3));

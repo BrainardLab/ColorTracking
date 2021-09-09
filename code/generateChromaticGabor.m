@@ -55,13 +55,11 @@ assert(size(coneFundamentals,1) == 3,'Cone fundamentals is not a [3 x N] matrix'
 assert(size(displaySPDs,1) == 3,'Display SPDs is not a [3 x N] matrix');
 assert(size(displaySPDs,2) == size(coneFundamentals,2),'Cone fundamental and display SPD  spectral entries do not match');
 
-% Compute cone excitations for these primaries and displaySPD
-backgroundSPD = ...
-    backgroundPrimaries(1) * displaySPDs(1,:) + ...
-    backgroundPrimaries(2) * displaySPDs(2,:) + ...
-    backgroundPrimaries(3) * displaySPDs(3,:);
+%% Set the color space conversions
+SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
 
-backgroundConeExcitations = coneFundamentals * backgroundSPD';
+%% Get the background excitations
+backgroundConeExcitations = PrimaryToSensor(calStructOBJ, backgroundPrimaries);
 
 % Generate the Gabor spatial contrast profile of the stimulus
 rows = (-p.Results.stimHalfSize:p.Results.stimHalfSize)/(2*p.Results.stimHalfSize+1);
@@ -93,7 +91,7 @@ assert(size(coneExcitations,1) == 3, 'Cone excitations must have 3 rows');
 M = coneFundamentals * displaySPDs';
 % Least squares solution to the system of linear equations M*primaries = [Lcone Mcone Scone].
 stimPrimaries = M\coneExcitations;
-
+%stimPrimaries = SensorToPrimary(calStructOBJ,coneExcitations);
 end
 
 

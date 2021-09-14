@@ -88,10 +88,10 @@ assert((size(backgroundConeExcitations,1) == 3)  && (size(backgroundConeExcitati
 coneExcitations = repmat(backgroundConeExcitations, [1, size(coneContrasts,2)]) .* (coneContrasts);
 
 assert(size(coneExcitations,1) == 3, 'Cone excitations must have 3 rows');
-M = coneFundamentals * displaySPDs';
+%M = coneFundamentals * displaySPDs';
 % Least squares solution to the system of linear equations M*primaries = [Lcone Mcone Scone].
-stimPrimaries = M\coneExcitations;
-%stimPrimaries = SensorToPrimary(calStructOBJ,coneExcitations);
+%stimPrimaries = M\coneExcitations;
+stimPrimaries = SensorToPrimary(calStructOBJ,coneExcitations);
 end
 
 

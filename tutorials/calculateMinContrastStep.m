@@ -5,11 +5,11 @@ clear; close all; clc;
 
 %% Load a test calibration file
 cal = LoadCalFile('ViewSonicG220fb',[],getpref('BrainardLabToolbox','CalDataFolder'));
- 
+
 [calStructOBJ, inputArgIsACalStructOBJ] = ObjectToHandleCalOrCalStruct(cal);
 
 %% Set number of bits for display
-nMonitorBits = 4;
+nMonitorBits = 8;
 nInputLevels = 2.^nMonitorBits;
 CalibrateFitGamma(calStructOBJ, nInputLevels);
 
@@ -27,7 +27,7 @@ P_device      = calStructOBJ.get('P_device');
 gammaInput = calStructOBJ.get('gammaInput');
 gammaTable = calStructOBJ.get('gammaTable');
 
-% Load Stockman and Sharpe 2 deg Cone Fund. 
+% Load Stockman and Sharpe 2 deg Cone Fund.
 load T_cones_ss2
 % Spline the Stockman and Sharpe 2 deg cone fundamentals to match the wavelengthAxis
 %T_cones_ss2 = SplineCmf(S_cones_ss2, T_cones_ss2, wavelengthAxis);
@@ -37,12 +37,12 @@ SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
 SetGammaMethod(calStructOBJ,2);
 
 %% Choose a target XYZ that is within monitor gamut.
-% 
+%
 % We'll do this using Psychtoolbox calibration code.
 
 
 %backgroundLMS = [0.0193 0.0138 0.0050]';
-backgroundRGB = [0.3 0.3 0.3]'; %SensorToSettings(calStructOBJ,backgroundLMS);
+backgroundRGB = [0.30 0.30 0.3]'; %SensorToSettings(calStructOBJ,backgroundLMS);
 fprintf('<strong>*The Background*</strong>.\n')
 str = 'Desired Settings of Background:       R = %1.4f, G = %1.4f,  B = %1.4f\n';
 fprintf( str, backgroundRGB(1),backgroundRGB(2),backgroundRGB(3));
@@ -56,14 +56,30 @@ fprintf( str, backgroundRGB_hat(1),backgroundRGB_hat(2),backgroundRGB_hat(3));
 str = 'Quantized Ecxitations of Background:  L = %1.4f, M = %1.4f,  S = %1.4f\n';
 fprintf( str, backgroundLMS_hat(1),backgroundLMS_hat(2),backgroundLMS_hat(3));
 
-coneContrasts = [1.09 1 1]';
-fprintf('\n<strong>*The Modulation* </strong>                     L = %1.3f, M = %1.3f,  S = %1.3f\n',coneContrasts(1),coneContrasts(2),coneContrasts(3))
-contrastExcitations = backgroundLMS_hat.*coneContrasts;
+%% Generate the stimulus
+angle = 0;
+LMScontrastModulation = .08*[.7071 -.7071 0]';
+[stimPrimaries,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundRGB_hat,LMScontrastModulation, angle);
+
+% Make the background
+for ii = 1: length(backgroundLMS_hat)
+    background(ii,:) =  backgroundLMS_hat(ii) .* ones([1 imgInfo.rows*imgInfo.cols]);
+end
+
+
+contrastExcitations =  coneExcitations + background;
+
+
+fprintf('\n<strong>*The Modulation* </strong>                     L = %1.3f, M = %1.3f,  S = %1.3f\n',LMScontrastModulation(1),LMScontrastModulation(2),LMScontrastModulation(3))
+
 str = 'Desired Excitations of Modulation:    L = %1.4f, M = %1.4f,  S = %1.4f\n';
-fprintf( str, contrastExcitations(1),contrastExcitations(2),contrastExcitations(3));
+fprintf( str, max(contrastExcitations(1,:)),max(contrastExcitations(2,:)),max(contrastExcitations(3,:)));
 
 
-contrastSettings = SensorToSettings(calStructOBJ,contrastExcitations);
+[contrastSettings,badIndex] = SensorToSettings(calStructOBJ,contrastExcitations);
+if ~sum(badIndex) == 0
+    fprintf('\n<strong>WARNING:</strong> L = %1.2f%% of pixels out of gammut\n\n',100*(sum(badIndex)/length(badIndex)))
+end
 contrastExcitations_hat = SettingsToSensor(calStructOBJ,contrastSettings);
 
 str = 'Quantized Ecitations of Modulation:   L = %1.4f, M = %1.4f,  S = %1.4f\n';

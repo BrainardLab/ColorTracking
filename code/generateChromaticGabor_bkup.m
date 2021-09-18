@@ -1,4 +1,4 @@
-function [stimPrimariesMod,coneExcitationsMod,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation, angle, varargin)
+function [stimPrimaries,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation, angle, varargin)
 %% Make a chromatic gabor of specified chormatic direction and orientation
 %
 % Synopsis
@@ -26,7 +26,12 @@ p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('calStructOBJ',@isobject);
 p.addRequired('backgroundPrimaries',@isvector);
 p.addRequired('LMScontrastModulation',@isvector);
-p.parse(calStructOBJ,backgroundPrimaries,LMScontrastModulation, varargin{:});
+p.addRequired('angle',@isnumeric);
+p.addParameter('stimHalfSize',512, @isnumeric);
+p.addParameter('sigma',.125, @isnumeric);
+p.addParameter('fx',4, @isnumeric);
+p.addParameter('phase',0, @isnumeric);
+p.parse(calStructOBJ,backgroundPrimaries,LMScontrastModulation,angle, varargin{:});
 
 
 % Load displaySPDs and cone fundamentals sampled at the same spectral axis
@@ -56,12 +61,18 @@ SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
 %% Get the background excitations
 backgroundConeExcitations = PrimaryToSensor(calStructOBJ, backgroundPrimaries);
 
-[contrastImage, sRGBimage] = generateStimContrastProfile(p.Results.imgSzXYdeg,p.Results.smpPerDeg,p.Results.fx,p.Results.angle,p.Results.phase,p.Results.sigma);
+% Generate the Gabor spatial contrast profile of the stimulus
+rows = (-p.Results.stimHalfSize:p.Results.stimHalfSize)/(2*p.Results.stimHalfSize+1);
+cols = rows;
+[meshX,meshY] = meshgrid(cols,rows);
+sineWavePattern = sin(2*pi*(p.Results.fx * cosd(angle)*meshX + p.Results.fx*sind(angle)*meshY) + deg2rad(p.Results.phase));
+gaussPattern = exp(-((meshX).^2+(meshY).^2)/(2*p.Results.sigma^2));
+stimContrastSpatialProfile = sineWavePattern.* gaussPattern;
 
 % Generate stimulus settings
-imgInfo.rows = size(contrastImage,1);
-imgInfo.cols = size(contrastImage,2);
-stimContrastProfile1D = reshape(contrastImage, [1 imgInfo.rows*imgInfo.cols]);
+imgInfo.rows = size(stimContrastSpatialProfile,1);
+imgInfo.cols = size(stimContrastSpatialProfile,2);
+stimContrastProfile1D = reshape(stimContrastSpatialProfile, [1 imgInfo.rows*imgInfo.cols]);
 
 coneContrasts = zeros(3, numel(stimContrastProfile1D));
 for pixel = 1:numel(stimContrastProfile1D)
@@ -74,12 +85,13 @@ end
 assert(size(coneContrasts,1) == 3, 'cone contrasts must be a [3 x N] matrix');
 assert((size(backgroundConeExcitations,1) == 3)  && (size(backgroundConeExcitations,2) == 1), 'background  cone excitations must be a [3 x 1] matrix');
 
-coneExcitationsMod = repmat(backgroundConeExcitations, [1, size(coneContrasts,2)]) .* (coneContrasts);
+coneExcitations = repmat(backgroundConeExcitations, [1, size(coneContrasts,2)]) .* (coneContrasts);
 
-assert(size(coneExcitationsMod,1) == 3, 'Cone excitations must have 3 rows');
-
-stimPrimariesMod = SensorToPrimary(calStructOBJ,coneExcitationsMod);
-
+assert(size(coneExcitations,1) == 3, 'Cone excitations must have 3 rows');
+%M = coneFundamentals * displaySPDs';
+% Least squares solution to the system of linear equations M*primaries = [Lcone Mcone Scone].
+%stimPrimaries = M\coneExcitations;
+stimPrimaries = SensorToPrimary(calStructOBJ,coneExcitations);
 end
 
 

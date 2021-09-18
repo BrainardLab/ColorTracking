@@ -4,7 +4,7 @@ function  generateConeContrastStimulus()
     resourcesDir = sprintf('%s/resources',rootDir);
     
     % Select the calibration file for a particular display (here a ViewSonic display)
-    displayCalFileName = sprintf('%s/ViewSonicProbe', resourcesDir);
+    displayCalFileName = sprintf('%s/ViewSonicG220fb', resourcesDir);
     
     % Load the calibration file
     load(displayCalFileName, 'cals');
@@ -16,10 +16,10 @@ function  generateConeContrastStimulus()
     [displaySPDs, coneFundamentals] = loadDisplaySPDsAndConeFundamentals(calStructOBJ);
 
     % Speficy primary values for background
-    backgroundPrimaries = [.3 .3 .3]';
+    backgroundPrimaries = [.5 .5 .5]';
     
     % Speficy LMS contrast vector
-    LMScontrastModulation = [.95 .95 0];
+    LMScontrastModulation = 0.01*[0.7071 -0.7071 0];
     
     % Compute cone excitations for these primaries and displaySPD
     backgroundConeExcitations = coneExcitationsForBackground(displaySPDs, coneFundamentals, backgroundPrimaries);
@@ -67,8 +67,8 @@ function  stimSettingsImage = stimSettingsFromContrastImageForDesiredConeContras
     end
     
     % To  settings
-    gammaMethod = 1;
-    SetGammaMethod(calStructOBJ, gammaMethod, 1024);
+    gammaMethod = 2;
+    SetGammaMethod(calStructOBJ, gammaMethod, 256);
     settings = PrimaryToSettings(calStructOBJ,primaries);
     
     %  Back to image format
@@ -128,7 +128,7 @@ function [stimContrastProfile, sRGBimage] = generateStimContrastProfile(type, re
             cols = rows;
             [meshX,meshY] = meshgrid(cols,rows);
             fx = 4.0;
-            angle = 45;
+            angle = 0;
             sineWavePattern = sin(2*pi*(fx*cosd(angle)*meshX + fx*sind(angle)*meshY));
             gaussPattern = exp(-((meshX).^2+(meshY).^2)/(2*sig^2)); 
             stimContrastProfile = sineWavePattern.* gaussPattern;

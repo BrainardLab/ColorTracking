@@ -83,13 +83,13 @@ end
 contrastExcitations_hat = SettingsToSensor(calStructOBJ,contrastSettings);
 
 str = 'Quantized Ecitations of Modulation:   L = %1.4f, M = %1.4f,  S = %1.4f\n';
-fprintf( str, contrastExcitations_hat(1),contrastExcitations_hat(2),contrastExcitations_hat(3));
+fprintf( str, max(contrastExcitations_hat(1,:)),max(contrastExcitations_hat(2,:)),max(contrastExcitations_hat(3,:)));
 
 str = 'Quantized Settings of Modulation:     R = %1.4f, G = %1.4f,  B = %1.4f\n';
-fprintf( str, contrastSettings(1),contrastSettings(2),contrastSettings(3));
+fprintf( str, max(contrastSettings(1,:)),max(contrastSettings(2,:)),max(contrastSettings(3,:)));
 
-coneContrasts_hat = contrastExcitations_hat ./ backgroundLMS_hat;
-fprintf('\n<strong>*Recoverd Modulation*</strong>                 L = %1.4f, M = %1.4f,  S = %1.4f\n',coneContrasts_hat(1),coneContrasts_hat(2),coneContrasts_hat(3))
+coneContrasts_hat = contrastExcitations_hat ./ (1+backgroundLMS_hat);
+fprintf('\n<strong>*Recoverd Modulation*</strong>                 L = %1.4f, M = %1.4f,  S = %1.4f\n',max(coneContrasts_hat(1,:)),max(coneContrasts_hat(2,:)),max(coneContrasts_hat(3,:)))
 
 
 theBitsSettings = round(2^nMonitorBits .* contrastSettings);

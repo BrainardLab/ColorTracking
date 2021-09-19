@@ -1,4 +1,4 @@
-function [stimPrimariesMod,coneExcitationsMod,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,LMScontrastModulation, angle, varargin)
+function [stimSettings,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage, backgroundExcitations,stimLMScontrast, varargin)
 %% Make a chromatic gabor of specified chormatic direction and orientation
 %
 % Synopsis
@@ -11,10 +11,9 @@ function [stimPrimariesMod,coneExcitationsMod,imgInfo] = generateChromaticGabor(
 % Inputs
 %  backgroundPrimaries:       Speficy primary values for background (vector).
 %  LMScontrastModulation:     Speficy LMS contrast vector (vector).
-%  angle:                     Specify angle of gabor in degrees (scalar).
 %
 % Key/val pairs
-%  kernelSize:                Gaussian smoothing size mm (scalar).
+%  -none
 %
 % Output
 %  -none
@@ -24,9 +23,10 @@ function [stimPrimariesMod,coneExcitationsMod,imgInfo] = generateChromaticGabor(
 % Input Parser
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('calStructOBJ',@isobject);
+p.addRequired('contrastImage',@ismatrix);
 p.addRequired('backgroundPrimaries',@isvector);
 p.addRequired('LMScontrastModulation',@isvector);
-p.parse(calStructOBJ,backgroundPrimaries,LMScontrastModulation, varargin{:});
+p.parse(calStructOBJ,contrastImage,backgroundExcitations,stimLMScontrast, varargin{:});
 
 
 % Load displaySPDs and cone fundamentals sampled at the same spectral axis
@@ -40,7 +40,7 @@ displaySPDs = (calStructOBJ.get('P_device'))';
 % Load the Smith-Pokorny 2 deg cone fundamentals
 load('T_cones_ss2.mat');
 
-% Spline the Smith-Pokorny 2 deg cone fundamentals to match the wavelengthAxis
+% Spline the Stockman Sharpe 2 deg cone fundamentals to match the wavelengthAxis
 coneFundamentals = SplineCmf(S_cones_ss2, T_cones_ss2, WlsToS(wavelengthAxis));
 
 % Check outputs for correctness
@@ -53,32 +53,41 @@ assert(size(displaySPDs,2) == size(coneFundamentals,2),'Cone fundamental and dis
 %% Set the color space conversions
 SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
 
-%% Get the background excitations
-backgroundConeExcitations = PrimaryToSensor(calStructOBJ, backgroundPrimaries);
-
-[contrastImage, sRGBimage] = generateStimContrastProfile(p.Results.imgSzXYdeg,p.Results.smpPerDeg,p.Results.fx,p.Results.angle,p.Results.phase,p.Results.sigma);
-
-% Generate stimulus settings
+% Create a 1-D contrast image
 imgInfo.rows = size(contrastImage,1);
 imgInfo.cols = size(contrastImage,2);
 stimContrastProfile1D = reshape(contrastImage, [1 imgInfo.rows*imgInfo.cols]);
 
-coneContrasts = zeros(3, numel(stimContrastProfile1D));
+stimConeContrast = zeros(3, numel(stimContrastProfile1D));
+
+% scale the contrast images by the LMS modulaiton amount
 for pixel = 1:numel(stimContrastProfile1D)
-    cL = stimContrastProfile1D(pixel) * LMScontrastModulation(1);
-    cM = stimContrastProfile1D(pixel) * LMScontrastModulation(2);
-    cS = stimContrastProfile1D(pixel) * LMScontrastModulation(3);
-    coneContrasts(:, pixel) = [cL  cM cS];
+    cL = stimContrastProfile1D(pixel) * stimLMScontrast(1);
+    cM = stimContrastProfile1D(pixel) * stimLMScontrast(2);
+    cS = stimContrastProfile1D(pixel) * stimLMScontrast(3);
+    stimConeContrast(:, pixel) = [cL  cM cS];
 end
 
-assert(size(coneContrasts,1) == 3, 'cone contrasts must be a [3 x N] matrix');
-assert((size(backgroundConeExcitations,1) == 3)  && (size(backgroundConeExcitations,2) == 1), 'background  cone excitations must be a [3 x 1] matrix');
+% Check Dimensions
+assert(size(stimConeContrast,1) == 3, 'cone contrasts must be a [3 x N] matrix');
+assert((size(backgroundExcitations,1) == 3)  && (size(backgroundExcitations,2) == 1), 'background  cone excitations must be a [3 x 1] matrix');
 
-coneExcitationsMod = repmat(backgroundConeExcitations, [1, size(coneContrasts,2)]) .* (coneContrasts);
+% Create the stimulus excitations
+stimExcitations = repmat(backgroundExcitations, [1, size(stimConeContrast,2)]) .* (1 + stimConeContrast);
 
-assert(size(coneExcitationsMod,1) == 3, 'Cone excitations must have 3 rows');
+% Check Dimensions
+assert(size(stimExcitations,1) == 3, 'Cone excitations must have 3 rows');
 
-stimPrimariesMod = SensorToPrimary(calStructOBJ,coneExcitationsMod);
+% Convert excitation to settings
+[stimSettings2D, badIndex] = SensorToSettings(calStructOBJ,stimExcitations);
+
+% check and warn for out of gamut pixles
+if sum(badIndex) > 0
+    fprintf('\n <strong> WARNGING: </strong> %2.3f%% of pixels out of gamut.\n', 100*(sum(badIndex)./size(stimSettings2D,2)));
+end
+
+% reshape to an mxnx3 image
+stimSettings = reshape(stimSettings2D',[imgInfo.rows, imgInfo.cols, 3]);
 
 end
 

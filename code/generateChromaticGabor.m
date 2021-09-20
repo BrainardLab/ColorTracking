@@ -65,7 +65,7 @@ for pixel = 1:numel(stimContrastProfile1D)
     cL = stimContrastProfile1D(pixel) * stimLMScontrast(1);
     cM = stimContrastProfile1D(pixel) * stimLMScontrast(2);
     cS = stimContrastProfile1D(pixel) * stimLMScontrast(3);
-    stimConeContrast(:, pixel) = [cL  cM cS];
+    stimConeContrast(:, pixel) = [cL  cM cS]';
 end
 
 % Check Dimensions

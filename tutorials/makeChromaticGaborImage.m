@@ -42,22 +42,22 @@ SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
 SetGammaMethod(calStructOBJ,2);
 
 %% Set the background
-backgroundRGB = [0.50 0.50 0.50]'; %SensorToSettings(calStructOBJ,backgroundLMS);
+backgroundPrimaries = [0.50 0.5 0.50]'; %SensorToSettings(calStructOBJ,backgroundLMS);
 
-backgroundLMS_hat = SettingsToSensor(calStructOBJ,backgroundRGB);
+backgroundLMS_hat = SettingsToSensor(calStructOBJ,PrimaryToSettings(calStructOBJ,backgroundPrimaries));
 
-backgroundRGB_hat = SensorToSettings(calStructOBJ,backgroundLMS_hat);
+backgroundPrimaries_hat = SensorToPrimary(calStructOBJ,backgroundLMS_hat);
 
 
 %% Create a chromatic modulation 
-LMScontrastModulation = .10*[.7071 -.7071 0]';
-
+%LMScontrastModulation = .10*[.7071 -.7071 0]';
+LMScontrastModulation = .09*[1 0 0]';
 [stimSettings,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,scaledContrastImage,backgroundLMS_hat,LMScontrastModulation);
 
 %% Display the Gabor
 hFig = figure(1); clf;
 set(hFig, 'Position', [800 10  400 500]);
-image(stimSettings); axis 'image'; axis 'ij'
+imshow(stimSettings); axis 'image'; axis 'ij'
 set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
 box off
-set(hFig, 'Color', backgroundRGB);
+set(hFig, 'Color', backgroundPrimaries);

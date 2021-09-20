@@ -44,8 +44,10 @@ switch localhostname
 	%%%%%%%%%%%%%%%%%%%%%%%%%
     % DEVELOPMENT COMPUTERS %
     %%%%%%%%%%%%%%%%%%%%%%%%%
-    case 'BrainardLab-21-01' % SPEED EXPERIMENT COMPUTER
+    case 'BrainardLab-21-01' % MICHAEL'S DESKTOP
         fname = 'ViewSonicG220fb.mat';
+    case 'jburge-marr' % BEN DESKTOP
+        fname = 'ViewSonicG220fb.mat';        
     otherwise
         error(['psyLoadCalibrationData: WARNING! unhandled localhostname= ' num2str(localhostname) '. Write code?']);
 end
@@ -53,11 +55,13 @@ end
 % TRY LOADING DATA FROM LOCAL DISK
 if strcmp(localhostname,'ben-Precision-7520')
    fdir = '~/Documents/VisionScience/Data/BurgeLabCalibrationData/';
+elseif strcmp(localhostname,'jburge-marr')   
+   fdir = ['/Users/Shared/VisionScience/BurgeLabCalibrationData/'];    
 else
    fdir = ['/Users/Shared/Matlab/BurgeLabCalibrationData/'];
 end
 flag = exist(fdir,'dir');
-if flag == 0 || exist([fdir fname],'file') ~= 2
+if (flag == 0 || exist([fdir fname],'file') ~= 2) && strcmp(localhostname,'BrainardLab-21-01')
     % TRY LOADING DATA FROM SERVER
     fdir = ['/Users/michael/Documents/MATLAB/toolboxes/Psychtoolbox-3/Psychtoolbox/PsychCalDemoData/'];
 end

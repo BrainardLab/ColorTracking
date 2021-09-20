@@ -380,7 +380,11 @@ end
 
 % Get Cal Data
 % Select the calibration file for a particular display (here a ViewSonic display)
-displayCalFileName = '/Users/michael/Documents/MATLAB/toolboxes/Psychtoolbox-3/Psychtoolbox/PsychCalDemoData/ViewSonicG220fb.mat';
+if strcmp(D.cmpInfo.localHostName,'BrainardLab-21-01')
+   displayCalFileName = '/Users/michael/Documents/MATLAB/toolboxes/Psychtoolbox-3/Psychtoolbox/PsychCalDemoData/ViewSonicG220fb.mat';
+elseif strcmp(D.cmpInfo.localHostName,'jburge-marr')
+   displayCalFileName = '/Users/Shared/VisionScience/BurgeLabCalibrationData/ViewSonicG220fb.mat';
+end
 
 % Load the calibration file
 load(displayCalFileName, 'cals');

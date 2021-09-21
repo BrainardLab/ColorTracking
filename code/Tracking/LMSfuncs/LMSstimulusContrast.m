@@ -33,7 +33,7 @@ switch p.Results.experiment
         %    Experiment-1 Stim     %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % l isolating
-        [~,~,~,lIso]      = generateStimContrasts(0,0,expspace(.19,.02,6));
+        [~,~,~,lIso]      = generateStimContrasts(0,0,expspace(.16,.02,6));
         % s isolating
         [~,~,~,sIso]      = generateStimContrasts(0,90,expspace(.91,.20,6));
         % L+S

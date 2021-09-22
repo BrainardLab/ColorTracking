@@ -40,7 +40,7 @@ switch userID
     case {'brainardlab'}
         CalFolder = fullfile('/home',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
     case{'michael'}
-        CalFolder = fullfile('Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
+        CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
     otherwise
 end
 

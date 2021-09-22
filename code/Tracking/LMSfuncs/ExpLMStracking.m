@@ -454,7 +454,10 @@ for t = 1:S.trlPerRun;
     SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
   
     SetGammaMethod(calStructOBJ,2);
-    [stmLE,~,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,D.bgd',S.MaxContrastLMS(t,:)');
+    
+    backgroundExcitations = PrimaryToSensor(calStructOBJ,D.bgd');
+    
+    [stmLE,~,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundExcitations,S.MaxContrastLMS(t,:)');
     
     stmRE = stmLE;
     

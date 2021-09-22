@@ -46,6 +46,8 @@ switch localhostname
     %%%%%%%%%%%%%%%%%%%%%%%%%
     case 'BrainardLab-21-01' % SPEED EXPERIMENT COMPUTER
         fname = 'ViewSonicG220fb.mat';
+    case 'blobfish' % SPEED EXPERIMENT COMPUTER
+        fname = 'ViewSonicG220fb.mat';
     otherwise
         error(['psyLoadCalibrationData: WARNING! unhandled localhostname= ' num2str(localhostname) '. Write code?']);
 end
@@ -53,6 +55,8 @@ end
 % TRY LOADING DATA FROM LOCAL DISK
 if strcmp(localhostname,'ben-Precision-7520')
    fdir = '~/Documents/VisionScience/Data/BurgeLabCalibrationData/';
+elseif strcmp(localhostname,'blobfish')
+   fdir = '/home/brainardlab/labDropbox/CNST_materials/ColorTracking/calData/';
 else
    fdir = ['/Users/Shared/Matlab/BurgeLabCalibrationData/'];
 end

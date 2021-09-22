@@ -4,7 +4,7 @@
 clear; close all; clc;
 
 %% Load a CRT calibration file
-cal = LoadCalFile('ViewSonicG220fb',[],getpref('BrainardLabToolbox','CalDataFolder'));
+cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
 
 % Make calibration file compatible with current system
 [calStructOBJ, inputArgIsACalStructOBJ] = ObjectToHandleCalOrCalStruct(cal);

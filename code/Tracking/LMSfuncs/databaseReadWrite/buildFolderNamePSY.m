@@ -63,6 +63,9 @@ cmpInfo = psyComputerInfo;
 if strcmp(cmpInfo.localHostName,'ben-Precision-7520')
     fdirRoot = '~/Documents/VisionScience/Project_PsyData';
     fdir  = [fdirRoot filesep prjCode filesep expType filesep subjName   ];
+elseif strcmp(cmpInfo.localHostName,'blobfish')
+    fdirRoot = '/home/brainardlab/labDropbox/CNST_analysis/ColorTracking/dataDev/';
+    fdir  = [fdirRoot filesep prjCode filesep expType filesep subjName   ];
 end
-    
+
     

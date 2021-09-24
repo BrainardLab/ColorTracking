@@ -61,13 +61,15 @@ elseif strcmp(localhostname,'jburge-marr')
    fdir = ['/Users/Shared/VisionScience/BurgeLabCalibrationData/'];    
 elseif strcmp(localhostname,'blobfish')
    fdir = '/home/brainardlab/labDropbox/CNST_materials/ColorTracking/calData/';
+elseif strcmp(localhostname,'BrainardLab-21-01')   
+   fdir = ['/Users/michael/Documents/MATLAB/toolboxes/Psychtoolbox-3/Psychtoolbox/PsychCalDemoData/']; 
 else
    fdir = ['/Users/Shared/Matlab/BurgeLabCalibrationData/'];
 end
 flag = exist(fdir,'dir');
-if (flag == 0 || exist([fdir fname],'file') ~= 2) && strcmp(localhostname,'BrainardLab-21-01')
+if flag == 0 || exist([fdir fname],'file') ~= 2
     % TRY LOADING DATA FROM SERVER
-    fdir = ['/Users/michael/Documents/MATLAB/toolboxes/Psychtoolbox-3/Psychtoolbox/PsychCalDemoData/'];
+    fdir = ['/Volumes/Data/BurgeLabCalibrationData/'];
 end
 % HARD CODED DIRECTORY ON VICTOR RODRIGUEZ'S COMPUTER
 if flag == 0 && (strcmp(localhostname, 'Mac-mini-de-VioBioMac-11') || strcmp(localhostname, 'PORTATILVIOBIO') || strcmp(localhostname, 'IVIO-2'))

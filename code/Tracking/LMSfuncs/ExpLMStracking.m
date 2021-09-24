@@ -313,7 +313,7 @@ end
 % SET COLOR VALUES %
 %%%%%%%%%%%%%%%%%%%%
 D.blk        = 0.0;
-D.bgd        = [0.3, 0.3, 0.3]; % 128; % 0.5000;
+D.bgd        = [0.5, 0.5, 0.5]; % 128; % 0.5000;
 D.wht        = 1.0; % 255; % 1.0000;
 
 %%%%%%%%%%%%%%%
@@ -379,18 +379,10 @@ if ~exist('stereoMode','var') || isempty(stereoMode),
 end
 
 % Get Cal Data
-% Select the calibration file for a particular display (here a ViewSonic display)
-if strcmp(D.cmpInfo.localHostName,'BrainardLab-21-01')
-   displayCalFileName = '/Users/michael/Documents/MATLAB/toolboxes/Psychtoolbox-3/Psychtoolbox/PsychCalDemoData/ViewSonicG220fb.mat';
-elseif strcmp(D.cmpInfo.localHostName,'jburge-marr')
-   displayCalFileName = '/Users/Shared/VisionScience/BurgeLabCalibrationData/ViewSonicG220fb.mat';
-end
-
-% Load the calibration file
-load(displayCalFileName, 'cals');
+cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
 
 % Construct a calStructOBJ from the latest calibration
-[calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cals{end});
+[calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cal);
 
 % To  settings
 gammaMethod = 2;
@@ -451,31 +443,21 @@ S.meanDC(1:S.trlPerRun,1) = mean(D.correctedBgd);
 % MaxContrastLMS = 0.1.*[1 0 0]; %l-iso-10p.pdf
 % MaxContrastLMS = 0.1.*[0.7071 -0.7071 0]; %l-m-iso-10p.pdf
 % CREATE STIMULUS
+
+% Load Cone Fundamentals
+load T_cones_ss2
+
 for t = 1:S.trlPerRun;
-    [stimPrimariesMod,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,D.bgd,S.MaxContrastLMS(t,:), S.ortDeg(t), 'stimHalfSize', 60, 'fx', S.frqCpdL(t), 'sigma',bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)),'imgSzXYdeg',S.imgSzXYdeg(t,:),'smpPerDeg',S.smpPerDeg(t),'phase',S.phsDegL(t));
     
-    % Make the background
-    for ii = 1: length(D.bgd)
-        theBackground(ii,:) =  D.bgd(ii) .* ones([1 imgInfo.rows*imgInfo.cols]);
-    end
+    contrastImage = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
+                                                                                                                                                                                                                                                                    
+    SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
+  
+    SetGammaMethod(calStructOBJ,2);
     
-    notZero = PrimaryToSettings(calStructOBJ,[0,0,0]);
+    backgroundExcitations = PrimaryToSensor(calStructOBJ,D.bgd');
     
-    for ii = 1: length(notZero)
-        theNonZeroZeros(ii,:) =  notZero(ii) .* ones([1 imgInfo.rows*imgInfo.cols]);
-    end
-    
-    theGabor =  stimPrimariesMod + theBackground;
-    
-    % Gamma Correct
-    [settings,badIndex] = PrimaryToSettings(calStructOBJ,theGabor);
-    
-    if sum(badIndex)> 0
-        error('WARNING: %s percent of pixels are out of gamut',num2str(round(100*(sum(badIndex)/length(badIndex)),2)))
- 
-    end
-    %  Back to image format
-    stmLE = reshape(settings', [imgInfo.rows  imgInfo.cols 3]);
+    [stmLE,~,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundExcitations,S.MaxContrastLMS(t,:)');
     
     stmRE = stmLE;
     

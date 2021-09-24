@@ -1,0 +1,28 @@
+[
+    {
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "config/CorticalColorMappingLocalHookTemplate.m",
+		"name": "CorticalColorMapping",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "git",
+		"update": "",
+		"url": "https://github.com/BrainardLab/CorticalColorMapping.git"
+	},	
+    {
+        "flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "Configuration/BrainardLabToolboxLocalHookTemplate.m",
+		"name": "BrainardLabToolbox",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "git",
+		"update": "",
+		"url": "https://github.com/brainardlab/BrainardLabToolbox.git"
+	}
+]

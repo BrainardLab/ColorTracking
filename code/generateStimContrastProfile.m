@@ -1,4 +1,4 @@
-function [scaledContrastImage, sRGBimage] = generateStimContrastProfile(imgSzXYdeg,smpPerDeg,fx,angle,phase,sigma,varargin)
+function [contrastImage] = generateStimContrastProfile(imgSzXYdeg,smpPerDeg,fx,angle,phase,sigma,varargin)
 
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('angle',@isnumeric);
@@ -23,11 +23,5 @@ yDeg  = smpPos(smpPerDeg,imgSzXYsmp(2));
 sineWavePattern = sin(2*pi*(fx * cosd(angle)*meshX + fx*sind(angle)*meshY) + deg2rad(phase));
 gaussPattern = exp(-((meshX).^2+(meshY).^2)/(2*sigma^2));
 contrastImage = sineWavePattern.* gaussPattern;
-
-% scale contrast image to be max = 1 or -1
-scaledContrastImage = contrastImage./max(abs(contrastImage(:)));
-
-% Generate an sRGB image
-sRGBimage = repmat(lin2rgb(scaledContrastImage),[1,1,3]);
 
 end

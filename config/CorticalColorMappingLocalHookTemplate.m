@@ -36,20 +36,25 @@ end
 %% Specify base paths for materials and data
 [~, userID] = system('whoami');
 userID = strtrim(userID);
-% switch userID
-%     case {'dhb'}
-%     otherwise
-% end
-%
-%% Specify where output goes
-% 
-% if ismac
-%     % Code to run on Mac plaform
-%     setpref(projectName,'');
-% elseif isunix
-% elseif ispc
-%     % Code to run on Windows platform
-%     warning('No supported for PC')
-% else
-%     disp('What are you using?')
-% end
+switch userID
+    case {'brainardlab'}
+        CalFolder = fullfile('/home',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
+    case{'michael'}
+        CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
+    otherwise
+end
+
+setpref(projectName,'CalFolder',CalFolder) 
+
+if ismac
+    % Code to run on Mac plaform
+    setpref(projectName,'');
+elseif isunix
+    fprintf('*** ADDING Psychtoolbox-3 ***')
+    %addpath(genpath('/usr/share/psychtoolbox-3/'));
+elseif ispc
+    % Code to run on Windows platform
+    warning('No supported for PC')
+else
+    disp('What are you using?')
+end

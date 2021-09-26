@@ -33,33 +33,38 @@ switch p.Results.experiment
         %    Experiment-1 Stim     %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % l isolating
-        [~,~,~,lIso]      = generateStimContrasts(0,0,expspace(.16,.02,6));
+        [lIso]      = generateStimContrasts(0,0,expspace(.18,.02,6));
         % s isolating
-        [~,~,~,sIso]      = generateStimContrasts(0,90,expspace(.91,.20,6));
-        % L+S
-        [~,~,~,lPlusS] = generateStimContrasts(0,45,expspace(.27,.03,6));
-        % L-S
-        [~,~,~,lMinS]  = generateStimContrasts(0,-45,expspace(.285,.03,6));
-        MaxContrastLMS = [lIso; sIso; lPlusS; lMinS];
+        [sIso]      = generateStimContrasts(0,90,expspace(.85,.18,6));
+        % L+S 45
+        [lPlusS45]  = generateStimContrasts(0,45,expspace(.25,.03,6));
+        % L-S 45
+        [lMinS45]   = generateStimContrasts(0,-45,expspace(.26,.03,6));
+        % L+S 75
+        [lPlusS75]  = generateStimContrasts(0,75,expspace(.65,.06,6));
+        % L-S 75
+        [lMinS75]   = generateStimContrasts(0,-75,expspace(.78,.06,6));
+        
+        MaxContrastLMS = [lIso; sIso; lPlusS75; lMinS75; lPlusS45; lMinS45];
     case 'SLplane-Min'
         % l isolating
-        [~,~,~,lIso]      = generateStimContrasts(0,0,.02);
+        [lIso]      = generateStimContrasts(0,0,.02);
         % s isolating
-        [~,~,~,sIso]      = generateStimContrasts(0,90,.20);
+        [sIso]      = generateStimContrasts(0,90,.20);
         % L+S
-        [~,~,~,lPlusS] = generateStimContrasts(0,45,.03);
+        [lPlusS] = generateStimContrasts(0,45,.03);
         % L-S
-        [~,~,~,lMinS]  = generateStimContrasts(0,-45,.03);
+        [lMinS]  = generateStimContrasts(0,-45,.03);
         MaxContrastLMS = [lIso; sIso; lPlusS; lMinS];
     case 'SLplane-Max'
         % l isolating
-        [~,~,~,lIso]      = generateStimContrasts(0,0,.19);
+        [lIso]      = generateStimContrasts(0,0,.19);
         % s isolating
-        [~,~,~,sIso]      = generateStimContrasts(0,90,.91);
+        [sIso]      = generateStimContrasts(0,90,.91);
         % L+S
-        [~,~,~,lPlusS] = generateStimContrasts(0,45,.27);
+        [lPlusS] = generateStimContrasts(0,45,.27);
         % L-S
-        [~,~,~,lMinS]  = generateStimContrasts(0,-45,.285);
+        [lMinS]  = generateStimContrasts(0,-45,.285);
         MaxContrastLMS = [lIso; sIso; lPlusS; lMinS];
 end
 

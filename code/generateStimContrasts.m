@@ -1,4 +1,4 @@
-function [cL,cM,cS,stimCombinations] = generateStimContrasts(azi,ele,C)
+function [stimCombinations] = generateStimContrasts(azi,ele,C)
 %
 % For the L S plane
 %   azi = 0; L+S ele = 45; L-S ele = -45;

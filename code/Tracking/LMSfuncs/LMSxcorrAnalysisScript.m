@@ -4,10 +4,14 @@ Sall = loadPSYdataLMSall('TRK', 'BMC', 'CGB', {[2:3]}, 'blobfish', 'local');
 
 %%
 
-ind1 = Sall.MaxContrastLMS(:,1)>0           & abs(Sall.MaxContrastLMS(:,2))<0.0001 & abs(Sall.MaxContrastLMS(:,3))<0.0001; 
-ind2 = abs(Sall.MaxContrastLMS(:,1))<0.0001 & abs(Sall.MaxContrastLMS(:,2))<0.0001     & Sall.MaxContrastLMS(:,3)>0; 
-ind3 = Sall.MaxContrastLMS(:,1)>0           & abs(Sall.MaxContrastLMS(:,2))<0.0001     & Sall.MaxContrastLMS(:,3)<0; 
-ind4 = Sall.MaxContrastLMS(:,1)>0.0001           & abs(Sall.MaxContrastLMS(:,2))<0.0001     & Sall.MaxContrastLMS(:,3)>0; 
+% 0 DEG IN SL PLANE
+ind1 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-0)<0.001;
+% 90 DEG IN SL PLANE
+ind2 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-90)<0.001; 
+% -45 DEG IN SL PLANE
+ind3 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(-45))<0.001; 
+% 45 DEG IN SL PLANE
+ind4 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(+45))<0.001; 
 S1 = structElementSelect(Sall,ind1,size(Sall.tgtXmm,2));
 S2 = structElementSelect(Sall,ind2,size(Sall.tgtXmm,2));
 S3 = structElementSelect(Sall,ind3,size(Sall.tgtXmm,2));
@@ -15,4 +19,4 @@ S4 = structElementSelect(Sall,ind4,size(Sall.tgtXmm,2));
 
 %%
 
-LMSxcorrAnalysis(S2,'LGS')
+LMSxcorrAnalysis(S1,'LGS')

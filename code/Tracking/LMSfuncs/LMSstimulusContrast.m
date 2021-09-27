@@ -28,7 +28,7 @@ p.parse(varargin{:});
 
 switch p.Results.experiment
     %% Set the stimulus conditions for a specfifc experiment here
-    case 'SLplane-Full'
+    case 'SLplane-Pos'
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %    Experiment-1 Stim     %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,6 +44,24 @@ switch p.Results.experiment
         [lPlusS75]  = generateStimContrasts(0,75,expspace(.65,.06,6));
         % L-S 75
         [lMinS75]   = generateStimContrasts(0,-75,expspace(.78,.06,6));
+        
+        MaxContrastLMS = [lIso; sIso; lPlusS75; lMinS75; lPlusS45; lMinS45];
+    case 'SLplane-Neg'
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %    Experiment-1 Stim     %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % l isolating
+        [lIso]      = -1.*generateStimContrasts(0,0,expspace(.18,.02,6));
+        % s isolating
+        [sIso]      = -1.*generateStimContrasts(0,90,expspace(.85,.18,6));
+        % L+S 45
+        [lPlusS45]  = -1.*generateStimContrasts(0,45,expspace(.25,.03,6));
+        % L-S 45
+        [lMinS45]   = -1.*generateStimContrasts(0,-45,expspace(.26,.03,6));
+        % L+S 75
+        [lPlusS75]  = -1.*generateStimContrasts(0,75,expspace(.65,.06,6));
+        % L-S 75
+        [lMinS75]   = -1.*generateStimContrasts(0,-75,expspace(.78,.06,6));
         
         MaxContrastLMS = [lIso; sIso; lPlusS75; lMinS75; lPlusS45; lMinS45];
     case 'SLplane-Min'

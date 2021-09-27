@@ -41,12 +41,12 @@ backgroundPrimaries_hat = SensorToPrimary(calStructOBJ,backgroundLMS_hat);
 
 
 %% Create a chromatic modulation 
- LMScontrastModulation1 = generateStimContrasts(0,-45,0.26)'
- LMScontrastModulation2 = generateStimContrasts(0,45,0.25)'
- LMScontrastModulation3 = generateStimContrasts(0,-75,0.78)'
- LMScontrastModulation4 = generateStimContrasts(0,75,0.65)'
- LMScontrastModulation5 = generateStimContrasts(0,90,0.85)'
- LMScontrastModulation6 = generateStimContrasts(0,0,0.18)'
+ LMScontrastModulation1 = -1*generateStimContrasts(0,-45,0.26)'
+ LMScontrastModulation2 = -1*generateStimContrasts(0,45,0.25)'
+ LMScontrastModulation3 = -1*generateStimContrasts(0,-75,0.78)'
+ LMScontrastModulation4 = -1*generateStimContrasts(0,75,0.65)'
+ LMScontrastModulation5 = -1*generateStimContrasts(0,90,0.85)'
+ LMScontrastModulation6 = -1*generateStimContrasts(0,0,0.18)'
  
 [stimSettings1,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation1);
 [stimSettings2,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation2);
@@ -57,7 +57,10 @@ backgroundPrimaries_hat = SensorToPrimary(calStructOBJ,backgroundLMS_hat);
 %% Display the Gabor
 hFig = figure; clf;
 set(hFig, 'Position', [800 10  400 500]);
-montage({stimSettings1,stimSettings2,stimSettings3,stimSettings4,stimSettings5,stimSettings6});
+catIm1 = cat(2,stimSettings1,stimSettings2,stimSettings3);
+catIm2 = cat(2,stimSettings4,stimSettings5,stimSettings6);
+catIm = cat(1,catIm1,catIm2);
+image(catIm)
 axis 'image'; axis 'ij'
 set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
 box off

@@ -39,7 +39,7 @@ switch localhostname
 %         fname = 'Linear8bit_Artificial.mat';
         fname = 'VIEWPixx3D_Calib_Dec_15_2020.mat';
     case 'jburge-hubel' % SPEED EXPERIMENT COMPUTER
-        fname = 'ViewSonic-2_Calib.mat';
+        fname = 'ViewSonicG220fb.mat';
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%
     % DEVELOPMENT COMPUTERS %

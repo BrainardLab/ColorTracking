@@ -280,7 +280,8 @@ S.phsDspArcmin = repmat(phsDspArcmin', [trlPerRun./length(phsDspArcmin), 1]);
 % INITIAL PHASE DISPARITY (LEFT OR RIGHT SIDE START
 phsDegInit1             = 0;
 phsDegInit2             = 180;
-S.phsDegInit   = repmat([phsDegInit1; phsDegInit2], [S.trlPerRun(1)/2, 1]);
+% S.phsDegInit   = repmat([phsDegInit1; phsDegInit2], [S.trlPerRun(1)/2, 1]);
+S.phsDegInit = round(rand([S.trlPerRun 1])).*180;
 % RANDOM INDEX
 indRnd = randsample(S.trlPerRun, S.trlPerRun);
 S.phsDegInit   = S.phsDegInit(indRnd);

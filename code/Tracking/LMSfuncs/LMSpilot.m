@@ -7,7 +7,7 @@ subjID = 'JNK';
 MaxContrastLMS = LMSstimulusContrast();
 MaxContrastLMS = MaxContrastLMS(1,:);
 
-nTrialsReps = 2;
+nTrialsReps = 1;
 
 nTrials = nTrialsReps * size(MaxContrastLMS,1);
 

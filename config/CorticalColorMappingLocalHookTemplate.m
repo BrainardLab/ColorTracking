@@ -41,14 +41,17 @@ switch userID
         CalFolder = fullfile('/home',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
     case{'michael'}
         CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
+    case{'jburge-hubel'}
+        CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');
     otherwise
+        CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
 end
 
 setpref(projectName,'CalFolder',CalFolder) 
 
 if ismac
     % Code to run on Mac plaform
-    setpref(projectName,'');
+    %setpref(projectName,'');
 elseif isunix
     fprintf('*** ADDING Psychtoolbox-3 ***')
     %addpath(genpath('/usr/share/psychtoolbox-3/'));

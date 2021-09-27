@@ -50,13 +50,16 @@ if strcmp(serverORlocal,'server') || strcmp(serverORlocal,'both')
     fdirRoot  = [filesep 'Volumes' filesep 'Data' filesep 'Project_PsyData' ];
 elseif strcmp(serverORlocal,'local') || strcmp(serverORlocal,'both')
     % LOCAL DIRECTORY
-    fdirRoot  = fullfile('/Users', 'michael', 'labDropbox', 'ColorTrackingTask','Data');
+    fdirRoot  = [filesep 'Users' filesep 'Shared' filesep 'VisionScience' filesep 'Project_PsyData' ];
 else
     error(['buildFolderNamePSY: WARNING! bServerDir has unhandled value: ' serverORlocal]);
 end
 
-fdir  = fullfile(fdirRoot,subjName);
-
+if strcmp(imgDim,'0')
+    fdir  = [fdirRoot filesep prjCode filesep expType filesep subjName   ];
+else
+    fdir  = [fdirRoot filesep prjCode filesep expType filesep imgDim filesep subjName   ];
+end
 
 % SPECIAL CASE FOR BEN LAPTOP
 cmpInfo = psyComputerInfo;
@@ -66,6 +69,9 @@ if strcmp(cmpInfo.localHostName,'ben-Precision-7520')
 elseif strcmp(cmpInfo.localHostName,'blobfish')
     fdirRoot = '/home/brainardlab/labDropbox/CNST_analysis/ColorTracking/dataDev/';
     fdir  = [fdirRoot filesep prjCode filesep expType filesep subjName   ];
+elseif strcmp(cmpInfo.localHostName,'BrainardLab-21-01')
+    fdirRoot  = fullfile('/Users', 'michael', 'labDropbox', 'ColorTrackingTask','Data');
+    fdir  = fullfile(fdirRoot,subjName);
 end
 
     

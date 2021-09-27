@@ -41,44 +41,51 @@ backgroundPrimaries_hat = SensorToPrimary(calStructOBJ,backgroundLMS_hat);
 
 
 %% Create a chromatic modulation 
- LMScontrastModulation1 = generateStimContrasts(0,-45,0.03)'
- LMScontrastModulation2 = generateStimContrasts(0,45,0.03)'
- LMScontrastModulation3 = generateStimContrasts(0,-75,0.06)'
- LMScontrastModulation4 = generateStimContrasts(0,75,0.06)'
-
+ LMScontrastModulation1 = generateStimContrasts(0,-45,0.26)'
+ LMScontrastModulation2 = generateStimContrasts(0,45,0.25)'
+ LMScontrastModulation3 = generateStimContrasts(0,-75,0.78)'
+ LMScontrastModulation4 = generateStimContrasts(0,75,0.65)'
+ LMScontrastModulation5 = generateStimContrasts(0,90,0.85)'
+ LMScontrastModulation6 = generateStimContrasts(0,0,0.18)'
+ 
 [stimSettings1,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation1);
 [stimSettings2,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation2);
 [stimSettings3,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation3);
 [stimSettings4,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation4);
-
+[stimSettings5,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation5);
+[stimSettings6,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation6);
 %% Display the Gabor
 hFig = figure; clf;
 set(hFig, 'Position', [800 10  400 500]);
-imshow(stimSettings1); axis 'image'; axis 'ij'
+montage({stimSettings1,stimSettings2,stimSettings3,stimSettings4,stimSettings5,stimSettings6});
+axis 'image'; axis 'ij'
 set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
 box off
 set(hFig, 'Color', PrimaryToSettings(calStructOBJ, backgroundPrimaries));
-
-%% Display the Gabor
-hFig = figure; clf;
-set(hFig, 'Position', [800 10  400 500]);
-imshow(stimSettings2); axis 'image'; axis 'ij'
-set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
-box off
-set(hFig, 'Color', PrimaryToSettings(calStructOBJ, backgroundPrimaries));
-
-%% Display the Gabor
-hFig = figure; clf;
-set(hFig, 'Position', [800 10  400 500]);
-imshow(stimSettings3); axis 'image'; axis 'ij'
-set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
-box off
-set(hFig, 'Color', PrimaryToSettings(calStructOBJ, backgroundPrimaries));
-
-%% Display the Gabor
-hFig = figure; clf;
-set(hFig, 'Position', [800 10  400 500]);
-imshow(stimSettings4); axis 'image'; axis 'ij'
-set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
-box off
-set(hFig, 'Color', PrimaryToSettings(calStructOBJ, backgroundPrimaries));
+% 
+% %% Display the Gabor
+% hFig = figure; clf;
+% set(hFig, 'Position', [800 10  400 500]);
+% imshow(stimSettings2); axis 'image'; axis 'ij'
+% set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
+% box off
+% set(hFig, 'Color', PrimaryToSettings(calStructOBJ, backgroundPrimaries));
+% 
+% %% Display the Gabor
+% hFig = figure; clf;
+% set(hFig, 'Position', [800 10  400 500]);
+% imshow(stimSettings3); axis 'image'; axis 'ij'
+% set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
+% box off
+% set(hFig, 'Color', PrimaryToSettings(calStructOBJ, backgroundPrimaries));
+% 
+% %% Display the Gabor
+% hFig = figure; clf;
+% set(hFig, 'Position', [800 10  400 500]);
+% imshow(stimSettings4); axis 'image'; axis 'ij'
+% set(gca, 'XColor', 'none', 'YColor', 'none', 'XTick', [], 'YTick', [], 'FontSize', 14);
+% box off
+% set(hFig, 'Color', PrimaryToSettings(calStructOBJ, backgroundPrimaries));
+% 
+% montage({stimSettings1,stimSettings2,stimSettings3,stimSettings4});
+% montage(catIm);

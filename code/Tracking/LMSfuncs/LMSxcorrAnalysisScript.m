@@ -20,8 +20,8 @@ S1 = structElementSelect(Sall,ind1,size(Sall.tgtXmm,2));
 S2 = structElementSelect(Sall,ind2,size(Sall.tgtXmm,2));
 S3 = structElementSelect(Sall,ind3,size(Sall.tgtXmm,2));
 S4 = structElementSelect(Sall,ind4,size(Sall.tgtXmm,2));
-S5 = structElementSelect(Sall,ind3,size(Sall.tgtXmm,2));
-S6 = structElementSelect(Sall,ind4,size(Sall.tgtXmm,2));
+S5 = structElementSelect(Sall,ind5,size(Sall.tgtXmm,2));
+S6 = structElementSelect(Sall,ind6,size(Sall.tgtXmm,2));
 
 %%
 

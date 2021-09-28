@@ -19,21 +19,30 @@ function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType)
 
 %% ANALYZE BY LMS CONDITION
 
+colorAngle = round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)));
+colorContrast = round(sqrt(Sall.MaxContrastLMS(:,3).^2+Sall.MaxContrastLMS(:,1).^2),3);
+colorAngleContrastUnq = unique([colorAngle colorContrast],'rows');
+
 MaxContrastLMSunq = unique(Sall.MaxContrastLMS,'rows');
+
 figure; hold on;
 legendLMS = {''};
 xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--');
-for i = 1:size(MaxContrastLMSunq,1)
-    ind =   abs(Sall.MaxContrastLMS(:,1)-MaxContrastLMSunq(i,1))<0.001 ...
-          & abs(Sall.MaxContrastLMS(:,2)-MaxContrastLMSunq(i,2))<0.001 ...
-          & abs(Sall.MaxContrastLMS(:,3)-MaxContrastLMSunq(i,3))<0.001;
+for i = 1:size(colorAngleContrastUnq,1)
+%     ind =   abs(Sall.MaxContrastLMS(:,1)-MaxContrastLMSunq(i,1))<0.001 ...
+%           & abs(Sall.MaxContrastLMS(:,2)-MaxContrastLMSunq(i,2))<0.001 ...
+%           & abs(Sall.MaxContrastLMS(:,3)-MaxContrastLMSunq(i,3))<0.001;
+    ind =   abs(colorAngle-colorAngleContrastUnq(i,1))<0.001 ...
+          & abs(colorContrast-colorAngleContrastUnq(i,2))<0.001;      
     S = structElementSelect(Sall,ind,size(Sall.MaxContrastLMS,1));
     maxLagSec = 2;
     smpBgnEnd = 1;
     bPLOTxcorr = 0;
-    MaxContrastLMStitle = ['LMS = ' '[' num2str(MaxContrastLMSunq(i,1),3) ...
-                                  ' '   num2str(MaxContrastLMSunq(i,2),3) ...
-                                  ' '   num2str(MaxContrastLMSunq(i,3),3) ']'];
+%     MaxContrastLMStitle = ['LMS = ' '[' num2str(MaxContrastLMSunq(i,1),3) ...
+%                                   ' '   num2str(MaxContrastLMSunq(i,2),3) ...
+%                                   ' '   num2str(MaxContrastLMSunq(i,3),3) ']'];
+    MaxContrastLMStitle = ['Angle = ' num2str(colorAngleContrastUnq(i,1),3) ...
+                           ', Contrast = '   num2str(colorAngleContrastUnq(i,2),3)];                              
     tLbl='X'; rLbl='X'; 
     [r(:,i), rLagVal(:,i),rAll] = xcorrEasy(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr); 
     if strcmp(modelType,'FLT')
@@ -101,13 +110,13 @@ for i = 1:size(rSmooth,2)
 end
 
 figure;
-plot(sqrt(sum(MaxContrastLMSunq.^2,2)),lagXXms,'ko','LineWidth',1.5,'MarkerSize',10);
+plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),lagXXms,'ko','LineWidth',1.5,'MarkerSize',10);
 axis square;
 formatFigure('Contrast','Lag (s)');
 ylim([0 0.6]);
 
 figure;
-plot(sqrt(sum(MaxContrastLMSunq.^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
+plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
 axis square;
 formatFigure('Contrast','Integration period (s)');
 % ylim([0 0.6]);

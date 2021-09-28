@@ -39,6 +39,7 @@ for i = 1:length(dataFileNums)
     disp(['loadPSYdataLMS: BRAVO! successfully loaded: ' fname ' ...'])
     % COMBINE STRUCTS
     if strcmp(expType,'TRK')
+       S = rmfield(S,'fname');
        Sall = structmerge(Sall,S,S.trlPerRun);
     else
         disp(['loadPSYdataLMS: INVALID ARGUMENT TO expType = ' num2str(expType) '. WRITE CODE!?']);

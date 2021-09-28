@@ -1,4 +1,8 @@
-% runLMSpilot
+%% runLMSpilot
 
-LMSpilot('SLplane-Pos')
-LMSpilot('SLplane-Neg')
+LMSpilot('BMC','SLplane-Pos')
+LMSpilot('BMC','SLplane-Neg')
+LMSpilot('BMC','SLplane-Pos')
+LMSpilot('BMC','SLplane-Neg')
+LMSpilot('BMC','SLplane-Pos')
+LMSpilot('BMC','SLplane-Neg')

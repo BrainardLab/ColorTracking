@@ -1,7 +1,5 @@
 function [] = LMSpilot(expType)
 
-close all; 
-clear all;
 sca;
 
 subjID = 'JNK';

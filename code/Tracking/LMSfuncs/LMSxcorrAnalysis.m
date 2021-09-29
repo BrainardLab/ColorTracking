@@ -27,15 +27,9 @@ colorAngleContrastUnq = unique([colorAngle colorContrast],'rows');
 % THIS IS NOT USED RIGHT NOW
 MaxContrastLMSunq = unique(Sall.MaxContrastLMS,'rows');
 
-% ----------- BEGIN SECTION 1 ----------------------------
-% -------------------------------------------------------------------
-% THIS SECTION IS A MESS RIGHT NOW--DOES TWO THINGS. IT PLOTS THE RAW 
-% CROSS-CORRELATION FUNCTIONS AND FITS THE FUNCTIONS SIMULTANEOUSLY. BEN
-% WILL CLEAN IT UP AT SOME POINT
-% -------------------------------------------------------------------
-figure; hold on;
+%------------ BEGIN MAIN ANALYSIS SECTION -------------------------
+
 legendLMS = {''};
-xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--');
 for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
 %     ind =   abs(Sall.MaxContrastLMS(:,1)-MaxContrastLMSunq(i,1))<0.001 ...
 %           & abs(Sall.MaxContrastLMS(:,2)-MaxContrastLMSunq(i,2))<0.001 ...
@@ -65,8 +59,6 @@ for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
        rhoXXstd = std(rAll,[],2);
        [rSmooth(:,i),rParam(:,i),tSecFit(:,i)] = xcorrFitMLE(rLagVal(:,i),r(:,i),rhoXXstd,rStdK,modelType,initType);
     end
-    % PLOT CROSS-CORRELATION FUNCTIONS
-    plot(rLagVal(:,i),r(:,i),'LineWidth',1);
 %    text(0.5,0.2,MaxContrastLMStitle,'FontSize',15);
     legendLMS{end+1} = MaxContrastLMStitle;
     if ~strcmp(modelType,'LGS') % IF FITS WERE NOT DONE WITH LOG-GAUSSIAN
@@ -79,21 +71,25 @@ for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
         FWHH(i) = exp(log(rParam(2,i))+rParam(3,i).*sqrt(log(4))) - exp(log(rParam(2,i))-rParam(3,i).*sqrt(log(4)));
     end
 end
+
+if strcmp(modelType,'LGS') % IF FITS WERE DONE WITH LOG-GAUSSIAN
+   % LAG = MEAN OF LOG-GAUSSIAN FIT
+   lagXXms = rParam(2,:);
+end
+
+% ---------------- END MAIN ANALYSIS SECTION -------------------
+
+% PLOT RAW CROSS-CORRELATION FUNCTIONS
+figure; hold on;
+xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--');
+for i = 1:size(rSmooth,2)
+    % PLOT CROSS-CORRELATION FUNCTIONS
+    plot(rLagVal(:,i),r(:,i),'LineWidth',1);    
+end
 tLbl='X'; rLbl='X';
 axis square;
 formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[35  386 476 420]);
 legend(legendLMS);
-if strcmp(modelType,'LGS')
-   lagXXms = rParam(2,:);
-end
-% maxLagSec = 2;
-% smpBgnEnd = 1;
-% bPLOTxcorr = 1;
-% tLbl='X'; rLbl='X'; xcorrEasy(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr); xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--'); formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[35  386 476 420]);
-% tLbl='Z'; rLbl='Z'; xcorrEasy(diff(S.tgtZmm),diff(S.rspZmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr); xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--'); formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[479 386 476 420]);
-% tLbl='X'; rLbl='Z'; xcorrEasy(diff(S.tgtXmm),diff(S.rspZmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr); xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--'); formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[917 386 476 420]);
-
-% ----------------------- END SECTION 1 --------------------------
 
 % PLOTS ALL CROSS-CORRELATION FITS ONLY
 figure;
@@ -110,8 +106,6 @@ axis square;
 formatFigure('Lag (ms)','Response');
 xlim([-0.5 1.5]);
 legend(legendLMS);
-
-%%
 
 % PLOTS BOTH FITS AND RAW CROSS-CORRELATION FUNCTIONS--FOR EXAMINING
 % QUALITY OF FIT
@@ -132,13 +126,14 @@ for i = 1:size(rSmooth,2)
     xlim([-0.5 1.5]);
 end
 
-% PLOT LAGS AND FULL WIDTH AT HALF HEIGHT
+% PLOT LAGS AT HALF HEIGHT
 figure;
 plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),lagXXms,'ko','LineWidth',1.5,'MarkerSize',10);
 axis square;
 formatFigure('Contrast','Lag (s)',['Angle = ' num2str(unique(colorAngle))]);
 ylim([0 0.6]);
 
+% PLOT FULL WIDTHS AT HALF HEIGHT
 figure;
 plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
 axis square;

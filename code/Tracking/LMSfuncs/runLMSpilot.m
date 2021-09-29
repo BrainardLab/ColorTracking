@@ -1,8 +1,14 @@
 %% runLMSpilot
 
-LMSpilot('BMC','SLplane-Pos')
-LMSpilot('BMC','SLplane-Neg')
-LMSpilot('BMC','SLplane-Pos')
-LMSpilot('BMC','SLplane-Neg')
-LMSpilot('BMC','SLplane-Pos')
-LMSpilot('BMC','SLplane-Neg')
+subjID = 'BMC';
+
+LMSpilot(subjID,'SLplane-Pos')
+LMSpilot(subjID,'SLplane-Neg')
+LMSpilot(subjID,'SLplane-Pos')
+LMSpilot(subjID,'SLplane-Neg')
+LMSpilot(subjID,'SLplane-Pos')
+LMSpilot(subjID,'SLplane-Neg')
+LMSpilot(subjID,'SLplane-Pos')
+LMSpilot(subjID,'SLplane-Neg')
+LMSpilot(subjID,'SLplane-Pos')
+LMSpilot(subjID,'SLplane-Neg')

@@ -57,7 +57,7 @@ for i = 1:size(colorAngleContrastUnq,1)
 %    text(0.5,0.2,MaxContrastLMStitle,'FontSize',15);
     legendLMS{end+1} = MaxContrastLMStitle;
     [~,rSmoothMaxInd] = max(rSmooth(:,i));
-    lagXXms(i) = tSecFit(rSmoothMaxInd,i);
+%    lagXXms(i) = tSecFit(rSmoothMaxInd,i);
     if strcmp(modelType,'LGS')
 %        FWHH(i) = lognFWHH(rParam(2,i),rParam(3,i));
         FWHH(i) = exp(log(rParam(2,i))+rParam(3,i).*sqrt(log(4))) - exp(log(rParam(2,i))-rParam(3,i).*sqrt(log(4)));
@@ -66,6 +66,7 @@ end
 axis square;
 formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[35  386 476 420]);
 legend(legendLMS);
+lagXXms = rParam(2,:);
 % maxLagSec = 2;
 % smpBgnEnd = 1;
 % bPLOTxcorr = 1;
@@ -112,7 +113,7 @@ end
 figure;
 plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),lagXXms,'ko','LineWidth',1.5,'MarkerSize',10);
 axis square;
-formatFigure('Contrast','Lag (s)');
+formatFigure('Contrast','Lag (s)',['Angle = ' num2str(unique(colorAngle))]);
 ylim([0 0.6]);
 
 figure;
@@ -120,6 +121,7 @@ plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'Marke
 axis square;
 formatFigure('Contrast','Integration period (s)');
 % ylim([0 0.6]);
+
 
 
 end

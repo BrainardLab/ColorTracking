@@ -1,6 +1,6 @@
 %%
 
-Sall = loadPSYdataLMSall('TRK', 'JNK', 'CGB', {[1:2]}, 'jburge-hubel', 'server');
+Sall = loadPSYdataLMSall('TRK', 'BMC', 'CGB', {[1:10]}, 'jburge-hubel', 'server');
 
 %%
 
@@ -25,4 +25,33 @@ S6 = structElementSelect(Sall,ind6,size(Sall.tgtXmm,2));
 
 %%
 
-LMSxcorrAnalysis(S1,'LGS')
+[~,~,rParams(:,:,1)] = LMSxcorrAnalysis(S1,'LGS');
+close all
+[~,~,rParams(:,:,2)] = LMSxcorrAnalysis(S2,'LGS');
+close all
+[~,~,rParams(:,:,3)] = LMSxcorrAnalysis(S3,'LGS');
+close all
+[~,~,rParams(:,:,4)] = LMSxcorrAnalysis(S4,'LGS');
+close all
+[~,~,rParams(:,:,5)] = LMSxcorrAnalysis(S5,'LGS');
+close all
+[~,~,rParams(:,:,6)] = LMSxcorrAnalysis(S6,'LGS');
+close all
+
+lags = squeeze(rParams(2,:,:));
+MaxContrastLMS = LMSstimulusContrast('experiment','SLplane-Pos');
+
+figure;hold on;
+scatter3(MaxContrastLMS(1:6,1),MaxContrastLMS(1:6,3),lags(:,1))
+
+scatter3(MaxContrastLMS(7:12,1),MaxContrastLMS(7:12,3),lags(:,2))
+
+scatter3(MaxContrastLMS(13:18,1),MaxContrastLMS(13:18,3),lags(:,6))
+
+scatter3(MaxContrastLMS(19:24,1),MaxContrastLMS(19:24,3),lags(:,5))
+
+scatter3(MaxContrastLMS(25:30,1),MaxContrastLMS(25:30,3),lags(:,4))
+
+scatter3(MaxContrastLMS(31:36,1),MaxContrastLMS(31:36,3),lags(:,3))
+grid on
+set(gca,'LineWidth',1.5)

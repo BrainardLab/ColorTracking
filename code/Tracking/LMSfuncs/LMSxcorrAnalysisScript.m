@@ -389,7 +389,7 @@ vecContrast = sqrt(MaxContrastLMS(:,1).^2+MaxContrastLMS(:,3).^2);
 
 matContrast = reshape(vecContrast,size(lags));
 
-scaledContrast = matContrast./matContrast(1,:);
+scaledContrast = flipud(matContrast./matContrast(1,:));
 
 tcHndl = figure;
 hold on;

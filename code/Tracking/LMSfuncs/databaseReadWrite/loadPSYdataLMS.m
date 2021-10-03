@@ -40,6 +40,8 @@ for i = 1:length(dataFileNums)
     % COMBINE STRUCTS
     if strcmp(expType,'TRK')
        S = rmfield(S,'fname');
+       S = rmfield(S,'stmRE');
+       S = rmfield(S,'stmLE');
        Sall = structmerge(Sall,S,S.trlPerRun);
     else
         disp(['loadPSYdataLMS: INVALID ARGUMENT TO expType = ' num2str(expType) '. WRITE CODE!?']);

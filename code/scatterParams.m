@@ -60,10 +60,6 @@ if p.Results.semiLog
     set(gca,'Xscale','log');
 end
 
-if ~isempty(p.Results.xTickVals)
-    set(gca,'XTick',p.Results.xTickVals);
-end
-
 ylim(p.Results.yLimVals)
 
 autoTicksY = p.Results.yLimVals(1):(p.Results.yLimVals(2)-p.Results.yLimVals(1))/4:p.Results.yLimVals(2);
@@ -84,6 +80,9 @@ set(gca, ...
 
 set(gcf, 'Color', 'white' );
 
+if ~isempty(p.Results.xTickVals)
+    set(gca,'XTick',p.Results.xTickVals);
+end
 
 %% Add labels
 if isfield(plotNames,'title')

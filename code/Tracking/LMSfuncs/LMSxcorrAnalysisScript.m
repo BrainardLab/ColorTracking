@@ -143,7 +143,7 @@ plotNames.title  = 'Lag Vs. Proportion S';
 plotNames.xlabel  = 'S / (S + L) (Proportion S)';
 plotNames.ylabel = 'Lag (s)';
 
-[tcHndl] = scatterParams(matSContrast,lags,plotColors',plotNames,'yLimVals', [.3 .650],'semiLog',false,'xTickVals',[],'sz',12.^2,'contrastAlpha',scaledContrasts);
+[tcHndl] = scatterParams(matSContrast,lags,plotColors',plotNames,'yLimVals', [.3 .60],'semiLog',false,'xTickVals',[],'sz',12.^2,'contrastAlpha',scaledContrasts);
 
 set(tcHndl, 'Renderer', 'Painters');
 figureSizeInches = [8 8];
@@ -181,7 +181,7 @@ plotNames.title  = 'Amplitude Vs. TIP';
 plotNames.xlabel  = 'Amplitude (a.u.)';
 plotNames.ylabel = 'Temporal Intergration Period (s)';
 
-[tcHndl] = scatterParams(amps,tips,plotColors',plotNames,'yLimVals', [0.1 .40],'sz',12.^2,'contrastAlpha',scaledContrasts);
+[tcHndl] = scatterParams(amps,tips,plotColors',plotNames,'yLimVals', [0.15 .35],'xTickVals',0:0.02:.2,'sz',12.^2,'contrastAlpha',scaledContrasts);
 
 set(tcHndl, 'Renderer', 'Painters');
 figureSizeInches = [8 8];

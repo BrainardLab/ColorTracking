@@ -1,5 +1,6 @@
 %% LOAD DATA
 subjID = 'BMC';
+theRuns = 1:20;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
@@ -9,7 +10,7 @@ elseif strcmp(subjID,'BMC')
     subjCode = 'Subject2';
 end
 
-Sall = loadPSYdataLMSall('TRK', 'BMC', 'CGB', {[1:20]}, 'jburge-hubel', 'local');
+Sall = loadPSYdataLMSall('TRK', subjID, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
 %% SORT TRIALS BY COLOR ANGLE
 
@@ -120,7 +121,6 @@ plotNames.title  = 'Amplitude Vs. Contrast';
 plotNames.ylabel = 'Amplitude (a.u.)';
 
 [tcHndl] = plotParams(matrixContrasts,amps,plotColors',plotNames,'yLimVals', [0 .4]);
-
 
 set(tcHndl, 'Renderer', 'Painters');
 figureSizeInches = [8 8];

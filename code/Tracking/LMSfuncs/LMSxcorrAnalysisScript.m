@@ -36,17 +36,11 @@ S6 = structElementSelect(Sall,ind6,size(Sall.tgtXmm,2));
 %% LMS ANALYSIS TO ESTIMATE LAGS
 
 [~,~,rParams(:,:,1)] = LMSxcorrAnalysis(S1,'LGS');
-close all
 [~,~,rParams(:,:,2)] = LMSxcorrAnalysis(S2,'LGS');
-close all
 [~,~,rParams(:,:,3)] = LMSxcorrAnalysis(S3,'LGS');
-close all
 [~,~,rParams(:,:,4)] = LMSxcorrAnalysis(S4,'LGS');
-close all
 [~,~,rParams(:,:,5)] = LMSxcorrAnalysis(S5,'LGS');
-close all
 [~,~,rParams(:,:,6)] = LMSxcorrAnalysis(S6,'LGS');
-close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs Lag

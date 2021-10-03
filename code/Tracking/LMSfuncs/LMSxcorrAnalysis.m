@@ -1,4 +1,4 @@
-function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType)
+function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType,varargin)
 %
 % function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType)
 %
@@ -18,6 +18,17 @@ function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType)
 %                 Sall = loadPSYdataLMSall('TRK', 'BMC', 'CGB', {[1:10]}, 'jburge-hubel', 'server');
 %
 % analyzes data from LMS tracking experiment
+
+% Input Parser
+p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
+p.addRequired('Sall',@isstruct);
+p.addRequired('modelType',@ischar);
+p.addParameter('bPLOTrawXCORR',0,@isnumeric);
+p.addParameter('bPLOTfitsOnly',0,@isnumeric);
+p.addParameter('bPLOTfitsAndRaw',0,@isnumeric);
+p.addParameter('bPLOTlags',0,@isnumeric);
+p.addParameter('bPLOTfwhh',0,@isnumeric);
+p.parse(Sall,modelType,varargin{:});
 
 % CONVERT MaxContrastLMS MATRIX TO ANGLE AND CONTRAST IN COLOR SPACE
 colorAngle = round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)));
@@ -79,65 +90,75 @@ end
 
 % ---------------- END MAIN ANALYSIS SECTION -------------------
 
-% PLOT RAW CROSS-CORRELATION FUNCTIONS
-figure; hold on;
-xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--');
-for i = 1:size(rSmooth,2)
-    % PLOT CROSS-CORRELATION FUNCTIONS
-    plot(rLagVal(:,i),r(:,i),'LineWidth',1);    
-end
-tLbl='X'; rLbl='X';
-axis square;
-formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[35  386 476 420]);
-legend(legendLMS);
-
-% PLOTS ALL CROSS-CORRELATION FITS ONLY
-figure;
-ylim([-.1 .25]); plot([0 0],ylim,'k--');
-hold on;
-for i = 1:size(rSmooth,2)
-    if strcmp(modelType,'FLT')
-       plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1);
-    else
-       plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
+if p.Results.bPLOTrawXCORR
+    % PLOT RAW CROSS-CORRELATION FUNCTIONS
+    figure; hold on;
+    xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--');
+    for i = 1:size(rSmooth,2)
+        % PLOT CROSS-CORRELATION FUNCTIONS
+        plot(rLagVal(:,i),r(:,i),'LineWidth',1);
     end
+    tLbl='X'; rLbl='X';
+    axis square;
+    formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[35  386 476 420]);
+    legend(legendLMS);
 end
-axis square;
-formatFigure('Lag (ms)','Response');
-xlim([-0.5 1.5]);
-legend(legendLMS);
 
-% PLOTS BOTH FITS AND RAW CROSS-CORRELATION FUNCTIONS--FOR EXAMINING
-% QUALITY OF FIT
-figure;
-set(gcf,'Position',[303 242 1687 990]);
-for i = 1:size(rSmooth,2)
-    subplot(3,4,i);
+if p.Results.bPLOTfitsOnly
+    % PLOTS ALL CROSS-CORRELATION FITS ONLY
+    figure;
     ylim([-.1 .25]); plot([0 0],ylim,'k--');
     hold on;
-    plot(rLagVal(:,i),r(:,i),'LineWidth',1);
-    if strcmp(modelType,'FLT')
-       plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1); 
-    else
-       plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
+    for i = 1:size(rSmooth,2)
+        if strcmp(modelType,'FLT')
+           plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1);
+        else
+           plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
+        end
     end
     axis square;
     formatFigure('Lag (ms)','Response');
     xlim([-0.5 1.5]);
+    legend(legendLMS);
 end
 
-% PLOT LAGS AT HALF HEIGHT
-figure;
-plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),lagXXms,'ko','LineWidth',1.5,'MarkerSize',10);
-axis square;
-formatFigure('Contrast','Lag (s)',['Angle = ' num2str(unique(colorAngle))]);
-ylim([0 0.6]);
+if p.Results.bPLOTfitsAndRaw
+    % PLOTS BOTH FITS AND RAW CROSS-CORRELATION FUNCTIONS--FOR EXAMINING
+    % QUALITY OF FIT
+    figure;
+    set(gcf,'Position',[303 242 1687 990]);
+    for i = 1:size(rSmooth,2)
+        subplot(3,4,i);
+        ylim([-.1 .25]); plot([0 0],ylim,'k--');
+        hold on;
+        plot(rLagVal(:,i),r(:,i),'LineWidth',1);
+        if strcmp(modelType,'FLT')
+           plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1); 
+        else
+           plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
+        end
+        axis square;
+        formatFigure('Lag (ms)','Response');
+        xlim([-0.5 1.5]);
+    end
+end
 
-% PLOT FULL WIDTHS AT HALF HEIGHT
-figure;
-plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
-axis square;
-formatFigure('Contrast','Integration period (s)');
-% ylim([0 0.6]);
+if p.Results.bPLOTlags
+    % PLOT LAGS AT HALF HEIGHT
+    figure;
+    plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),lagXXms,'ko','LineWidth',1.5,'MarkerSize',10);
+    axis square;
+    formatFigure('Contrast','Lag (s)',['Angle = ' num2str(unique(colorAngle))]);
+    ylim([0 0.6]);
+end
+
+if p.Results.bPLOTfwhh
+    % PLOT FULL WIDTHS AT HALF HEIGHT
+    figure;
+    plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
+    axis square;
+    formatFigure('Contrast','Integration period (s)');
+    % ylim([0 0.6]);
+end
 
 end

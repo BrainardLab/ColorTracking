@@ -24,13 +24,13 @@ function [LB,UB] = xcorrFitMLEparamBounds(modelType,rLagVal)
 rLagValMin = min(rLagVal);
 rLagValMax = max(rLagVal);
 % LOWER & UPPER BOUND ON AMPLITUDE
-LBa = 0;               UBa = 1;
+LBa = 0;               UBa = 1.5;
 % LOWER & UPPER BOUND ON MAX
-LBm = 0.25.*rLagValMin; UBm = 0.35.*rLagValMax;
+LBm = 0.25.*rLagValMin; UBm = 0.45.*rLagValMax;
 LBmLog = .0001;
 
 % LOWER & UPPER BOUND ON STD
-LBs = 0.00001;         UBs = rLagValMax;
+LBs = 0.00001;         UBs = rLagValMax.*2;
 if strcmp(modelType,'GMA') || strcmp(modelType,'GM2')
 	LBs = LBs.*10;         UBs = rLagValMax.*20;
 end

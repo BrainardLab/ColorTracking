@@ -29,6 +29,7 @@ p.addRequired('plotNames',@isstruct);
 p.addParameter('sz',12,@isscalar);
 p.addParameter('yLimVals',[0.2 0.6],@isvector);
 p.addParameter('semiLog',true,@islogical);
+p.addParameter('legendLocation','northeastoutside',@ischar);
 p.parse(xAxisVals,yAxisVals,plotColors, plotNames, varargin{:});
 
 %% init the plot
@@ -93,7 +94,7 @@ end
 
 %% Add Legend
 if isfield(plotNames,'legend')
-legend('0°','90°','-75°','75°','-45°','45°');
+    legend(plotNames.legend,'Location',p.Results.legendLocation);
 end
 %% Format fonts
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');

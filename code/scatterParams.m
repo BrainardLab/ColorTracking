@@ -31,6 +31,7 @@ p.addParameter('contrastAlpha',ones(size(yAxisVals)),@ismatrix);
 p.addParameter('yLimVals',[0.2 0.6],@isvector);
 p.addParameter('xTickVals',[]);
 p.addParameter('semiLog',true,@islogical);
+p.addParameter('legendLocation','northeastoutside',@ischar);
 p.parse(xAxisVals,yAxisVals,plotColors, plotNames, varargin{:});
 
 %% init the plot
@@ -42,14 +43,18 @@ numLines = size(yAxisVals,1);
 
 numPoints = size(yAxisVals,2);
 % Loop over the lines
+counter = 1;
 for ii = 1:numLines
+    countsOfInterest(ii) = counter;
     for jj = 1:numPoints
     
-    scatter(xAxisVals(jj,ii),yAxisVals(jj,ii),p.Results.sz, ...
+    sc(counter) = scatter(xAxisVals(jj,ii),yAxisVals(jj,ii),p.Results.sz, ...
         'MarkerEdgeColor',.3*plotColors(:,ii),...
         'MarkerFaceColor',plotColors(:,ii),...
         'MarkerFaceAlpha', p.Results.contrastAlpha(jj,ii),...
         'LineWidth',2);
+    
+    counter = counter+1;
     end
 end
 
@@ -97,7 +102,7 @@ end
 
 %% Add Legend
 if isfield(plotNames,'legend')
-legend('0°','90°','-75°','75°','-45°','45°');
+    legend([sc(countsOfInterest)],plotNames.legend,'Location',p.Results.legendLocation);
 end
 %% Format fonts
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');

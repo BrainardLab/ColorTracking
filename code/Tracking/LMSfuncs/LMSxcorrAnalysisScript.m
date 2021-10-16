@@ -76,7 +76,7 @@ plotNames.ylabel = 'Lag (s)';
 plotNames.legend = {'0°','90°','-45°','45°','-75°','75°'};
 
 % Plot it!
-[tcHndl] =plotParams(matrixContrasts,lags,plotColors',plotNames,'yLimVals', [0.3 .8]);
+[tcHndl] =plotParams(matrixContrasts,lags,plotColors',plotNames,'yLimVals', [0.3 .8],'semiLog',false);
 
 % Save it!
 figureSizeInches = [8 8];
@@ -86,7 +86,7 @@ set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
 figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast.pdf']);
 % Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
+%print(tcHndl, figNameTc, '-dpdf', '-r300');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs TIP
@@ -214,6 +214,37 @@ print(tcHndl, figNameTc, '-dpdf', '-r300');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%    Lag vs L-cone Contrast
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plotNames.title  = 'Lag Vs. L Cone Contrast';
+plotNames.xlabel =  'L Cone Contrast (%)'; 
+plotNames.ylabel = 'Lag (s)';
+
+coneContrastLvec = MaxContrastLMS(:,1);
+coneContrastSvec = MaxContrastLMS(:,3);
+
+coneContrastL_unsorted = reshape(coneContrastLvec,size(lags));
+coneContrastS_unsorted = reshape(coneContrastSvec,size(lags));
+
+coneContrastL = coneContrastL_unsorted(:,[1 2 6 5 4 3]);
+coneContrastS = abs(coneContrastS_unsorted(:,[1 2 6 5 4 3]));
+   
+aa = 0.4;
+bb = 1;
+alphaValsS = (bb-aa) .* ((coneContrastS - min(coneContrastS(:)))./ (max(coneContrastS(:)) -min(coneContrastS(:))) ) + aa;
+
+[tcHndl] = scatterParams(coneContrastL,lags,plotColors',plotNames,'yLimVals', [.3 .80],'sz',12.^2,'contrastAlpha',alphaValsS, 'semiLog', false);
+
+set(tcHndl, 'Renderer', 'Painters');
+figureSizeInches = [8 8];
+set(tcHndl, 'PaperUnits', 'inches');
+set(tcHndl, 'PaperSize',figureSizeInches);
+set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
+% Full file name
+figNameTc =  fullfile(figSavePath,[subjCode, '_L-Cone_contrastVsLag.pdf']);
+% Save it
+print(tcHndl, figNameTc, '-dpdf', '-r300');
+
+
+
 
 %
 % % MAKE 3D SCATTER PLOT

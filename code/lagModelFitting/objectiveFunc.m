@@ -9,5 +9,5 @@ Lag2 =  p(5) + p(6) .* exp(-1.*p(7).*m2);
 
 lagEsts = min([Lag1'; Lag2'])';
 %% objective function
-objVal = sqrt(mean(lags(:) - lagEsts).^2);
+objVal = sqrt(mean((lags(:) - lagEsts).^2));
 end

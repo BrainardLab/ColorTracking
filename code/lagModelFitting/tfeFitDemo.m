@@ -2,7 +2,8 @@
 subjID = 'BMC';
 theRuns = 1:20;
 
-figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
+
+figSavePath = fullfile(getpref('CorticalColorMapping','dropboxPath'),'CNST_analysis','ColorTracking','Results'); %'/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
@@ -74,7 +75,10 @@ nlcon =[];
 lb =[0,0,0,0,.2,0,0];
 ub = [1,1,1,1,.5,10,100];
 
-p_hat = fmincon(@(p) objectiveFunc(p,lags(:),cL,cS),p,A,aa,Aeq,aaeq,lb,ub,nlcon);
+options = optimset('fmincon');
+options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');
+
+p_hat = fmincon(@(p) objectiveFunc(p,lags(:),cL,cS),p,A,aa,Aeq,aaeq,lb,ub,nlcon,options);
 
 %% break up p
 a1_hat = p_hat(1);

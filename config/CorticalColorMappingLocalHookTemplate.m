@@ -38,16 +38,24 @@ end
 userID = strtrim(userID);
 switch userID
     case {'brainardlab'}
+        setpref(projectName,'dropboxPath',fullfile('/home',userID, 'labDropbox'));
         CalFolder = fullfile('/home',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
     case{'michael'}
+        setpref(projectName,'dropboxPath',fullfile('/home',userID, 'labDropbox'));
         CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
     case{'jburge-hubel'}
+        setpref(projectName,'dropboxPath',[]);
         CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');
+    case{'dhb'}
+        setpref(projectName,'dropboxPath',fullfile(['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)']));
+        CalFolder = fullfile(['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)'],CNST_materials','ColorTracking','calData');
     otherwise
+        setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab']);
         CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
 end
 
-setpref(projectName,'CalFolder',CalFolder) 
+setpref(projectName,'CalFolder',CalFolder);
+setpref('BrainardLabToolbox','CalDataFolder',CalFolder);
 
 if ismac
     % Code to run on Mac plaform

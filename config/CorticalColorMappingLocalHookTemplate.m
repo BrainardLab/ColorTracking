@@ -41,7 +41,7 @@ switch userID
         setpref(projectName,'dropboxPath',fullfile('/home',userID, 'labDropbox'));
         CalFolder = fullfile('/home',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
     case{'michael'}
-        setpref(projectName,'dropboxPath',fullfile('/home',userID, 'labDropbox'));
+        setpref(projectName,'dropboxPath',fullfile('/Users',userID, 'labDropbox'));
         CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
     case{'jburge-hubel'}
         setpref(projectName,'dropboxPath',[]);

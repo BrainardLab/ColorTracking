@@ -36,22 +36,27 @@ end
 %% Specify base paths for materials and data
 [~, userID] = system('whoami');
 userID = strtrim(userID);
+cmpInfo = psyComputerInfo;
 switch userID
     case {'brainardlab'}
-        setpref(projectName,'dropboxPath',fullfile('/home',userID, 'labDropbox'));
-        CalFolder = fullfile('/home',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
+        setpref(projectName,'dropboxPath',fullfile('/home',userID,'labDropbox'));
+        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
     case{'michael'}
-        setpref(projectName,'dropboxPath',fullfile('/Users',userID, 'labDropbox'));
-        CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
+        setpref(projectName,'dropboxPath',fullfile('/Users',userID,'labDropbox'));
+        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
     case{'jburge-hubel'}
         setpref(projectName,'dropboxPath',[]);
         CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');
     case{'dhb'}
-        setpref(projectName,'dropboxPath',fullfile(['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)']));
-        CalFolder = fullfile(['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)'],CNST_materials','ColorTracking','calData');
+        if strcmp(cmpInfo.localHostName,'Davids-iMac')
+            setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)']);
+        else
+            setpref(projectName,'dropboxPath',fullfile(['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)']));
+        end
+        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
     otherwise
-        setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab']);
-        CalFolder = fullfile('/Users',userID, 'labDropbox','CNST_materials','ColorTracking','calData');
+        setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)']);
+        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
 end
 
 setpref(projectName,'CalFolder',CalFolder);

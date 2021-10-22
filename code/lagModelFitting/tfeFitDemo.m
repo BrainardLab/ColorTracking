@@ -1,5 +1,5 @@
 %% LOAD DATA
-subjID = 'BMC';
+subjID = 'KAS';
 theRuns = 1:20;
 
 
@@ -38,7 +38,7 @@ S5 = structElementSelect(Sall,ind5,size(Sall.tgtXmm,2));
 S6 = structElementSelect(Sall,ind6,size(Sall.tgtXmm,2));
 
 %% LMS ANALYSIS TO ESTIMATE LAGS
-plotRawData = 1;
+plotRawData = 0;
 [~,~,rParams(:,:,1)] = LMSxcorrAnalysis(S1,'LGS','bPLOTfitsAndRaw',plotRawData);
 [~,~,rParams(:,:,2)] = LMSxcorrAnalysis(S2,'LGS','bPLOTfitsAndRaw',plotRawData);
 [~,~,rParams(:,:,3)] = LMSxcorrAnalysis(S3,'LGS','bPLOTfitsAndRaw',plotRawData);
@@ -57,9 +57,9 @@ cS = MaxContrastLMS(:,3);
 %% set up the mechanisms
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
 a1 = 0.7;
-b1 = 0.3;
-a2 = 0.997;
-b2 = 0.003;
+b1 = 0;
+a2 = 0;
+b2 = 0;
 minLag1 = 0.3;
 decay1 = .25;
 % c1 = .5;
@@ -78,7 +78,7 @@ nlcon =[];
 % lb =[0,0,0,0,0,0,0,0];
 % ub = [100,100,100,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
-ub = [1000,1000,1000,1000,5,100];
+ub = [1000,0,0,0,5,100];
 
 options = optimset('fmincon');
 options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');
@@ -100,6 +100,7 @@ decay1_hat  = p_hat(6);
 % m2_hat =  sqrt(a2_hat.*cL.^2 + b2_hat.*cS.^2);
 m1_hat =  abs(a1_hat.*cL + b1_hat.*cS);
 m2_hat =  abs(a2_hat.*cL + b2_hat.*cS);
+
 %% Contrast-Lag nonlinearity
  Lag1_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m1_hat);
  Lag2_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m2_hat);

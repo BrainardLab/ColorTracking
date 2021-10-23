@@ -43,7 +43,7 @@ switch userID
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
     case{'michael'}
         setpref(projectName,'dropboxPath',fullfile('/Users',userID,'labDropbox'));
-        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
+        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');
     case{'jburge-hubel'}
         setpref(projectName,'dropboxPath',[]);
         CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');

@@ -41,12 +41,12 @@ backgroundPrimaries_hat = SensorToPrimary(calStructOBJ,backgroundLMS_hat);
 
 
 %% Create a chromatic modulation 
- LMScontrastModulation1 = -1*generateStimContrasts(0,-45,0.26)'
- LMScontrastModulation2 = -1*generateStimContrasts(0,45,0.25)'
- LMScontrastModulation3 = -1*generateStimContrasts(0,-75,0.78)'
- LMScontrastModulation4 = -1*generateStimContrasts(0,75,0.65)'
- LMScontrastModulation5 = -1*generateStimContrasts(0,90,0.85)'
- LMScontrastModulation6 = -1*generateStimContrasts(0,0,0.18)'
+ LMScontrastModulation1 = -1*generateStimContrasts(0,78.75, 0.12)'
+ LMScontrastModulation2 = -1*generateStimContrasts(0,82.50, 0.13)'
+ LMScontrastModulation3 = -1*generateStimContrasts(0,86.25, 0.16)'
+ LMScontrastModulation4 = -1*generateStimContrasts(0,-78.75,0.12)'
+ LMScontrastModulation5 = -1*generateStimContrasts(0,-82.50,0.13)'
+ LMScontrastModulation6 = -1*generateStimContrasts(0,-86.25,0.18)'
  
 [stimSettings1,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation1);
 [stimSettings2,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundLMS_hat,LMScontrastModulation2);

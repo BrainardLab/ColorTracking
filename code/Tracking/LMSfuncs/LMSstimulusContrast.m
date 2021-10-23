@@ -28,10 +28,11 @@ p.parse(varargin{:});
 
 switch p.Results.experiment
     %% Set the stimulus conditions for a specfifc experiment here
-    case 'SLplane-Pos'
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %    Experiment-1 Stim     %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %    Experiment-1 Stim     %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'Experiment1-Pos'
         % l isolating
         [lIso]      = generateStimContrasts(0,0,expspace(.18,.02,6));
         % s isolating
@@ -46,10 +47,7 @@ switch p.Results.experiment
         [lMinS75]   = generateStimContrasts(0,-75,expspace(.78,.06,6));
         
         MaxContrastLMS = [lIso; sIso; lPlusS75; lMinS75; lPlusS45; lMinS45];
-    case 'SLplane-Neg'
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %    Experiment-1 Stim     %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'Experiment1-Neg'
         % l isolating
         [lIso]      = -1.*generateStimContrasts(0,0,expspace(.18,.02,6));
         % s isolating
@@ -64,6 +62,44 @@ switch p.Results.experiment
         [lMinS75]   = -1.*generateStimContrasts(0,-75,expspace(.78,.06,6));
         
         MaxContrastLMS = [lIso; sIso; lPlusS75; lMinS75; lPlusS45; lMinS45];
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %    Experiment-2 Stim     %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'Experiment2-Pos'
+        % 78.75 degree
+        [lPlusS78]      = generateStimContrasts(0,78.75,expspace(.65,.06,6));
+        % 82.50 degree 
+        [lPlusS82]      = generateStimContrasts(0,82.5,expspace(.65,.06,6));
+        % 86.20 degree  
+        [lPlusS86]  = generateStimContrasts(0,86.2,expspace(.65,.06,6));
+        % -78.75 degree
+        [lMinS78]   = generateStimContrasts(0,-78.75,expspace(.65,.06,6));
+        % -82.50 degree
+        [lMinS82]  = generateStimContrasts(0,-82.5,expspace(.65,.06,6));
+        % -86.20 degree
+        [lMinS86]   = generateStimContrasts(0,-86.2,expspace(.65,.06,6));
+        
+        MaxContrastLMS = [lPlusS78; lPlusS82; lPlusS86; lMinS78; lMinS82; lMinS86];
+    case 'Experiment2-Neg'
+        % 78.75 degree
+        [lPlusS78]      = -1.*generateStimContrasts(0,78.75,expspace(.18,.02,6));
+        % 82.50 degree
+        [lPlusS82]      = -1.*generateStimContrasts(0,82.5,expspace(.85,.18,6));
+        % 86.20 degree  
+        [lPlusS86]  = -1.*generateStimContrasts(0,86.2,expspace(.25,.03,6));
+        % -78.75 degree
+        [lMinS78]   = -1.*generateStimContrasts(0,-78.75,expspace(.26,.03,6));
+        % -82.50 degre
+        [lMinS82]  = -1.*generateStimContrasts(0,-82.5,expspace(.65,.06,6));
+        % -86.20 degree
+        [lMinS86]   = -1.*generateStimContrasts(0,-86.2,expspace(.78,.06,6));
+        
+        MaxContrastLMS = [lPlusS78; lPlusS82; lPlusS86; lMinS78; lMinS82; lMinS86];
+       
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %           EXTRAS         %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     case 'SLplane-Min'
         % l isolating
         [lIso]      = generateStimContrasts(0,0,.02);

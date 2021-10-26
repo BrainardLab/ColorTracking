@@ -68,32 +68,32 @@ switch p.Results.experiment
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     case 'Experiment2-Pos'
         % 78.75 degree
-        [lPlusS78]      = generateStimContrasts(0,78.75,expspace(.65,.06,6));
+        [lPlusS78]      = generateStimContrasts(0,78.75,expspace(.83,.13,6));
         % 82.50 degree 
-        [lPlusS82]      = generateStimContrasts(0,82.5,expspace(.65,.06,6));
+        [lPlusS82]      = generateStimContrasts(0,82.5, expspace(.85,0.14,6));
         % 86.20 degree  
-        [lPlusS86]  = generateStimContrasts(0,86.2,expspace(.65,.06,6));
+        [lPlusS86]  = generateStimContrasts(0,86.2,     expspace(.85,0.18,6));
         % -78.75 degree
-        [lMinS78]   = generateStimContrasts(0,-78.75,expspace(.65,.06,6));
+        [lMinS78]   = generateStimContrasts(0,-78.75,   expspace(.84,.13,6));
         % -82.50 degree
-        [lMinS82]  = generateStimContrasts(0,-82.5,expspace(.65,.06,6));
+        [lMinS82]  = generateStimContrasts(0,-82.5,     expspace(.84,.15,6));
         % -86.20 degree
-        [lMinS86]   = generateStimContrasts(0,-86.2,expspace(.65,.06,6));
+        [lMinS86]   = generateStimContrasts(0,-86.2,    expspace(.84,.18,6));
         
         MaxContrastLMS = [lPlusS78; lPlusS82; lPlusS86; lMinS78; lMinS82; lMinS86];
     case 'Experiment2-Neg'
         % 78.75 degree
-        [lPlusS78]      = -1.*generateStimContrasts(0,78.75,expspace(.18,.02,6));
+        [lPlusS78]      = -1.*generateStimContrasts(0, 78.75, expspace(.83,.13,6));
         % 82.50 degree
-        [lPlusS82]      = -1.*generateStimContrasts(0,82.5,expspace(.85,.18,6));
+        [lPlusS82]      = -1.*generateStimContrasts(0, 82.5,  expspace(.85,0.14,6));
         % 86.20 degree  
-        [lPlusS86]  = -1.*generateStimContrasts(0,86.2,expspace(.25,.03,6));
+        [lPlusS86]      = -1.*generateStimContrasts(0, 86.2,  expspace(.85,0.18,6));
         % -78.75 degree
-        [lMinS78]   = -1.*generateStimContrasts(0,-78.75,expspace(.26,.03,6));
+        [lMinS78]       = -1.*generateStimContrasts(0,-78.75, expspace(.84,.13,6));
         % -82.50 degre
-        [lMinS82]  = -1.*generateStimContrasts(0,-82.5,expspace(.65,.06,6));
+        [lMinS82]       = -1.*generateStimContrasts(0,-82.5,  expspace(.84,.15,6));
         % -86.20 degree
-        [lMinS86]   = -1.*generateStimContrasts(0,-86.2,expspace(.78,.06,6));
+        [lMinS86]       = -1.*generateStimContrasts(0,-86.2,  expspace(.84,.18,6));
         
         MaxContrastLMS = [lPlusS78; lPlusS82; lPlusS86; lMinS78; lMinS82; lMinS86];
        

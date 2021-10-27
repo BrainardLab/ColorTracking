@@ -1,14 +1,19 @@
 %% runLMSpilot
 
-subjID = 'BMC';
+subjID = 'KAS';
 
-LMSpilot(subjID,'SLplane-Pos')
-LMSpilot(subjID,'SLplane-Neg')
-LMSpilot(subjID,'SLplane-Pos')
-LMSpilot(subjID,'SLplane-Neg')
-LMSpilot(subjID,'SLplane-Pos')
-LMSpilot(subjID,'SLplane-Neg')
-LMSpilot(subjID,'SLplane-Pos')
-LMSpilot(subjID,'SLplane-Neg')
-LMSpilot(subjID,'SLplane-Pos')
-LMSpilot(subjID,'SLplane-Neg')
+LMSpilot(subjID,'Experiment2-Pos')
+LMSpilot(subjID,'Experiment2-Neg')
+LMSpilot(subjID,'Experiment2-Pos')
+LMSpilot(subjID,'Experiment2-Neg')
+LMSpilot(subjID,'Experiment2-Pos')
+LMSpilot(subjID,'Experiment2-Neg')
+LMSpilot(subjID,'Experiment2-Pos')
+LMSpilot(subjID,'Experiment2-Neg')
+LMSpilot(subjID,'Experiment2-Pos')
+LMSpilot(subjID,'Experiment2-Neg')
+
+
+% subjID = 'JNK';
+% 
+% LMSpilot(subjID,'Experiment2-Neg')

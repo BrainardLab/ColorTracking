@@ -323,8 +323,8 @@ D.wht        = 1.0; % 255; % 1.0000;
 
 S.fname         = buildFilenamePSYdataLMS(expType,S.subjName(1,:),S.stmType(1,:),[],[]);
 S.fname         = repmat(S.fname,[S.trlPerRun 1]);
-S.fdirLoc       = buildFolderNamePSY('LMS',expType,S.subjName(1,:),'local');
-S.fdirSrv       = buildFolderNamePSY('LMS',expType,S.subjName(1,:),'server');
+S.fdirLoc       = buildFolderNamePSY('LS2',expType,S.subjName(1,:),'local');
+S.fdirSrv       = buildFolderNamePSY('LS2',expType,S.subjName(1,:),'server');
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % PRINT DATA TO SCREEN %

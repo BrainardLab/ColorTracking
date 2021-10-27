@@ -37,7 +37,7 @@ end
 
 if strcmp(localORserver,'local')
     try
-        fdir  = buildFolderNamePSY('LMS',expType,subjName,'local');
+        fdir  = buildFolderNamePSY('LS2',expType,subjName,'local');
         % SAVE DATA IF FILE DOES NOT EXIST OR IF USER SAYS TO OVERWRITE REGARDLESS   
         savePSYdataLMSfunc(fdir,fname,bOverwrite,V1,V1name)
     catch
@@ -46,7 +46,7 @@ if strcmp(localORserver,'local')
     end
 elseif strcmp(localORserver,'server')
     try
-        fdir  = buildFolderNamePSY('LMS',expType,subjName,'server');
+        fdir  = buildFolderNamePSY('LS2',expType,subjName,'server');
         % SAVE DATA IF FILE DOES NOT EXIST OR IF USER SAYS TO OVERWRITE REGARDLESS   
         savePSYdataLMSfunc(fdir,fname,bOverwrite,V1,V1name)
         disp(['savePSYdataLMS: Saved ' fdir filesep fname ' ...']);
@@ -56,7 +56,7 @@ elseif strcmp(localORserver,'server')
     end
 elseif strcmp(localORserver,'both')
     try
-        fdir  = buildFolderNamePSY('LMS',expType,subjName,'local');
+        fdir  = buildFolderNamePSY('LS2',expType,subjName,'local');
         % SAVE DATA IF FILE DOES NOT EXIST OR IF USER SAYS TO OVERWRITE REGARDLESS   
         savePSYdataLMSfunc(fdir,fname,bOverwrite,V1,V1name);
         disp(['Saved ' fdir filesep fname ' ...']);
@@ -65,7 +65,7 @@ elseif strcmp(localORserver,'both')
         error(['savePSYdataLMS: WARNING! could not save to both locally:  [ ' fdir filesep fname ']. Check directory?']);   
     end
     try
-        fdir  = buildFolderNamePSY('LMS',expType,subjName,'server');
+        fdir  = buildFolderNamePSY('LS2',expType,subjName,'server');
         % SAVE DATA IF FILE DOES NOT EXIST OR IF USER SAYS TO OVERWRITE REGARDLESS   
         savePSYdataLMSfunc(fdir,fname,bOverwrite,V1,V1name)
         disp(['savePSYdataLMS: Saved ' fdir filesep fname ' ...']);

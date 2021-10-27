@@ -38,11 +38,11 @@ if ~exist('hostName','var') || isempty(hostName)
 end
 
 % FILE DIRECTORIES ON SERVER AND LOCAL MACHINE
-fdirSrv = buildFolderNamePSY('LMS',expType,subjName,'server');
-fdirLoc = buildFolderNamePSY('LMS',expType,subjName,'local');
+fdirSrv = buildFolderNamePSY('LS2',expType,subjName,'server');
+fdirLoc = buildFolderNamePSY('LS2',expType,subjName,'local');
 
 % FILE NAME BASE (w.o FILE NUMBER)
-fnameBase = ['LMS_' expType '_' hostName '_' stmType '_' subjName];
+fnameBase = ['LS2_' expType '_' hostName '_' stmType '_' subjName];
 
 % IF FILE DOES NOT EXIST YET, CREATE APPROPRIATE FILE NUMBER
 if exist('fnameNum','var') && ~isempty(fnameNum)

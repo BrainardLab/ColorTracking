@@ -1,4 +1,4 @@
-function S = loadPSYdataLMS(expType,subjName,stmType,dataFileNums,localHostName,serverORlocal)
+function S = loadPSYdataLMS(expType,subjName,expName,stmType,dataFileNums,localHostName,serverORlocal)
 
 % function S = loadPSYdataLMS(expType,subjName,stmType,dataFileNum,localHostName,serverORlocal)
 %
@@ -27,12 +27,12 @@ function S = loadPSYdataLMS(expType,subjName,stmType,dataFileNums,localHostName,
 %%
 
 % BUILD DIRECTORY
-fdir = buildFolderNamePSY('LMS',expType,subjName,serverORlocal);
+fdir = buildFolderNamePSY(expName,expType,subjName,serverORlocal);
 
 Sall = [];
 for i = 1:length(dataFileNums)
     % DATA FILE NAME (
-    fname = buildFilenamePSYdataPRJ('LMS',expType,subjName,stmType,localHostName,dataFileNums(i));
+    fname = buildFilenamePSYdataPRJ(expName,expType,subjName,stmType,localHostName,dataFileNums(i));
     % fname = buildFilenamePSYdataPRJ('SPD',expType,subjName,stmType,localHostName,dataFileNums(i));
     try
     load([fdir filesep fname]);

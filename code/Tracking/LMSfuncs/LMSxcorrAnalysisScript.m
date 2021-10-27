@@ -2,8 +2,9 @@ close all
 clear all
 
 %% LOAD DATA
-subjID = 'BMC';
-theRuns = 1:20;
+subjID  = 'KAS';
+expName = 'LS2';
+theRuns = 1:10;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
@@ -15,38 +16,30 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
-Sall = loadPSYdataLMSall('TRK', subjID, 'CGB', {theRuns}, 'jburge-hubel', 'local');
+Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
 %% SORT TRIALS BY COLOR ANGLE
+plotRawData = 1;
+uniqColorDirs = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
 
-% 0 DEG IN SL PLANE
-ind1 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-0)<0.001;
-% 90 DEG IN SL PLANE
-ind2 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-90)<0.001;
-% -45 DEG IN SL PLANE
-ind3 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(-45))<0.001;
-% 45 DEG IN SL PLANE
-ind4 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(+45))<0.001;
-% -75 DEG IN SL PLANE
-ind5 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(-75))<0.001;
-% 75 DEG IN SL PLANE
-ind6 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(+75))<0.001;
-S1 = structElementSelect(Sall,ind1,size(Sall.tgtXmm,2));
-S2 = structElementSelect(Sall,ind2,size(Sall.tgtXmm,2));
-S3 = structElementSelect(Sall,ind3,size(Sall.tgtXmm,2));
-S4 = structElementSelect(Sall,ind4,size(Sall.tgtXmm,2));
-S5 = structElementSelect(Sall,ind5,size(Sall.tgtXmm,2));
-S6 = structElementSelect(Sall,ind6,size(Sall.tgtXmm,2));
+switch expName
+    
+    case 'LS1'
+        uniqColorDirs = uniqColorDirs([1 2 6 5 4 3]); %% CHECK THIS IS CORRECT
+    case 'LS2'
+        uniqColorDirs = uniqColorDirs([4 5 6 3 2 1]);
+end
 
-%% LMS ANALYSIS TO ESTIMATE LAGS
-plotRawData = 0;
-[~,~,rParams(:,:,1)] = LMSxcorrAnalysis(S1,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,2)] = LMSxcorrAnalysis(S2,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,3)] = LMSxcorrAnalysis(S3,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,4)] = LMSxcorrAnalysis(S4,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,5)] = LMSxcorrAnalysis(S5,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,6)] = LMSxcorrAnalysis(S6,'LGS','bPLOTfitsAndRaw',plotRawData);
-
+for ii = 1:length(uniqColorDirs)
+    
+    % 0 DEG IN SL PLANE
+    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
+    
+    S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
+    % LMS ANALYSIS TO ESTIMATE LAGS
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
+    
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs Lag
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -54,7 +47,7 @@ plotRawData = 0;
 lags = flipud(squeeze(rParams(2,:,:)));
 
 % Get the cone contrasts
-MaxContrastLMS = LMSstimulusContrast('experiment','SLplane-Pos');
+MaxContrastLMS = LMSstimulusContrast('experiment','Experiment2-Pos');
 
 % Set the colors
 plotColors = [230 172 178; ...
@@ -67,14 +60,15 @@ plotColors = [230 172 178; ...
 
 % Get the l2 norm of the cone contrasts
 vecContrast = sqrt(MaxContrastLMS(:,1).^2+MaxContrastLMS(:,3).^2);
-matrixContrasts_unsorted = reshape(vecContrast,size(lags));
-matrixContrasts = matrixContrasts_unsorted(:,[1 2 6 5 4 3]);
+matrixContrasts = reshape(vecContrast,size(lags));
+
 % Names for plotting
 plotNames.title  = 'Lag Vs. Contrast';
 plotNames.xlabel  = 'Contrast (%)';
 plotNames.ylabel = 'Lag (s)';
-plotNames.legend = {'0°','90°','-45°','45°','-75°','75°'};
-
+for jj = 1:length(uniqColorDirs)
+    plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
+end
 % Plot it!
 [tcHndl] =plotParams(matrixContrasts,lags,plotColors',plotNames,'yLimVals', [0.3 .8],'semiLog',false);
 
@@ -215,7 +209,7 @@ print(tcHndl, figNameTc, '-dpdf', '-r300');
 %%    Lag vs L-cone Contrast
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotNames.title  = 'Lag Vs. L Cone Contrast';
-plotNames.xlabel =  'L Cone Contrast (%)'; 
+plotNames.xlabel =  'L Cone Contrast (%)';
 plotNames.ylabel = 'Lag (s)';
 
 coneContrastLvec = MaxContrastLMS(:,1);
@@ -226,7 +220,7 @@ coneContrastS_unsorted = reshape(coneContrastSvec,size(lags));
 
 coneContrastL = coneContrastL_unsorted(:,[1 2 6 5 4 3]);
 coneContrastS = abs(coneContrastS_unsorted(:,[1 2 6 5 4 3]));
-   
+
 aa = 0.4;
 bb = 1;
 alphaValsS = (bb-aa) .* ((coneContrastS - min(coneContrastS(:)))./ (max(coneContrastS(:)) -min(coneContrastS(:))) ) + aa;

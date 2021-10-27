@@ -1,4 +1,4 @@
-function Sall = loadPSYdataLMSall(expType, subjNames, stmType, dataFileNums, localHostName, serverORlocal)
+function Sall = loadPSYdataLMSall(expType, subjNames, expName, stmType, dataFileNums, localHostName, serverORlocal)
 
 % function Sall = loadPSYdataLMSall(expType, subjName, stmType, dataFileNums, localHostName, serverORlocal)
 %
@@ -28,7 +28,7 @@ end
 
 for i = 1:size(subjNames,1)
     % LOAD FILE
-    S = loadPSYdataLMS(expType,subjNames(i,:),stmType,cell2mat(dataFileNums(i)),localHostName,serverORlocal);
+    S = loadPSYdataLMS(expType,subjNames(i,:),expName,stmType,cell2mat(dataFileNums(i)),localHostName,serverORlocal);
     % DATA FROM ALL SUBJECTS MERGED TOGETHER
     Sall = structmerge(Sall,S);
 end

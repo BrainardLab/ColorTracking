@@ -36,7 +36,8 @@ if  ~strcmp(prjCode,'SPD') && ~strcmp(prjCode,'S3D') &&  ...
    ~strcmp(prjCode,'TLT') && ~strcmp(prjCode,'HOC') && ...
    ~strcmp(prjCode,'PFE') && ~strcmp(prjCode,'PFT') && ...
    ~strcmp(prjCode,'SFB') && ~strcmp(prjCode,'NPE') && ...
-   ~strcmp(prjCode,'PRE') && ~strcmp(prjCode,'LMS')
+   ~strcmp(prjCode,'PRE') && ~strcmp(prjCode,'LMS') && ...
+   ~strcmp(prjCode,'LS1') && ~strcmp(prjCode,'LS2') 
     error(['buildFolderNamePSY: WARNING! unhandled prjCode = ' num2str(prjCode) '. If this is a new project code, i) add code to line above, and ii) make sure folder is in ../Project_Database folder tree...']);
 end
 
@@ -64,7 +65,7 @@ end
 % SPECIAL CASE FOR BEN LAPTOP
 cmpInfo = psyComputerInfo;
 if (ispref('CorticalColorMapping','dropboxPath'))
-    fdirRoot = fullfile(getpref('CorticalColorMapping','dropboxPath'),'ColorTrackingTask','Data');
+    fdirRoot = fullfile(getpref('CorticalColorMapping','dropboxPath'),'CNSC_data','ColorTrackingTask',prjCode);
     fdir  = fullfile(fdirRoot,subjName); 
 elseif strcmp(cmpInfo.localHostName,'ben-Precision-7520')
     fdirRoot = '~/Documents/VisionScience/Project_PsyData';

@@ -72,20 +72,27 @@ for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
     end
 %    text(0.5,0.2,MaxContrastLMStitle,'FontSize',15);
     legendLMS{end+1} = MaxContrastLMStitle;
-    if ~strcmp(modelType,'LGS') % IF FITS WERE NOT DONE WITH LOG-GAUSSIAN
+    if strcmp(modelType,'GMA')
+        [rSmoothMax,rSmoothMaxInd] = max(rSmooth(:,i));
+        [~,hh1ind] = min(abs(rSmooth(tSecFit(:,i)>tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
+        hh1 = tSecFit(hh1ind+rSmoothMaxInd,i);
+        [~,hh2ind] = min(abs(rSmooth(tSecFit(:,i)<tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
+        hh2 = tSecFit(hh2ind,i);
+        FWHH(i) = hh1-hh2;
+    end
+    if ~strcmp(modelType,'LGS') || ~strcmp(modelType,'GMA') % IF FITS WERE NOT DONE WITH LOG-GAUSSIAN
         % NUMERICALLY READ OUT LAG VALUES 
         [~,rSmoothMaxInd] = max(rSmooth(:,i));
         lagXXms(i) = tSecFit(rSmoothMaxInd,i);
-    end
-    if strcmp(modelType,'LGS') % IF FITS WERE DONE WITH LOG-GAUSSIAN
-%        FWHH(i) = lognFWHH(rParam(2,i),rParam(3,i));
-        FWHH(i) = exp(log(rParam(2,i))+rParam(3,i).*sqrt(log(4))) - exp(log(rParam(2,i))-rParam(3,i).*sqrt(log(4)));
     end
 end
 
 if strcmp(modelType,'LGS') % IF FITS WERE DONE WITH LOG-GAUSSIAN
    % LAG = MEAN OF LOG-GAUSSIAN FIT
    lagXXms = rParam(2,:);
+   FWHH = exp(log(rParam(2,:))+rParam(3,:).*sqrt(log(4))) - exp(log(rParam(2,:))-rParam(3,:).*sqrt(log(4)));
+elseif strcmp(modelType,'GMA')
+   lagXXms = (rParam(3,:)-1).*rParam(2,:)+rParam(4,:);
 end
 
 % ---------------- END MAIN ANALYSIS SECTION -------------------

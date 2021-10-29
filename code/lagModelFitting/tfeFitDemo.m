@@ -1,7 +1,7 @@
 %% LOAD DATA
-subjID  = 'KAS';
-expName = 'LS1';
-theRuns = 1:20;
+subjID  = 'BMC';
+expName = 'LS2';
+theRuns = 1:10;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
@@ -42,18 +42,24 @@ end
 lags = flipud(squeeze(rParams(2,:,:)));
 
 % Get the cone contrasts
-MaxContrastLMS = LMSstimulusContrast('experiment','Experiment1-Pos');
+switch expName
+    case 'LS1'
+        expStimName = 'Experiment1-Pos';
+    case 'LS2'
+        expStimName = 'Experiment2-Pos';
+end
+MaxContrastLMS = LMSstimulusContrast('experiment',expStimName);
 cL = MaxContrastLMS(:,1);
 cS = MaxContrastLMS(:,3);
 
 %% set up the mechanisms
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
-a1 = 0.7;
+a1 = .5;
 b1 = .5;
 a2 = .5;
 b2 = .5;
 minLag1 = 0.3;
-decay1 = .25;
+decay1 = 3;
 % c1 = .5;
 % c2 = .5;
 

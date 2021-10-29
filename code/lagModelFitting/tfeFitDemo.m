@@ -1,9 +1,9 @@
 %% LOAD DATA
-subjID = 'KAS';
+subjID  = 'KAS';
+expName = 'LS1';
 theRuns = 1:20;
 
-
-figSavePath = fullfile(getpref('CorticalColorMapping','dropboxPath'),'CNST_analysis','ColorTracking','Results'); %'/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
+figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
@@ -13,53 +13,45 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
-Sall = loadPSYdataLMSall('TRK', subjID, 'CGB', {theRuns}, 'jburge-hubel', 'local');
+Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
 %% SORT TRIALS BY COLOR ANGLE
-
-% 0 DEG IN SL PLANE
-ind1 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-0)<0.001;
-% 90 DEG IN SL PLANE
-ind2 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-90)<0.001;
-% -45 DEG IN SL PLANE
-ind3 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(+75))<0.001;
-% 45 DEG IN SL PLANE
-ind4 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(-75))<0.001;
-% -75 DEG IN SL PLANE
-ind5 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(+45))<0.001;
-% 75 DEG IN SL PLANE
-ind6 = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-(-45))<0.001;
-
-S1 = structElementSelect(Sall,ind1,size(Sall.tgtXmm,2));
-S2 = structElementSelect(Sall,ind2,size(Sall.tgtXmm,2));
-S3 = structElementSelect(Sall,ind3,size(Sall.tgtXmm,2));
-S4 = structElementSelect(Sall,ind4,size(Sall.tgtXmm,2));
-S5 = structElementSelect(Sall,ind5,size(Sall.tgtXmm,2));
-S6 = structElementSelect(Sall,ind6,size(Sall.tgtXmm,2));
-
-%% LMS ANALYSIS TO ESTIMATE LAGS
 plotRawData = 0;
-[~,~,rParams(:,:,1)] = LMSxcorrAnalysis(S1,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,2)] = LMSxcorrAnalysis(S2,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,3)] = LMSxcorrAnalysis(S3,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,4)] = LMSxcorrAnalysis(S4,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,5)] = LMSxcorrAnalysis(S5,'LGS','bPLOTfitsAndRaw',plotRawData);
-[~,~,rParams(:,:,6)] = LMSxcorrAnalysis(S6,'LGS','bPLOTfitsAndRaw',plotRawData);
+uniqColorDirs = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
+
+switch expName
+    
+    case 'LS1'
+        uniqColorDirs = uniqColorDirs([3 6 5 1 4 2]); %% CHECK THIS IS CORRECT
+    case 'LS2'
+        uniqColorDirs = uniqColorDirs([4 5 6 3 2 1]);
+end
+
+for ii = 1:length(uniqColorDirs)
+    
+    % 0 DEG IN SL PLANE
+    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
+    
+    S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
+    % LMS ANALYSIS TO ESTIMATE LAGS
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
+    
+end
 
 %% Get the lags from rParams
 lags = flipud(squeeze(rParams(2,:,:)));
 
 % Get the cone contrasts
-MaxContrastLMS = LMSstimulusContrast('experiment','SLplane-Pos');
+MaxContrastLMS = LMSstimulusContrast('experiment','Experiment1-Pos');
 cL = MaxContrastLMS(:,1);
 cS = MaxContrastLMS(:,3);
 
 %% set up the mechanisms
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
 a1 = 0.7;
-b1 = 0;
-a2 = 0;
-b2 = 0;
+b1 = .5;
+a2 = .5;
+b2 = .5;
 minLag1 = 0.3;
 decay1 = .25;
 % c1 = .5;
@@ -78,7 +70,7 @@ nlcon =[];
 % lb =[0,0,0,0,0,0,0,0];
 % ub = [100,100,100,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
-ub = [1000,0,0,0,5,100];
+ub = [100,100,100,100,5,100];
 
 options = optimset('fmincon');
 options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');
@@ -102,8 +94,8 @@ m1_hat =  abs(a1_hat.*cL + b1_hat.*cS);
 m2_hat =  abs(a2_hat.*cL + b2_hat.*cS);
 
 %% Contrast-Lag nonlinearity
- Lag1_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m1_hat);
- Lag2_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m2_hat);
+Lag1_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m1_hat);
+Lag2_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m2_hat);
 %Lag1_hat =  minLag1_hat + decay1_hat./m1_hat;
 %Lag2_hat =  minLag1_hat + decay1_hat./m2_hat;
 
@@ -125,26 +117,55 @@ plotColors = [230 172 178; ...
 
 % Get the l2 norm of the cone contrasts
 vecContrast = sqrt(MaxContrastLMS(:,1).^2+MaxContrastLMS(:,3).^2);
-matrixContrasts_unsorted = reshape(vecContrast,size(lags));
-matrixContrasts = matrixContrasts_unsorted(:,[1 2 6 5 4 3]);
+matrixContrasts = reshape(vecContrast,size(lags));
+
+
+legendLocation = 'northeast';
+
+% sub plot 1 - mechanism outputs 
+tcHndl1 = figure;
+subplot(1,3,1); hold on
+plotNames.title  = 'M1 and M2 Outputs';
+plotNames.xlabel = 'Stimuli';
+plotNames.ylabel = 'Mechanism Output';
+plotNames.legend = {'M1','M2'};
+
+simplePlot(m1_hat,[0, 0,.5],m2_hat,[0,.5,.5],plotNames,legendLocation)
+
+subplot(1,3,2); hold on
+plotNames.title  = 'Lag1 and Lag2 Outputs';
+plotNames.xlabel = 'Stimuli';
+plotNames.ylabel = 'Lag Output';
+plotNames.legend = {'Lag1','Lag2'};
+
+simplePlot(Lag1_hat,[0, 0,.5],Lag2_hat,[0,.5,.5],plotNames,legendLocation)
+% init the plot
+subplot(1,3,3);
+hold on;
+plotNames.title  = 'Model Fit';
+plotNames.xlabel = 'Stimuli';
+plotNames.ylabel = 'Lag (S)';
+plotNames.legend = {'Lag','Predicted Lag'};
+
+simplePlot(lags(:),[0, 0,0],lagsFromFit,[220 195 256]./256,plotNames,legendLocation)
+
+
+%% 
+% get the number of lines to plot
+tcHndl2 = figure;hold on
 % Names for plotting
+clear plotNames
 plotNames.title  = 'Lag Vs. Contrast';
 plotNames.xlabel  = 'Contrast (%)';
 plotNames.ylabel = 'Lag (s)';
-plotNames.legend = {'0°','90°','75°','-75°','45°','-45°'};
-
-% Plot it
-
+legendLocation = 'northeastoutside';
 sz = 12;
 yLimVals = [0.2 0.6];
 semiLog = true;
-legendLocation = 'northeastoutside';
+for jj = 1:length(uniqColorDirs)
+    plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
+end
 
-%% init the plot
-tcHndl = figure;
-hold on;
-
-% get the number of lines to plot
 numLines = size(lagsFromFitMat,1);
 
 
@@ -152,19 +173,19 @@ numLines = size(lagsFromFitMat,1);
 for ii = 1:numLines
     
     scatter(matrixContrasts(:,ii),lags(:,ii),sz.^2, ...
-         'MarkerEdgeColor',.3*plotColors(:,ii),...
-         'MarkerFaceColor',plotColors(:,ii),...
-         'LineWidth',2);
+        'MarkerEdgeColor',.3*plotColors(:,ii),...
+        'MarkerFaceColor',plotColors(:,ii),...
+        'LineWidth',2);
     
-end     
+end
 % Loop over the lines
 for ii = 1:numLines
     
     plot(matrixContrasts(:,ii),lagsFromFitMat(:,ii),'--', ...
         'Color',plotColors(:,ii),...
         'LineWidth',2);
-
-end        
+    
+end
 
 axis square;
 
@@ -195,7 +216,7 @@ set(gca, ...
 set(gcf, 'Color', 'white' );
 
 
-%% Add labels
+% Add labels
 if isfield(plotNames,'title')
     hTitle  = title (plotNames.title);
 end
@@ -206,7 +227,7 @@ if isfield(plotNames,'ylabel')
     hYLabel = ylabel(plotNames.ylabel);
 end
 
-%% Add Legend
+% Add Legend
 if isfield(plotNames,'legend')
     legend(plotNames.legend,'Location',legendLocation);
 end
@@ -215,14 +236,15 @@ set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 18);
 set( hTitle, 'FontSize', 18,'FontWeight' , 'bold');
 
-% Save it!
+%% Save it!
 figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
+set(tcHndl2, 'PaperUnits', 'inches');
+set(tcHndl2, 'PaperSize',figureSizeInches);
+set(tcHndl2, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
 %figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast.pdf']);
 % Save it
 %print(tcHndl, figNameTc, '-dpdf', '-r300');
+
 
 

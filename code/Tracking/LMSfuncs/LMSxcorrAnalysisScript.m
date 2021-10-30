@@ -2,9 +2,9 @@ close all
 clear all
 
 %% LOAD DATA
-subjID  = 'KAS';
+subjID  = 'BMC';
 expName = 'LS2';
-theRuns = 1:10;
+theRuns = 1:20;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 

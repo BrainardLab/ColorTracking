@@ -7,10 +7,10 @@ plot(thing2,'-', ...
     'LineWidth',1.5);
 axis square;
 
-ylim([0 1])
+maxVals = max(max([thing1(:),thing2(:)]));
 
-autoTicksY = 0:.2:1;
-
+autoTicksY = 0:ceil(maxVals+(0.15.*maxVals))./4:ceil(maxVals+(0.15.*maxVals));
+ylim([0 ceil(maxVals+(0.15.*maxVals))]);
 set(gca, ...
     'Box'         , 'off'     , ...
     'TickDir'     , 'out'     , ...

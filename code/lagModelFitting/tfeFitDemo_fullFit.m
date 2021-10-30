@@ -1,7 +1,7 @@
-%% LOAD DATA
+%% LOAD DATA from Exp 1
 subjID  = 'BMC';
-expName = 'LS2';
-theRuns = 1:10;
+expName = 'LS1';
+theRuns = 1:20;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
@@ -15,14 +15,14 @@ end
 
 Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
-%% SORT TRIALS BY COLOR ANGLE
+% SORT TRIALS BY COLOR ANGLE
 plotRawData = 0;
 uniqColorDirs = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
 
 switch expName
     
     case 'LS1'
-        uniqColorDirs = uniqColorDirs([3 6 5 1 4 2]); %% CHECK THIS IS CORRECT
+        uniqColorDirs = uniqColorDirs([3 6 5 1 4 2]); 
     case 'LS2'
         uniqColorDirs = uniqColorDirs([4 5 6 3 2 1]);
 end
@@ -38,19 +38,57 @@ for ii = 1:length(uniqColorDirs)
     
 end
 
-%% Get the lags from rParams
-lags = flipud(squeeze(rParams(2,:,:)));
+% Get the lags from rParams
+lagsLS1 = flipud(squeeze(rParams(2,:,:)));
 
-% Get the cone contrasts
+%% LOAD DATA from Exp 2
+expName = 'LS2';
+theRuns = 1:20;
+
+Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
+
+% SORT TRIALS BY COLOR ANGLE
+plotRawData = 0;
+uniqColorDirs = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
+
 switch expName
+    
     case 'LS1'
-        expStimName = 'Experiment1-Pos';
+        uniqColorDirs = uniqColorDirs([3 6 5 1 4 2]); 
     case 'LS2'
-        expStimName = 'Experiment2-Pos';
+        uniqColorDirs = uniqColorDirs([4 5 6 3 2 1]);
 end
-MaxContrastLMS = LMSstimulusContrast('experiment',expStimName);
-cL = MaxContrastLMS(:,1);
-cS = MaxContrastLMS(:,3);
+
+for ii = 1:length(uniqColorDirs)
+    
+    % 0 DEG IN SL PLANE
+    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
+    
+    S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
+    % LMS ANALYSIS TO ESTIMATE LAGS
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
+    
+end
+
+% Get the lags from rParams
+lagsLS2 = flipud(squeeze(rParams(2,:,:)));
+
+lags = [lagsLS1,lagsLS2]
+
+%% Get the stimuli
+% Get the cone contrasts for LS1
+MaxContrastLS1 = LMSstimulusContrast('experiment','Experiment1-Pos');
+cL_LS1 = MaxContrastLS1(:,1);
+cS_LS1 = MaxContrastLS1(:,3);
+
+% Get the cone contrasts for LS2
+MaxContrastLS2 = LMSstimulusContrast('experiment','Experiment2-Pos');
+cL_LS2 = MaxContrastLS2(:,1);
+cS_LS2 = MaxContrastLS2(:,3);
+
+MaxContrastLMS = [MaxContrastLS1;MaxContrastLS2];
+cL = [cL_LS1;cL_LS2];
+cS = [cS_LS1;cS_LS2];
 
 %% set up the mechanisms
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
@@ -76,7 +114,7 @@ nlcon =[];
 % lb =[0,0,0,0,0,0,0,0];
 % ub = [100,100,100,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
-ub = [1000,1000,1000,1000,5,100];
+ub = [100,100,100,100,5,100];
 
 options = optimset('fmincon');
 options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');

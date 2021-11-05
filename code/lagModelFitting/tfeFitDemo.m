@@ -1,5 +1,5 @@
 %% LOAD DATA
-subjID  = 'BMC';
+subjID  = 'MAB';
 expName = 'LS2';
 theRuns = 1:10;
 
@@ -35,12 +35,17 @@ for ii = 1:length(uniqColorDirs)
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
     [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
-    
+%     [~,~,rParams2(:,:,ii)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
 end
 
 %% Get the lags from rParams
 lags = flipud(squeeze(rParams(2,:,:)));
-
+% lags2 = flipud((squeeze(rParams2(3,:,:))-1).*squeeze(rParams2(2,:,:))+ squeeze(rParams2(4,:,:)));
+%  
+% scatter(lags(:),lags2(:));axis square; hold on
+% plot([0,.7],[0,0.7],'k--')
+% xlabel('Log Guassian')
+% ylabel('Gamma')
 % Get the cone contrasts
 switch expName
     case 'LS1'
@@ -54,10 +59,10 @@ cS = MaxContrastLMS(:,3);
 
 %% set up the mechanisms
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
-a1 = 0;
-b1 = 1;
-a2 = 1;
-b2 = 0;
+a1 = 51.0434;
+b1 = 2;
+a2 = 20;
+b2 = 2;
 minLag1 = 0.3;
 decay1 = 3;
 % c1 = .5;
@@ -76,7 +81,7 @@ nlcon =[];
 % lb =[0,0,0,0,0,0,0,0];
 % ub = [100,100,100,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
-ub = [1000,1000,1000,1000,5,100];
+ub = [100,100,100,100,5,100];
 
 options = optimset('fmincon');
 options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');

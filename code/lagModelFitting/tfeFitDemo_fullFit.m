@@ -1,5 +1,5 @@
 %% LOAD DATA from Exp 1
-subjID  = 'BMC';
+subjID  = 'KAS';
 expName = 'LS1';
 theRuns = 1:20;
 
@@ -17,30 +17,30 @@ Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel
 
 % SORT TRIALS BY COLOR ANGLE
 plotRawData = 0;
-uniqColorDirs = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
+uniqColorDirs1 = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
 
 switch expName
     
     case 'LS1'
-        uniqColorDirs = uniqColorDirs([3 6 5 1 4 2]); 
+        uniqColorDirs1 = uniqColorDirs1([3 6 5 1 4 2]);
     case 'LS2'
-        uniqColorDirs = uniqColorDirs([4 5 6 3 2 1]);
+        uniqColorDirs1 = uniqColorDirs1([4 5 6 3 2 1]);
 end
 
-for ii = 1:length(uniqColorDirs)
+for ii = 1:length(uniqColorDirs1)
     
     % 0 DEG IN SL PLANE
-    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
+    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs1(ii))<0.001;
     
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
     
 end
 
 % Get the lags from rParams
-lagsLS1 = flipud(squeeze(rParams(2,:,:)));
-
+%lagsLS1 = flipud(squeeze(rParams(2,:,:)));
+lagsLS1 = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
 %% LOAD DATA from Exp 2
 expName = 'LS2';
 theRuns = 1:20;
@@ -48,32 +48,32 @@ theRuns = 1:20;
 Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
 % SORT TRIALS BY COLOR ANGLE
-plotRawData = 0;
-uniqColorDirs = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
+uniqColorDirs2 = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
 
 switch expName
     
     case 'LS1'
-        uniqColorDirs = uniqColorDirs([3 6 5 1 4 2]); 
+        uniqColorDirs2 = uniqColorDirs2([3 6 5 1 4 2]);
     case 'LS2'
-        uniqColorDirs = uniqColorDirs([4 5 6 3 2 1]);
+        uniqColorDirs2 = uniqColorDirs2([4 5 6 3 2 1]);
 end
 
-for ii = 1:length(uniqColorDirs)
+for ii = 1:length(uniqColorDirs2)
     
     % 0 DEG IN SL PLANE
-    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
+    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs2(ii))<0.001;
     
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
     
 end
 
 % Get the lags from rParams
-lagsLS2 = flipud(squeeze(rParams(2,:,:)));
+%lagsLS2 = flipud(squeeze(rParams(2,:,:)));
+lagsLS2 = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
 
-lags = [lagsLS1,lagsLS2]
+lags = [lagsLS1,lagsLS2];
 
 %% Get the stimuli
 % Get the cone contrasts for LS1
@@ -92,12 +92,12 @@ cS = [cS_LS1;cS_LS2];
 
 %% set up the mechanisms
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
-a1 = 0;
-b1 = 1;
-a2 = 1;
-b2 = 0;
+a1 = 50;
+b1 = 2;
+a2 = 50;
+b2 = 6;
 minLag1 = 0.3;
-decay1 = 3;
+decay1 = 0.2;
 % c1 = .5;
 % c2 = .5;
 
@@ -112,7 +112,7 @@ aaeq =[];%[1];
 nlcon =[];
 
 % lb =[0,0,0,0,0,0,0,0];
-% ub = [100,100,100,100,5,100,1,1];
+% ub = [100,0,0,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
 ub = [100,100,100,100,5,100];
 
@@ -134,8 +134,8 @@ decay1_hat  = p_hat(6);
 %% Use the recovered weights
 % m1_hat =  sqrt(a1_hat.*cL.^2 + b1_hat.*cS.^2);
 % m2_hat =  sqrt(a2_hat.*cL.^2 + b2_hat.*cS.^2);
-m1_hat =  abs(a1_hat.*cL + b1_hat.*cS);
-m2_hat =  abs(a2_hat.*cL + b2_hat.*cS);
+m1_hat =  abs(a1_hat.*cL - b1_hat.*cS);
+m2_hat =  abs(a2_hat.*cL - b2_hat.*cS);
 
 %% Contrast-Lag nonlinearity
 Lag1_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m1_hat);
@@ -156,7 +156,13 @@ plotColors = [230 172 178; ...
     36   210  201; ...
     32   140  163; ...
     253  182    44; ...
-    252  153  233;...
+    252  153  233; ...
+    230/2 172/2 178/2; ...
+    194/2  171/2  253/2; ...
+    36/2   210/2  201/2; ...
+    32/2   140/2  163/2; ...
+    253/2  182/2    22; ...
+    252/2  153/2  233/2;...
     ]'./255;
 
 % Get the l2 norm of the cone contrasts
@@ -166,7 +172,7 @@ matrixContrasts = reshape(vecContrast,size(lags));
 
 legendLocation = 'northeast';
 
-% sub plot 1 - mechanism outputs 
+% sub plot 1 - mechanism outputs
 tcHndl1 = figure;
 subplot(1,3,1); hold on
 plotNames.title  = 'M1 and M2 Outputs';
@@ -194,7 +200,7 @@ plotNames.legend = {'Lag','Predicted Lag'};
 simplePlot(lags(:),[0, 0,0],lagsFromFit,[220 195 256]./256,plotNames,legendLocation)
 
 
-%% 
+%%
 % get the number of lines to plot
 tcHndl2 = figure;hold on
 % Names for plotting
@@ -210,67 +216,67 @@ for jj = 1:length(uniqColorDirs)
     plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
 end
 
-numLines = size(lagsFromFitMat,1);
+numLines = size(lagsFromFitMat,2);
 
 
 % Loop over the lines
+numPlotRows = floor(sqrt(numLines));
+numPlotCols = ceil(sqrt(numLines));
+
 for ii = 1:numLines
     
+    subplot(numPlotRows,numPlotCols)
     scatter(matrixContrasts(:,ii),lags(:,ii),sz.^2, ...
         'MarkerEdgeColor',.3*plotColors(:,ii),...
         'MarkerFaceColor',plotColors(:,ii),...
         'LineWidth',2);
     
-end
-% Loop over the lines
-for ii = 1:numLines
     
     plot(matrixContrasts(:,ii),lagsFromFitMat(:,ii),'--', ...
         'Color',plotColors(:,ii),...
         'LineWidth',2);
     
+    axis square;
+    
+    if semiLog
+        set(gca,'Xscale','log');
+    end
+    
+    set(gca,'XTick',[0.03 0.1 0.3 1]);
+    
+    ylim(yLimVals)
+    
+    autoTicksY = yLimVals(1):(yLimVals(2)-yLimVals(1))/4:yLimVals(2);
+    
+    set(gca, ...
+        'Box'         , 'off'     , ...
+        'TickDir'     , 'out'     , ...
+        'FontSize'    , 16        , ...
+        'TickLength'  , [.02 .02] , ...
+        'XMinorTick'  , 'on'      , ...
+        'YMinorTick'  , 'on'      , ...
+        'YGrid'       , 'on'      , ...
+        'XColor'      , [.3 .3 .3], ...
+        'YColor'      , [.3 .3 .3], ...
+        'YTick'       , autoTicksY, ...
+        'LineWidth'   , 2         , ...
+        'ActivePositionProperty', 'OuterPosition');
+    
+    set(gcf, 'Color', 'white' );
+    
+    
+    % Add labels
+    if isfield(plotNames,'title')
+        hTitle  = title (plotNames.title);
+    end
+    if isfield(plotNames,'xlabel')
+        hXLabel = xlabel(plotNames.xlabel);
+    end
+    if isfield(plotNames,'ylabel')
+        hYLabel = ylabel(plotNames.ylabel);
+    end
+    
 end
-
-axis square;
-
-if semiLog
-    set(gca,'Xscale','log');
-end
-
-set(gca,'XTick',[0.03 0.1 0.3 1]);
-
-ylim(yLimVals)
-
-autoTicksY = yLimVals(1):(yLimVals(2)-yLimVals(1))/4:yLimVals(2);
-
-set(gca, ...
-    'Box'         , 'off'     , ...
-    'TickDir'     , 'out'     , ...
-    'FontSize'    , 16        , ...
-    'TickLength'  , [.02 .02] , ...
-    'XMinorTick'  , 'on'      , ...
-    'YMinorTick'  , 'on'      , ...
-    'YGrid'       , 'on'      , ...
-    'XColor'      , [.3 .3 .3], ...
-    'YColor'      , [.3 .3 .3], ...
-    'YTick'       , autoTicksY, ...
-    'LineWidth'   , 2         , ...
-    'ActivePositionProperty', 'OuterPosition');
-
-set(gcf, 'Color', 'white' );
-
-
-% Add labels
-if isfield(plotNames,'title')
-    hTitle  = title (plotNames.title);
-end
-if isfield(plotNames,'xlabel')
-    hXLabel = xlabel(plotNames.xlabel);
-end
-if isfield(plotNames,'ylabel')
-    hYLabel = ylabel(plotNames.ylabel);
-end
-
 % Add Legend
 if isfield(plotNames,'legend')
     legend(plotNames.legend,'Location',legendLocation);

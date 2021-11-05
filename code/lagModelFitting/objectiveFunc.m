@@ -14,5 +14,5 @@ lagEsts = min([Lag1'; Lag2'])';
 %lagEsts = p(7).*Lag1 - p(8).*Lag2;
 
 %% objective function
-objVal = 1000*sqrt(mean((lags(:) - lagEsts).^2));
+objVal = 10000*sqrt(mean((lags(:) - lagEsts).^2));
 end

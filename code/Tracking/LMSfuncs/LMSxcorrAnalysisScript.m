@@ -2,7 +2,7 @@ close all
 clear all
 
 %% LOAD DATA
-subjID  = 'BMC';
+subjID  = 'KAS';
 expName = 'LS2';
 theRuns = 1:20;
 
@@ -37,14 +37,15 @@ for ii = 1:length(uniqColorDirs)
     
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs Lag
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get the lags from rParams
-lags = flipud(squeeze(rParams(2,:,:)));
+%lags = flipud(squeeze(rParams(2,:,:)));
+lags = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
 
 % Get the cone contrasts
 MaxContrastLMS = LMSstimulusContrast('experiment','Experiment2-Pos');

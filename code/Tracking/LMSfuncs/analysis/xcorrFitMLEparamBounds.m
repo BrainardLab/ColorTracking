@@ -36,7 +36,7 @@ if strcmp(modelType,'GMA') || strcmp(modelType,'GM2')
 end
 
 % LOWER & UPPER BOUND ON DELAY
-LBd = 0;         UBd = 1;
+LBd = -1;         UBd = 1;
 
 if strcmp(modelType,'GSS')
     LB = [LBa LBm LBs];

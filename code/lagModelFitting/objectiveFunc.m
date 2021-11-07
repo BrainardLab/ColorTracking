@@ -1,7 +1,7 @@
 function objVal = objectiveFunc(p,lags,cL,cS)
 
-m1 =  abs(p(1).*cL + p(2).*cS);
-m2 =  abs(p(3).*cL + p(4).*cS);
+m1 =  abs(p(1).*cL - p(2).*cS);
+m2 =  abs(p(3).*cL - p(4).*cS);
 %m1 =  sqrt(p(1).*cL.^2 + p(2).*cS.^2);
 %m2 =  sqrt(p(3).*cL.^2 + p(4).*cS.^2);
 % Contrast-Lag nonlinearity

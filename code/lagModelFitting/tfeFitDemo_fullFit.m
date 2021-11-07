@@ -1,9 +1,9 @@
 %% LOAD DATA from Exp 1
-subjID  = 'KAS';
+subjID  = 'BMC';
 expName = 'LS1';
 theRuns = 1:20;
 
-figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
+
 
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
@@ -69,6 +69,7 @@ for ii = 1:length(uniqColorDirs2)
     
 end
 
+
 % Get the lags from rParams
 %lagsLS2 = flipud(squeeze(rParams(2,:,:)));
 lagsLS2 = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
@@ -94,8 +95,8 @@ cS = [cS_LS1;cS_LS2];
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
 a1 = 50;
 b1 = 2;
-a2 = 50;
-b2 = 6;
+a2 = 0;
+b2 = 0;
 minLag1 = 0.3;
 decay1 = 0.2;
 % c1 = .5;
@@ -114,7 +115,7 @@ nlcon =[];
 % lb =[0,0,0,0,0,0,0,0];
 % ub = [100,0,0,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
-ub = [100,100,100,100,5,100];
+ub = [100,100,0,0,5,100];
 
 options = optimset('fmincon');
 options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');
@@ -151,19 +152,19 @@ lagsFromFitMat = reshape(lagsFromFit,size(lags));
 %% PLOT IT
 
 % Set the colors
-plotColors = [230 172 178; ...
-    194  171  253; ...
-    36   210  201; ...
-    32   140  163; ...
-    253  182    44; ...
-    252  153  233; ...
-    230/2 172/2 178/2; ...
-    194/2  171/2  253/2; ...
-    36/2   210/2  201/2; ...
-    32/2   140/2  163/2; ...
-    253/2  182/2    22; ...
-    252/2  153/2  233/2;...
-    ]'./255;
+plotColors = [230 172  178; ...
+             194  171  253; ...
+             36   210  201; ...
+             32   140  163; ...
+             253  182   44; ...
+             252  153  233; ...
+             235   64   52; ...
+             255  118  109; ...
+             121   12  126; ...
+             179  107  183; ...
+             185  177   91; ...
+             225  218  145;...
+             ]'./255;
 
 % Get the l2 norm of the cone contrasts
 vecContrast = sqrt(MaxContrastLMS(:,1).^2+MaxContrastLMS(:,3).^2);
@@ -202,99 +203,18 @@ simplePlot(lags(:),[0, 0,0],lagsFromFit,[220 195 256]./256,plotNames,legendLocat
 
 %%
 % get the number of lines to plot
-tcHndl2 = figure;hold on
-% Names for plotting
-clear plotNames
-plotNames.title  = 'Lag Vs. Contrast';
-plotNames.xlabel  = 'Contrast (%)';
-plotNames.ylabel = 'Lag (s)';
-legendLocation = 'northeastoutside';
-sz = 12;
-yLimVals = [0.2 0.6];
-semiLog = true;
-for jj = 1:length(uniqColorDirs)
-    plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
-end
+uniqColorDirs = [uniqColorDirs1; uniqColorDirs2];
 
-numLines = size(lagsFromFitMat,2);
+shuffIndx = [1 2 3 4 5 6 7 10 8 11 9 12];
 
+% Sort the directions to make the +/- direction pairs 
+matrixContrastsShuff= matrixContrasts(:,shuffIndx);
+lagsShuff = lags(:,shuffIndx);
+uniqColorDirsShuff = uniqColorDirs(shuffIndx);
+lagsFromFitMatShuff = lagsFromFitMat(:,shuffIndx);
 
-% Loop over the lines
-numPlotRows = floor(sqrt(numLines));
-numPlotCols = ceil(sqrt(numLines));
-
-for ii = 1:numLines
-    
-    subplot(numPlotRows,numPlotCols)
-    scatter(matrixContrasts(:,ii),lags(:,ii),sz.^2, ...
-        'MarkerEdgeColor',.3*plotColors(:,ii),...
-        'MarkerFaceColor',plotColors(:,ii),...
-        'LineWidth',2);
-    
-    
-    plot(matrixContrasts(:,ii),lagsFromFitMat(:,ii),'--', ...
-        'Color',plotColors(:,ii),...
-        'LineWidth',2);
-    
-    axis square;
-    
-    if semiLog
-        set(gca,'Xscale','log');
-    end
-    
-    set(gca,'XTick',[0.03 0.1 0.3 1]);
-    
-    ylim(yLimVals)
-    
-    autoTicksY = yLimVals(1):(yLimVals(2)-yLimVals(1))/4:yLimVals(2);
-    
-    set(gca, ...
-        'Box'         , 'off'     , ...
-        'TickDir'     , 'out'     , ...
-        'FontSize'    , 16        , ...
-        'TickLength'  , [.02 .02] , ...
-        'XMinorTick'  , 'on'      , ...
-        'YMinorTick'  , 'on'      , ...
-        'YGrid'       , 'on'      , ...
-        'XColor'      , [.3 .3 .3], ...
-        'YColor'      , [.3 .3 .3], ...
-        'YTick'       , autoTicksY, ...
-        'LineWidth'   , 2         , ...
-        'ActivePositionProperty', 'OuterPosition');
-    
-    set(gcf, 'Color', 'white' );
-    
-    
-    % Add labels
-    if isfield(plotNames,'title')
-        hTitle  = title (plotNames.title);
-    end
-    if isfield(plotNames,'xlabel')
-        hXLabel = xlabel(plotNames.xlabel);
-    end
-    if isfield(plotNames,'ylabel')
-        hYLabel = ylabel(plotNames.ylabel);
-    end
-    
-end
-% Add Legend
-if isfield(plotNames,'legend')
-    legend(plotNames.legend,'Location',legendLocation);
-end
-%% Format fonts
-set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
-set([hXLabel, hYLabel,],'FontSize', 18);
-set( hTitle, 'FontSize', 18,'FontWeight' , 'bold');
-
-%% Save it!
-figureSizeInches = [8 8];
-set(tcHndl2, 'PaperUnits', 'inches');
-set(tcHndl2, 'PaperSize',figureSizeInches);
-set(tcHndl2, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-%figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast.pdf']);
-% Save it
-%print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-
-
+% Plot the inividual color direction +/- pairs 
+figSaveInfo.figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
+figSaveInfo.subjCode    = subjCode;
+figSaveInfo.figureSizeInches = [18 12];
+plotDirectionPairs(matrixContrastsShuff,lagsShuff,lagsFromFitMatShuff,uniqColorDirsShuff,plotColors,figSaveInfo)

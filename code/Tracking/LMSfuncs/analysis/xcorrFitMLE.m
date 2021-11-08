@@ -1,4 +1,4 @@
-function [rFit,rParam,rLagFit] = xcorrFitMLE(rLagVal,r,rStd,rStdK,modelType,initType,bPLOT,bPLOTrpt)
+function [rFit,rParam,rLagFit,negLL] = xcorrFitMLE(rLagVal,r,rStd,rStdK,modelType,initType,bPLOT,bPLOTrpt)
 
 % function [rFit,rParam] = xcorrFitMLE(rLagVal,r,rStd,rStdK,modelType,initType,bPLOT,bPLOTrpt)
 %    

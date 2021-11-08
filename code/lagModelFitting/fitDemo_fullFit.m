@@ -1,8 +1,8 @@
 %% LOAD DATA from Exp 1
-subjID  = 'MAB';
+subjID  = 'KAS';
 expName = 'LS1';
 
-numRuns = 10;
+numRuns = 20;
 
 theRuns = 1:numRuns;
 
@@ -37,13 +37,20 @@ for ii = 1:length(uniqColorDirs1)
     
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
-    
+    [~,~,rParamsGMA(:,:,ii),negLL_GMA(ii,:)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
+    %[~,~,rParamsLGS(:,:,ii),negLL_LGS(ii,:)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
 end
 
-% Get the lags from rParams
-%lagsLS1 = flipud(squeeze(rParams(2,:,:)));
-lagsLS1 = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
+% % Get the lags from rParams
+% if mean(negLL_LGS(:)) < mean(negLL_GMA(:))
+%     lagsLS1 = flipud(squeeze(rParamsLGS(2,:,:)));
+% elseif  mean(negLL_GMA(:)) <  mean(negLL_LGS(:))
+    lagsLS1 = flipud((squeeze(rParamsGMA(3,:,:))-1).*squeeze(rParamsGMA(2,:,:))+ squeeze(rParamsGMA(4,:,:)));
+% else 
+%     lagsLS1_1 = flipud(squeeze(negLL_LGS(2,:,:)));
+%     lagsLS1_2 = flipud((squeeze(rParamsGMA(3,:,:))-1).*squeeze(rParamsGMA(2,:,:))+ squeeze(rParamsGMA(4,:,:)));
+%     lagsLS1 = (lagsLS1_1 + lagsLS1_2)./2;
+% end
 %% LOAD DATA from Exp 2
 expName = 'LS2';
 theRuns = 1:numRuns;
@@ -98,8 +105,8 @@ cS = [cS_LS1;cS_LS2];
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
 a1 = 50;
 b1 = 2;
-a2 = 0;
-b2 = 0;
+a2 = 60;
+b2 = 6;
 minLag1 = 0.3;
 decay1 = 0.2;
 % c1 = .5;
@@ -118,7 +125,7 @@ nlcon =[];
 % lb =[0,0,0,0,0,0,0,0];
 % ub = [100,0,0,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
-ub = [100,100,0,0,5,100];
+ub = [100,100,100,100,5,100];
 
 options = optimset('fmincon');
 options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');
@@ -156,18 +163,18 @@ lagsFromFitMat = reshape(lagsFromFit,size(lags));
 
 % Set the colors
 plotColors = [230 172  178; ...
-             194  171  253; ...
-             36   210  201; ...
-             32   140  163; ...
-             253  182   44; ...
-             252  153  233; ...
-             235   64   52; ...
-             255  118  109; ...
-             121   12  126; ...
-             179  107  183; ...
-             185  177   91; ...
-             225  218  145;...
-             ]'./255;
+    194  171  253; ...
+    36   210  201; ...
+    32   140  163; ...
+    253  182   44; ...
+    252  153  233; ...
+    235   64   52; ...
+    255  118  109; ...
+    121   12  126; ...
+    179  107  183; ...
+    185  177   91; ...
+    225  218  145;...
+    ]'./255;
 
 % Get the l2 norm of the cone contrasts
 vecContrast = sqrt(MaxContrastLMS(:,1).^2+MaxContrastLMS(:,3).^2);
@@ -210,13 +217,13 @@ uniqColorDirs = [uniqColorDirs1; uniqColorDirs2];
 
 shuffIndx = [1 2 3 4 5 6 7 10 8 11 9 12];
 
-% Sort the directions to make the +/- direction pairs 
+% Sort the directions to make the +/- direction pairs
 matrixContrastsShuff= matrixContrasts(:,shuffIndx);
 lagsShuff = lags(:,shuffIndx);
 uniqColorDirsShuff = uniqColorDirs(shuffIndx);
 lagsFromFitMatShuff = lagsFromFitMat(:,shuffIndx);
 
-% Plot the inividual color direction +/- pairs 
+% Plot the inividual color direction +/- pairs
 figSaveInfo.figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 figSaveInfo.subjCode    = subjCode;
 figSaveInfo.figureSizeInches = [18 12];

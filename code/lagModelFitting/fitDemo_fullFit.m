@@ -1,7 +1,10 @@
 %% LOAD DATA from Exp 1
-subjID  = 'BMC';
+subjID  = 'MAB';
 expName = 'LS1';
-theRuns = 1:20;
+
+numRuns = 10;
+
+theRuns = 1:numRuns;
 
 
 
@@ -43,7 +46,7 @@ end
 lagsLS1 = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
 %% LOAD DATA from Exp 2
 expName = 'LS2';
-theRuns = 1:20;
+theRuns = 1:numRuns;
 
 Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 

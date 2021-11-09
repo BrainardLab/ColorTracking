@@ -1,12 +1,11 @@
 function gradientDemo(benchmark)
 % gradientDemo([benchmark=0])
 %
-% This demo demonstrates fast drawing of apertured square wave gratings 
-% using procedural shaders. It only works on hardware with support for the GLSL
-% shading language, vertex- and fragment-shaders.
+% This demo creates a smooth gradient from one end of the screen to the
+% next. Originally created to test Bits++ device.
 
 % History:
-% 12/12/2017 modified from ProceduralGaborDemo.m (Ian Andolina).
+% 11/08/2021 modified from ProceduralSquareWaveDemo.m .
 
 
 % Default to mode 0 - Just a nice demo.
@@ -25,25 +24,27 @@ screenid = max(Screen('Screens'));
 
 % Open a window 
 PsychImaging('PrepareConfiguration');
-[win,winRect]= PsychImaging('OpenWindow', screenid, 0.5);
-% [win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid);
-newCLUT = repmat(linspace(0,1,256)',[1 3]);
 
+% OPEN WINDOW WITH BITS++ FUNCTION
+% [win,winRect]= PsychImaging('OpenWindow', screenid, 0.5);
+[win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid);
+
+% CREATE NEW GAMMA TABLE
+newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]).^(1/2.2);
+% CREATE ANOTHER GAMMA TABLE
+newCLUT2 = repmat(linspace(0,0.1,256)',[1 3]).^(1/2.2);
 % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',win);
+
+% HOW LONG TO DISPLAY EACH GAMMA TABLE
+tSecCLUT1 = 5;
+tSecCLUT2 = 10;
+
 % LOAD NEW GAMMA TABLE
-Screen('LoadNormalizedGammaTable', win, newCLUT);
-% CHECK TO MAKE SURE IT WAS LOADED--PLOT NEW GAMMA TABLE AFTER DEMO ENDS
-[curGamma,~]=Screen('ReadNormalizedGammaTable',win);
+Screen('LoadNormalizedGammaTable', win, newCLUT1);
 
-% Initial stimulus params for the grating:
-res = 600;
-phase = 0;
-freq = .04;
-tilt = 225;
-contrast = 0.5;
-
-gradientTest = linspace(0,0.2,256);
+% CREATE GRADIENT RUNNING FROM MIN TO MAX VALUE
+gradientTest = linspace(0,1,256).*256;
 % Build a procedural gabor texture for a grating with a support of tw x th
 % pixels, and a RGB color offset of 0.5 -- a 50% gray.
 % squarewavetex = CreateProceduralSquareWaveGrating(win, res, res, [.5 .5 .5 0], res/2);
@@ -61,13 +62,10 @@ tstart = vbl;
 count = 0;
 
 % Animation loop
-while GetSecs < tstart + 5
+while GetSecs < tstart + tSecCLUT1
     count = count + 1;
-    % update values:
-    phase = phase + 5;
 
-    % Draw the grating:
-%    Screen('DrawTexture', win, squarewavetex, [], [], tilt, [], [], [], [], [], [phase, freq, contrast, 0]);
+    % Draw the texture:
      Screen('DrawTexture', win, gradientTex, [], winRect);
     if benchmark > 0
         % Go as fast as you can without any sync to retrace and without
@@ -79,6 +77,28 @@ while GetSecs < tstart + 5
         Screen('Flip', win);
     end
 end
+
+% LOAD NEW GAMMA TABLE
+Screen('LoadNormalizedGammaTable', win, newCLUT2);
+
+% Animation loop
+while GetSecs < tstart + tSecCLUT2
+    count = count + 1;
+
+    % Draw the texture:
+     Screen('DrawTexture', win, gradientTex, [], winRect);
+    if benchmark > 0
+        % Go as fast as you can without any sync to retrace and without
+        % clearing the backbuffer -- we want to measure gabor drawing speed,
+        % not how fast the display is going etc.
+        Screen('Flip', win, 0, 2, 2);
+    else
+        % Go at normal refresh rate for good looking gabors:
+        Screen('Flip', win);
+    end
+end
+
+% RESTORE GAMMA TABLE
 Screen('LoadNormalizedGammaTable', win, saveGamma);
 % A final synced flip, so we can be sure all drawing is finished when we
 % reach this point; print some stats

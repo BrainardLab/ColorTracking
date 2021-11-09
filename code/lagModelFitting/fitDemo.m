@@ -1,7 +1,7 @@
 %% LOAD DATA
-subjID  = 'MAB';
+subjID  = 'KAS';
 expName = 'LS2';
-theRuns = 1:10;
+theRuns = 1:20;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
@@ -101,8 +101,8 @@ decay1_hat  = p_hat(6);
 %% Use the recovered weights
 % m1_hat =  sqrt(a1_hat.*cL.^2 + b1_hat.*cS.^2);
 % m2_hat =  sqrt(a2_hat.*cL.^2 + b2_hat.*cS.^2);
-m1_hat =  abs(a1_hat.*cL + b1_hat.*cS);
-m2_hat =  abs(a2_hat.*cL + b2_hat.*cS);
+m1_hat =  abs(a1_hat.*cL - b1_hat.*cS);
+m2_hat =  abs(a2_hat.*cL - b2_hat.*cS);
 
 %% Contrast-Lag nonlinearity
 Lag1_hat =  minLag1_hat +  decay1_hat.* exp(-1.*m1_hat);
@@ -161,7 +161,7 @@ plotNames.legend = {'Lag','Predicted Lag'};
 simplePlot(lags(:),[0, 0,0],lagsFromFit,[220 195 256]./256,plotNames,legendLocation)
 
 
-%% 
+%
 % get the number of lines to plot
 tcHndl2 = figure;hold on
 % Names for plotting
@@ -242,7 +242,7 @@ end
 if isfield(plotNames,'legend')
     legend(plotNames.legend,'Location',legendLocation);
 end
-%% Format fonts
+% Format fonts
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 18);
 set( hTitle, 'FontSize', 18,'FontWeight' , 'bold');

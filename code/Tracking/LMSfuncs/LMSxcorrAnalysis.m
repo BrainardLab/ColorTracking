@@ -1,4 +1,4 @@
-function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType,varargin)
+function [r, rSmooth, rParam, negLL] = LMSxcorrAnalysis(Sall,modelType,varargin)
 %
 % function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType)
 %
@@ -68,7 +68,7 @@ for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
        rStdK = 1.5;
        initType = 'RND';
        rhoXXstd = std(rAll,[],2);
-       [rSmooth(:,i),rParam(:,i),tSecFit(:,i)] = xcorrFitMLE(rLagVal(:,i),r(:,i),rhoXXstd,rStdK,modelType,initType);
+       [rSmooth(:,i),rParam(:,i),tSecFit(:,i),negLL(:,i)] = xcorrFitMLE(rLagVal(:,i),r(:,i),rhoXXstd,rStdK,modelType,initType);
     end
 %    text(0.5,0.2,MaxContrastLMStitle,'FontSize',15);
     legendLMS{end+1} = MaxContrastLMStitle;

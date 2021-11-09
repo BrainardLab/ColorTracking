@@ -32,7 +32,7 @@ LBmLog = .0001;
 % LOWER & UPPER BOUND ON STD
 LBs = 0.00001;         UBs = rLagValMax.*2;
 if strcmp(modelType,'GMA') || strcmp(modelType,'GM2')
-	LBs = LBs.*10;         UBs = rLagValMax.*20;
+	LBs = LBs.*10;         UBs = rLagValMax.*32;
 end
 
 % LOWER & UPPER BOUND ON DELAY

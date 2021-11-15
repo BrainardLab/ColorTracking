@@ -7,6 +7,9 @@ function gradientDemo(benchmark)
 % History:
 % 11/08/2021 modified from ProceduralSquareWaveDemo.m .
 
+% EITHER [] OR 2
+% bPlusPlusMode = [];
+bPlusPlusMode = 2;
 
 % Default to mode 0 - Just a nice demo.
 if nargin < 1
@@ -27,21 +30,30 @@ PsychImaging('PrepareConfiguration');
 
 % OPEN WINDOW WITH BITS++ FUNCTION
 % [win,winRect]= PsychImaging('OpenWindow', screenid, 0.5);
-[win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid);
+[win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid,[0.5 0.5 0.5].*256);
 
+% SIZE OF STIMULUS ON SCREEN
+stimRect = [0 round((winRect(4)*0.4)) winRect(3) round((winRect(4)*0.6))];
 % CREATE NEW GAMMA TABLE
-newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]).^(1/2.2);
+newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
 % CREATE ANOTHER GAMMA TABLE
-newCLUT2 = repmat(linspace(0,0.1,256)',[1 3]).^(1/2.2);
+newCLUT2 = repmat(linspace(0,0.1,256)',[1 3]);
+leaveOutGuns = [];
+if ~isempty(leaveOutGuns)
+    newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
+    newCLUT1(:,leaveOutGuns(2)) = zeros([256 1]);
+    newCLUT2(:,leaveOutGuns(1)) = zeros([256 1]);
+    newCLUT2(:,leaveOutGuns(2)) = zeros([256 1]);
+end
 % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',win);
 
 % HOW LONG TO DISPLAY EACH GAMMA TABLE
 tSecCLUT1 = 5;
-tSecCLUT2 = 10;
+tSecCLUT2 = 20;
 
 % LOAD NEW GAMMA TABLE
-Screen('LoadNormalizedGammaTable', win, newCLUT1);
+Screen('LoadNormalizedGammaTable', win, newCLUT1,bPlusPlusMode);
 
 % CREATE GRADIENT RUNNING FROM MIN TO MAX VALUE
 gradientTest = linspace(0,1,256).*256;
@@ -54,7 +66,7 @@ gradientTex = Screen('MakeTexture',win,gradientTest);
 % benchmark run below and doesn't do one time setup work inside the
 % benchmark loop:
 % Screen('DrawTexture', win, squarewavetex, [], [], tilt, [], [], [], [], [], [phase, freq, contrast, 0]);
-Screen('DrawTexture', win, gradientTex, [], winRect);
+Screen('DrawTexture', win, gradientTex, [], stimRect);
 
 % Perform initial flip to gray background and sync us to the retrace:
 vbl = Screen('Flip', win);
@@ -66,7 +78,7 @@ while GetSecs < tstart + tSecCLUT1
     count = count + 1;
 
     % Draw the texture:
-     Screen('DrawTexture', win, gradientTex, [], winRect);
+     Screen('DrawTexture', win, gradientTex, [], stimRect);
     if benchmark > 0
         % Go as fast as you can without any sync to retrace and without
         % clearing the backbuffer -- we want to measure gabor drawing speed,
@@ -79,14 +91,14 @@ while GetSecs < tstart + tSecCLUT1
 end
 
 % LOAD NEW GAMMA TABLE
-Screen('LoadNormalizedGammaTable', win, newCLUT2);
+Screen('LoadNormalizedGammaTable', win, newCLUT2,bPlusPlusMode);
 
 % Animation loop
 while GetSecs < tstart + tSecCLUT2
     count = count + 1;
 
     % Draw the texture:
-     Screen('DrawTexture', win, gradientTex, [], winRect);
+     Screen('DrawTexture', win, gradientTex, [], stimRect);
     if benchmark > 0
         % Go as fast as you can without any sync to retrace and without
         % clearing the backbuffer -- we want to measure gabor drawing speed,
@@ -99,7 +111,7 @@ while GetSecs < tstart + tSecCLUT2
 end
 
 % RESTORE GAMMA TABLE
-Screen('LoadNormalizedGammaTable', win, saveGamma);
+Screen('LoadNormalizedGammaTable', win, saveGamma,bPlusPlusMode);
 % A final synced flip, so we can be sure all drawing is finished when we
 % reach this point; print some stats
 tend = Screen('Flip', win);

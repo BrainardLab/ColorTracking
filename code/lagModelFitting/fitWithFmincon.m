@@ -4,8 +4,8 @@ function [p_hat,lagsFromFit,m1_hat,m2_hat,Lag1_hat,Lag2_hat] = fitWithFmincon(la
 %initial weight estimates [0.7 0.3 0.997 0.003 2.5/1000 0.3];
 a1 = 50;
 b1 = 2;
-a2 = 60;
-b2 = 6;
+a2 = 0;
+b2 = 0;
 minLag1 = 0.3;
 decay1 = 0.2;
 % c1 = .5;
@@ -24,7 +24,7 @@ nlcon =[];
 % lb =[0,0,0,0,0,0,0,0];
 % ub = [100,0,0,100,5,100,1,1];
 lb =[0,0,0,0,0,0];
-ub = [100,100,100,100,5,100];
+ub = [100,100,0,0,5,100];
 
 options = optimset('fmincon');
 options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set');

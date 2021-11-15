@@ -23,24 +23,28 @@ thePacket.metaData.stimContrasts  = vecnorm([cS,cL]')';
 
 %% Make the fit object
 theDimension= size(thePacket.stimulus.values, 1);
-numMechanism = 2;
+numMechanism = 1;
 
 ctmOBJ = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', numMechanism ,'fminconAlgorithm','active-set');
 
 
-
-
 %% Fit it
-defaultParamsInfo = [];
-initialParams     = [];
-fitErrorScalar    = 1000;
 
+
+% fit the old way
+[p_hat,lagsFromFit] = fitWithFmincon(thePacket.response.values ,thePacket.stimulus.values);
+if numMechanism == 1
+    oldWayParams = p_hat([1,2,5,6]);
+    oldWayParams = ctmOBJ.vecToParams(oldWayParams);
+else
+    oldWayParams = ctmOBJ.vecToParams(p_hat);
+end
+
+defaultParamsInfo = [];
+initialParams     = oldWayParams;
+fitErrorScalar    = 1000;
 [fitParams,fVal,objFitResponses] = ctmOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',initialParams, 'fitErrorScalar',fitErrorScalar);
-
-% fit the old way 
-[p_hat,lagsFromFit] = fitWithFmincon(thePacket.response.values ,thePacket.stimulus.values);
-oldWayParams = ctmOBJ.vecToParams(p_hat);
 
 
 %% Print the params

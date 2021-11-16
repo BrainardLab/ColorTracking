@@ -37,7 +37,7 @@ stimRect = [0 round((winRect(4)*0.4)) winRect(3) round((winRect(4)*0.6))];
 % CREATE NEW GAMMA TABLE
 newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
 % CREATE ANOTHER GAMMA TABLE
-newCLUT2 = repmat(linspace(0,0.0625,256)',[1 3]);
+newCLUT2 = repmat(linspace(0,0.125,256)',[1 3]);
 leaveOutGuns = [];
 if ~isempty(leaveOutGuns)
     newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
@@ -61,7 +61,7 @@ gradientTest = linspace(0,1,256).*256;
 % pixels, and a RGB color offset of 0.5 -- a 50% gray.
 % squarewavetex = CreateProceduralSquareWaveGrating(win, res, res, [.5 .5 .5 0], res/2);
 gradientTex = Screen('MakeTexture',win,gradientTest);
-rampTest = 3;
+rampTest = 6;
 
 % Draw the grating once, just to make sure the gfx-hardware is ready for the
 % benchmark run below and doesn't do one time setup work inside the

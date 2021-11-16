@@ -7,13 +7,46 @@ function rampDemo(benchmark)
 % History:
 % 11/08/2021 modified from ProceduralSquareWaveDemo.m .
 
+% Default to mode 0 - Just a nice demo.
+if nargin < 1
+    benchmark = 0;
+end
+
 % EITHER [] OR 2
 % bPlusPlusMode = [];
 bPlusPlusMode = 2;
 
-% Default to mode 0 - Just a nice demo.
-if nargin < 1
-    benchmark = 0;
+bUsePhotoDiode = 1;
+% CREATE NEW GAMMA TABLE
+newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
+% CREATE ANOTHER GAMMA TABLE
+newCLUT2 = repmat(linspace(0,0.125,256)',[1 3]);
+leaveOutGuns = [];
+if ~isempty(leaveOutGuns)
+    newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
+    newCLUT1(:,leaveOutGuns(2)) = zeros([256 1]);
+    newCLUT2(:,leaveOutGuns(1)) = zeros([256 1]);
+    newCLUT2(:,leaveOutGuns(2)) = zeros([256 1]);
+end
+% HOW LONG TO DISPLAY EACH GAMMA TABLE
+tSecCLUT1 = 5;
+tSecCLUT2 = 100;
+rampTest = 6;
+
+if bUsePhotoDiode==1
+    % Instantiate a LabJack object to handle communication with the device
+    labjackOBJ = LabJackU6('verbosity', 1);
+
+    % Set up sampling parameters
+    samplingParams = struct(...
+        'channelIDs', [1], ...         % list of  channels to aquire from (AIN1, AIN2, AIN3)
+        'frequencyInHz', 5*1000 ...    % using an 7 KHz sampling rate
+        );
+
+    % Configure analog input sampling
+    labjackOBJ.configureAnalogDataStream(samplingParams.channelIDs, samplingParams.frequencyInHz);
+
+    durationInSeconds = tSecCLUT2*0.6;
 end
 
 % Setup defaults and unit color range:
@@ -34,23 +67,9 @@ PsychImaging('PrepareConfiguration');
 
 % SIZE OF STIMULUS ON SCREEN
 stimRect = [0 round((winRect(4)*0.4)) winRect(3) round((winRect(4)*0.6))];
-% CREATE NEW GAMMA TABLE
-newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
-% CREATE ANOTHER GAMMA TABLE
-newCLUT2 = repmat(linspace(0,0.125,256)',[1 3]);
-leaveOutGuns = [];
-if ~isempty(leaveOutGuns)
-    newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
-    newCLUT1(:,leaveOutGuns(2)) = zeros([256 1]);
-    newCLUT2(:,leaveOutGuns(1)) = zeros([256 1]);
-    newCLUT2(:,leaveOutGuns(2)) = zeros([256 1]);
-end
+
 % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',win);
-
-% HOW LONG TO DISPLAY EACH GAMMA TABLE
-tSecCLUT1 = 5;
-tSecCLUT2 = 100;
 
 % LOAD NEW GAMMA TABLE
 Screen('LoadNormalizedGammaTable', win, newCLUT1,bPlusPlusMode);
@@ -61,7 +80,6 @@ gradientTest = linspace(0,1,256).*256;
 % pixels, and a RGB color offset of 0.5 -- a 50% gray.
 % squarewavetex = CreateProceduralSquareWaveGrating(win, res, res, [.5 .5 .5 0], res/2);
 gradientTex = Screen('MakeTexture',win,gradientTest);
-rampTest = 6;
 
 % Draw the grating once, just to make sure the gfx-hardware is ready for the
 % benchmark run below and doesn't do one time setup work inside the
@@ -94,6 +112,15 @@ end
 % LOAD NEW GAMMA TABLE
 Screen('LoadNormalizedGammaTable', win, newCLUT2,bPlusPlusMode);
 
+rampTex = Screen('MakeTexture',win,rampTest);
+% Draw the texture:
+ Screen('DrawTexture', win, rampTex, [], winRect);
+ Screen('Flip', win);
+ 
+if bUsePhotoDiode==1
+   % Aquire the data
+   labjackOBJ.startDataStreamingForSpecifiedDuration(durationInSeconds);
+end
 % Animation loop
 while GetSecs < tstart + tSecCLUT2
     count = count + 1;
@@ -110,7 +137,7 @@ while GetSecs < tstart + tSecCLUT2
         % Go at normal refresh rate for good looking gabors:
         Screen('Flip', win);
     end
-    pause(8);
+    pause(floor(durationInSeconds./9));
 end
 
 % RESTORE GAMMA TABLE
@@ -120,6 +147,11 @@ Screen('LoadNormalizedGammaTable', win, saveGamma,bPlusPlusMode);
 tend = Screen('Flip', win);
 avgfps = count / (tend - tstart);
 fprintf('\nPresented a total of %i frames at ~%.2g FPS...\n',count,avgfps);
+
+if bUsePhotoDiode==1
+   % Close-up shop
+   labjackOBJ.shutdown(); 
+end
 
 % Close window, release all ressources:
 sca

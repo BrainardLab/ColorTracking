@@ -31,6 +31,8 @@ end
 tSecCLUT1 = 5;
 tSecCLUT2 = 100;
 rampTest = 6./256;
+% DURATION OF MEASUREMENT IF MEASURING
+durationInSeconds = tSecCLUT2*0.6;
 
 if bUsePhotoDiode==1
     % Instantiate a LabJack object to handle communication with the device
@@ -44,8 +46,6 @@ if bUsePhotoDiode==1
 
     % Configure analog input sampling
     labjackOBJ.configureAnalogDataStream(samplingParams.channelIDs, samplingParams.frequencyInHz);
-
-    durationInSeconds = tSecCLUT2*0.6;
 end
 
 % Setup defaults and unit color range:
@@ -148,13 +148,17 @@ tend = Screen('Flip', win);
 avgfps = count / (tend - tstart);
 fprintf('\nPresented a total of %i frames at ~%.2g FPS...\n',count,avgfps);
 
+% Close window, release all ressources:
+sca
+
 if bUsePhotoDiode==1
    % Close-up shop
    labjackOBJ.shutdown(); 
+   figure; 
+   plot(labjackOBJ.timeAxis,labjackOBJ.data); 
+   axis square;
+   xlabel('Time (s)'); ylabel('Voltage');
 end
-
-% Close window, release all ressources:
-sca
 
 % Restore old settings for sync-tests:
 Screen('Preference', 'SkipSyncTests', oldSyncLevel);

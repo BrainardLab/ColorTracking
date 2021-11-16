@@ -1,8 +1,8 @@
 function rampDemonNoBitsPlus(benchmark)
 % gradientDemo([benchmark=0])
 %
-% This demo creates a smooth gradient from one end of the screen to the
-% next. Originally created to test Bits++ device.
+% This demo ramps the luminance of the screen. Originally created to test 
+% Bits++ device.
 
 % History:
 % 11/08/2021 modified from ProceduralSquareWaveDemo.m .
@@ -152,12 +152,12 @@ fprintf('\nPresented a total of %i frames at ~%.2g FPS...\n',count,avgfps);
 sca
 
 if bUsePhotoDiode==1
-   % Close-up shop
-   labjackOBJ.shutdown(); 
    figure; 
    plot(labjackOBJ.timeAxis,labjackOBJ.data); 
    axis square;
-   xlabel('Time (s)'); ylabel('Voltage');
+   xlabel('Time (s)'); ylabel('Voltage'); 
+   % Close-up shop
+   labjackOBJ.shutdown(); 
 end
 
 % Restore old settings for sync-tests:

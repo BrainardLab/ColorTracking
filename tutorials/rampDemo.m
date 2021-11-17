@@ -1,4 +1,4 @@
-function rampDemo(benchmark)
+function [data,timeAxis] = rampDemo(benchmark)
 % gradientDemo([benchmark=0])
 %
 % This demo ramps the luminance of the screen. Originally created to test 
@@ -20,7 +20,7 @@ bUsePhotoDiode = 1;
 % CREATE NEW GAMMA TABLE
 newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
 % CREATE ANOTHER GAMMA TABLE
-newCLUT2 = repmat(linspace(0,0.125,256)',[1 3]);
+newCLUT2 = repmat(linspace(0,0.0625,256)',[1 3]);
 leaveOutGuns = [];
 if ~isempty(leaveOutGuns)
     newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
@@ -30,10 +30,10 @@ if ~isempty(leaveOutGuns)
 end
 % HOW LONG TO DISPLAY EACH GAMMA TABLE
 tSecCLUT1 = 5;
-tSecCLUT2 = 100;
-rampTest = 6;
+tSecCLUT2 = 80;
+rampTest = 12;
 % DURATION OF MEASUREMENT IF MEASURING
-durationInSeconds = tSecCLUT2*0.6;
+durationInSeconds = tSecCLUT2*0.8;
 
 if bUsePhotoDiode==1
     % Instantiate a LabJack object to handle communication with the device
@@ -117,10 +117,8 @@ rampTex = Screen('MakeTexture',win,rampTest);
  Screen('DrawTexture', win, rampTex, [], winRect);
  Screen('Flip', win);
  
-if bUsePhotoDiode==1
-   % Aquire the data
-   labjackOBJ.startDataStreamingForSpecifiedDuration(durationInSeconds);
-end
+data = [];
+timeAxis = [];
 % Animation loop
 while GetSecs < tstart + tSecCLUT2
     count = count + 1;
@@ -137,7 +135,13 @@ while GetSecs < tstart + tSecCLUT2
         % Go at normal refresh rate for good looking gabors:
         Screen('Flip', win);
     end
-    pause(floor(durationInSeconds./9));
+    if bUsePhotoDiode==1
+      % Aquire the data
+      labjackOBJ.startDataStreamingForSpecifiedDuration(floor(durationInSeconds./9));
+    end
+    data = [data; labjackOBJ.data];
+    timeAxis = [timeAxis; labjackOBJ.timeAxis];    
+   pause(0.5);
 end
 
 % RESTORE GAMMA TABLE
@@ -162,3 +166,13 @@ end
 
 % Restore old settings for sync-tests:
 Screen('Preference', 'SkipSyncTests', oldSyncLevel);
+
+KszT = 2000;
+% MAKE BOX KERNEL
+K = [0 ones(1,KszT) 0]'./KszT;
+% CONVOLVE DATA WITH BOX KERNEL
+dataK = conv(data(:),K,'same');
+
+figure;
+plot(dataK);
+axis square;

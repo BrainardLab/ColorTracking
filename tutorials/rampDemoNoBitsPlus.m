@@ -1,4 +1,4 @@
-function [data,timeAxis] = rampDemonNoBitsPlus(benchmark)
+function [data,timeAxis] = rampDemoNoBitsPlus(benchmark)
 % gradientDemo([benchmark=0])
 %
 % This demo ramps the luminance of the screen. Originally created to test 

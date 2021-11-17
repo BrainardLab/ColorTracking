@@ -138,9 +138,9 @@ while GetSecs < tstart + tSecCLUT2
     if bUsePhotoDiode==1
       % Aquire the data
       labjackOBJ.startDataStreamingForSpecifiedDuration(floor(durationInSeconds./9));
+      data = [data; labjackOBJ.data];
+      timeAxis = [timeAxis; labjackOBJ.timeAxis];          
     end
-    data = [data; labjackOBJ.data];
-    timeAxis = [timeAxis; labjackOBJ.timeAxis];    
    pause(0.5);
 end
 
@@ -162,17 +162,16 @@ if bUsePhotoDiode==1
    xlabel('Time (s)'); ylabel('Voltage'); 
    % Close-up shop
    labjackOBJ.shutdown(); 
+   KszT = 2000;
+   % MAKE BOX KERNEL
+   K = [0 ones(1,KszT) 0]'./KszT;
+   % CONVOLVE DATA WITH BOX KERNEL
+   dataK = conv(data(:),K,'same');
+
+   figure;
+   plot(dataK(KszT/2:length(dataK)-KszT/2));
+   axis square;
 end
 
 % Restore old settings for sync-tests:
 Screen('Preference', 'SkipSyncTests', oldSyncLevel);
-
-KszT = 2000;
-% MAKE BOX KERNEL
-K = [0 ones(1,KszT) 0]'./KszT;
-% CONVOLVE DATA WITH BOX KERNEL
-dataK = conv(data(:),K,'same');
-
-figure;
-plot(dataK);
-axis square;

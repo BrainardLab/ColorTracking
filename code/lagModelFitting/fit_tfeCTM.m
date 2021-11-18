@@ -84,42 +84,42 @@ ctmOBJ.paramPrint(oldWayParams)
 % [C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.3, 350);
 % [isoS_1,isoL_1] = pol2cart(deg2rad(sampleBaseTheta),C);
 [C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.35, 350);
-[isoS_2,isoL_2] = pol2cart(deg2rad(sampleBaseTheta),C);
+[isoL_2,isoS_2] = pol2cart(deg2rad(sampleBaseTheta),C);
 [C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.4, 350);
-[isoS_3,isoL_3] = pol2cart(deg2rad(sampleBaseTheta),C);
+[isoL_3,isoS_3] = pol2cart(deg2rad(sampleBaseTheta),C);
 [C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.45, 350);
-[isoS_4,isoL_4] = pol2cart(deg2rad(sampleBaseTheta),C);
+[isoL_4,isoS_4] = pol2cart(deg2rad(sampleBaseTheta),C);
 [C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.5, 350);
-[isoS_5,isoL_5] = pol2cart(deg2rad(sampleBaseTheta),C);
+[isoL_5,isoS_5] = pol2cart(deg2rad(sampleBaseTheta),C);
 [C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.55, 350);
-[isoS_6,isoL_6] = pol2cart(deg2rad(sampleBaseTheta),C);
+[isoL_6,isoS_6] = pol2cart(deg2rad(sampleBaseTheta),C);
 
 
 % plot the isolag contour
 figHndl = figure;
 hold on;
-xlim([-13 13])
-ylim([-2 2])
+xlim([-1 1])
+ylim([-6 6])
 
 % get current axes
 axh = gca;
 
 % plot axes
 line([-20 20], [0 0], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
-line([0 0], [-5 5], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
+line([0 0], [-6 6], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 
 % plot ellipse
 % line(isoS_1,isoL_1,'color', [.2 .7 .85]- 0.2*[0 .7 .85], 'LineWidth', 2);
-line(isoS_2,isoL_2,'color', [.2 .7 .85]- 0.1*[0 .7 .85], 'LineWidth', 2);
-line(isoS_3,isoL_3,'color', [.2 .7 .85]- 0.0*[0 .7 .85], 'LineWidth', 2);
-line(isoS_4,isoL_4,'color', [.2 .7 .85]- 0.1*[0 .7 .85], 'LineWidth', 2);
-line(isoS_5,isoL_5,'color', [.2 .7 .85]- 0.2*[0 .7 .85], 'LineWidth', 2);
-line(isoS_6,isoL_6,'color', [.2 .7 .85]- 0.3*[0 .7 .85], 'LineWidth', 2);
+line(isoL_2,isoS_2,'color', [.2 .7 .85]- 0.1*[0 .7 .85], 'LineWidth', 2);
+line(isoL_3,isoS_3,'color', [.2 .7 .85]- 0.0*[0 .7 .85], 'LineWidth', 2);
+line(isoL_4,isoS_4,'color', [.2 .7 .85]- 0.1*[0 .7 .85], 'LineWidth', 2);
+line(isoL_5,isoS_5,'color', [.2 .7 .85]- 0.2*[0 .7 .85], 'LineWidth', 2);
+line(isoL_6,isoS_6,'color', [.2 .7 .85]- 0.3*[0 .7 .85], 'LineWidth', 2);
 
 
 % set axes and figure labels
-hXLabel = xlabel('S Contrast');
-hYLabel = ylabel('L Contrast');
+hXLabel = xlabel('L Contrast');
+hYLabel = ylabel('S Contrast');
 hTitle  = title('Isoresponse Contour');
 set(gca,'FontSize',12);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');

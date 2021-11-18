@@ -81,18 +81,14 @@ ctmOBJ.paramPrint(fitParams)
 fprintf('\nThe old way parameters:\n');
 ctmOBJ.paramPrint(oldWayParams)
 
-% [C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.3, 350);
-% [isoS_1,isoL_1] = pol2cart(deg2rad(sampleBaseTheta),C);
-[C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.35, 350);
-[isoL_2,isoS_2] = pol2cart(deg2rad(sampleBaseTheta),C);
-[C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.4, 350);
-[isoL_3,isoS_3] = pol2cart(deg2rad(sampleBaseTheta),C);
-[C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.45, 350);
-[isoL_4,isoS_4] = pol2cart(deg2rad(sampleBaseTheta),C);
-[C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.5, 350);
-[isoL_5,isoS_5] = pol2cart(deg2rad(sampleBaseTheta),C);
-[C, sampleBaseTheta] = generateIsorepsoneContour(fitParams, 0.55, 350);
-[isoL_6,isoS_6] = pol2cart(deg2rad(sampleBaseTheta),C);
+targetLags = [0.35;0.4;0.45;0.5];
+numSamples = 300; 
+
+[C_1, sampleBaseTheta_1, targetL_1, targetS_1,expDirPoints] = generateIsorepsoneContour(fitParams, targetLags(1), numSamples,...
+    'dataDirections',[0,90,45,-45,75,-75,78.75,82.5,86.2,-78.75,-82.5,-86.2]);
+% [C_2, sampleBaseTheta_2, targetL_2, targetS_2] = generateIsorepsoneContour(fitParams, targetLags(2), numSamples);
+% [C_3, sampleBaseTheta_3, targetL_3, targetS_3] = generateIsorepsoneContour(fitParams, targetLags(3), numSamples);
+% [C_4, sampleBaseTheta_4, targetL_4, targetS_4] = generateIsorepsoneContour(fitParams, targetLags(4), numSamples);
 
 
 % plot the isolag contour
@@ -108,14 +104,17 @@ axh = gca;
 line([-20 20], [0 0], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 line([0 0], [-6 6], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 
-% plot ellipse
-% line(isoS_1,isoL_1,'color', [.2 .7 .85]- 0.2*[0 .7 .85], 'LineWidth', 2);
-line(isoL_2,isoS_2,'color', [.2 .7 .85]- 0.1*[0 .7 .85], 'LineWidth', 2);
-line(isoL_3,isoS_3,'color', [.2 .7 .85]- 0.0*[0 .7 .85], 'LineWidth', 2);
-line(isoL_4,isoS_4,'color', [.2 .7 .85]- 0.1*[0 .7 .85], 'LineWidth', 2);
-line(isoL_5,isoS_5,'color', [.2 .7 .85]- 0.2*[0 .7 .85], 'LineWidth', 2);
-line(isoL_6,isoS_6,'color', [.2 .7 .85]- 0.3*[0 .7 .85], 'LineWidth', 2);
 
+% plot ellipse
+line(targetL_1,targetS_1,'color', [0 63 92]./256, 'LineWidth', 2);
+% line(targetL_2,targetS_2,'color', [122 81 149]./256, 'LineWidth', 2);
+% line(targetL_3,targetS_3,'color', [239 86 117]./256, 'LineWidth', 2);
+% line(targetL_4,targetS_4,'color', [255 166 0]./256, 'LineWidth', 2);
+%scatter the experimental directions intesect with contour
+sz = 30;
+scatter(expDirPoints(1,:),expDirPoints(2,:),sz,'MarkerEdgeColor',[0.3 .3 .3],...
+              'MarkerFaceColor',[0.75,0.5,0.5],...
+              'LineWidth',1.5)
 
 % set axes and figure labels
 hXLabel = xlabel('L Contrast');
@@ -125,4 +124,9 @@ set(gca,'FontSize',12);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
 set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
+
+legend([{''};{''}; compose('%g',targetLags);{''}])
+
+
+
 

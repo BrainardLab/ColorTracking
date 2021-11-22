@@ -98,6 +98,10 @@ SetSensorColorSpace(calObj,T_cones,S);
 bgExcitations = SettingsToSensor(calObj,bgSettings);
 
 %% Figure out maximum contrast we can obtain in the specified color direction.
+% 
+% This doesn't take monitor ambient into account, but that effect should be
+% small and not an issue as long as we stay away from the very edge of the
+% gamut.
 targetExcitationsDir = ContrastToExcitation(targetContrastDir,bgExcitations);
 targetPrimaryDir = SensorToPrimary(calObj,targetExcitationsDir);
 maximumContrast = MaximizeGamutContrast(targetPrimaryDir,bgPrimary);
@@ -111,6 +115,7 @@ end
 %
 % This is our monochrome contrast modulation image.  Multiply
 % by the target contrast vector to get the LMS contrast image.
+% This monochrome image is in the range [-1,1].
 fprintf('Making monocrome Gabor contrast image ...');
 centerN = imageN/2;
 gaborSdPixels = gaborSdImageFraction*imageN;
@@ -121,7 +126,7 @@ desiredMonochromeContrastGaborImage = rawMonochromeSineImage.*gaussianWindow;
 desiredMonochromeContrastGaborCal = ImageToCalFormat(desiredMonochromeContrastGaborImage);
 fprintf('done\n')
 
-% Compute the desired gabor image, without any quantization.
+% Compute the desired cone excigtation gabor image, without any quantization.
 fprintf('Computing desired image ...')
 desiredContrastGaborCal = targetContrast*targetContrastDir*desiredMonochromeContrastGaborCal;
 desiredExcitationsGaborCal = ContrastToExcitation(desiredContrastGaborCal,bgExcitations);

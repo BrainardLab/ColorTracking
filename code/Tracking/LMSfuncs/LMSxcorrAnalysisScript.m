@@ -2,7 +2,7 @@ close all
 clear all
 
 %% LOAD DATA
-subjID  = 'KAS';
+subjID  = 'MAB';
 expName = 'LS2';
 theRuns = 1:20;
 

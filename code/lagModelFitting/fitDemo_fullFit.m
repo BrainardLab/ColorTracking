@@ -1,5 +1,5 @@
 %% LOAD DATA from Exp 1
-subjID  = 'KAS';
+subjID  = 'BMC';
 expName = 'LS1';
 
 numRuns = 20;
@@ -37,15 +37,15 @@ for ii = 1:length(uniqColorDirs1)
     
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParamsGMA(:,:,ii),negLL_GMA(ii,:)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
-    %[~,~,rParamsLGS(:,:,ii),negLL_LGS(ii,:)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
+    %[~,~,rParamsGMA(:,:,ii),negLL_GMA(ii,:)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
+    [~,~,rParamsLGS(:,:,ii),negLL_LGS(ii,:)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
 end
 
 % % Get the lags from rParams
 % if mean(negLL_LGS(:)) < mean(negLL_GMA(:))
-%     lagsLS1 = flipud(squeeze(rParamsLGS(2,:,:)));
+     lagsLS1 = flipud(squeeze(rParamsLGS(2,:,:)));
 % elseif  mean(negLL_GMA(:)) <  mean(negLL_LGS(:))
-    lagsLS1 = flipud((squeeze(rParamsGMA(3,:,:))-1).*squeeze(rParamsGMA(2,:,:))+ squeeze(rParamsGMA(4,:,:)));
+%    lagsLS1 = flipud((squeeze(rParamsGMA(3,:,:))-1).*squeeze(rParamsGMA(2,:,:))+ squeeze(rParamsGMA(4,:,:)));
 % else 
 %     lagsLS1_1 = flipud(squeeze(negLL_LGS(2,:,:)));
 %     lagsLS1_2 = flipud((squeeze(rParamsGMA(3,:,:))-1).*squeeze(rParamsGMA(2,:,:))+ squeeze(rParamsGMA(4,:,:)));
@@ -75,14 +75,14 @@ for ii = 1:length(uniqColorDirs2)
     
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
     
 end
 
 
 % Get the lags from rParams
-%lagsLS2 = flipud(squeeze(rParams(2,:,:)));
-lagsLS2 = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
+lagsLS2 = flipud(squeeze(rParams(2,:,:)));
+%lagsLS2 = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
 
 lags = [lagsLS1,lagsLS2];
 

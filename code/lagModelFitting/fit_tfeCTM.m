@@ -1,6 +1,6 @@
 % test the tfeCTM
 %% Load the data
-load('dataCache_subj3.mat')
+load('dataCache_subj2.mat')
 
 %% Make the packet
 lagVec = lags(:)';

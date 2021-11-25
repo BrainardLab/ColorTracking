@@ -44,10 +44,14 @@ sampleBaseTheta = 0:sampleResolution:360;
 m = -log((targetLag - params.minLag) ./ params.amplitude);
 
 % use m and the weights to get the contrast per direction
-C = m ./ abs((params.weightL .* cosd(sampleBaseTheta)) + (params.weightS .* sind(sampleBaseTheta)));
+C = m ./ ((params.weightL .* cosd(sampleBaseTheta)) + (params.weightS .* sind(sampleBaseTheta)));
+
+posMechIndx = find(C >0);
+negMechIndx = find(C <0);
 
 % change polar to cartesian 
-[targetL, targetS] = pol2cart(deg2rad(sampleBaseTheta),C);
+[targetL.pos, targetS.pos] = pol2cart(deg2rad(sampleBaseTheta(posMechIndx)),C(posMechIndx));
+[targetL.neg, targetS.neg] = pol2cart(deg2rad(sampleBaseTheta(negMechIndx)),abs(C(negMechIndx)));
 
 if ~isempty(p.Results.dataDirections)
     dataDirPoints =  m ./ abs((params.weightL .* cosd(p.Results.dataDirections)) + (params.weightS .* sind(p.Results.dataDirections)));

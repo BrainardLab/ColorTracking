@@ -1,6 +1,6 @@
 % test the tfeCTM
 %% Load the data
-load('dataCache_subj2.mat')
+load('dataCache_subj3.mat')
 
 %% Make the packet
 lagVec = lags(:)';
@@ -83,9 +83,9 @@ ctmOBJ.paramPrint(oldWayParams)
 
 targetLags = [0.35;0.4;0.45;0.5];
 numSamples = 300; 
-
+measuredDirections = [0,90,45,-45,75,-75,78.75,82.5,86.2,-78.75,-82.5,-86.2];
 [C_1, sampleBaseTheta_1, targetL_1, targetS_1,expDirPoints] = generateIsorepsoneContour(fitParams, targetLags(1), numSamples,...
-    'dataDirections',[0,90,45,-45,75,-75,78.75,82.5,86.2,-78.75,-82.5,-86.2]);
+    'dataDirections',measuredDirections);
 % [C_2, sampleBaseTheta_2, targetL_2, targetS_2] = generateIsorepsoneContour(fitParams, targetLags(2), numSamples);
 % [C_3, sampleBaseTheta_3, targetL_3, targetS_3] = generateIsorepsoneContour(fitParams, targetLags(3), numSamples);
 % [C_4, sampleBaseTheta_4, targetL_4, targetS_4] = generateIsorepsoneContour(fitParams, targetLags(4), numSamples);
@@ -106,7 +106,8 @@ line([0 0], [-6 6], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 
 
 % plot ellipse
-line(targetL_1,targetS_1,'color', [0 63 92]./256, 'LineWidth', 2);
+p1 = line(targetL_1.pos,targetS_1.pos,'color', [0 63 92]./256, 'LineWidth', 2);
+p2 = line(targetL_1.neg,targetS_1.neg,'color', [0 63 92]./256, 'LineWidth', 2);
 % line(targetL_2,targetS_2,'color', [122 81 149]./256, 'LineWidth', 2);
 % line(targetL_3,targetS_3,'color', [239 86 117]./256, 'LineWidth', 2);
 % line(targetL_4,targetS_4,'color', [255 166 0]./256, 'LineWidth', 2);
@@ -125,7 +126,7 @@ set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
 set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
 
-legend([{''};{''}; compose('%g',targetLags);{''}])
+legend([p1],{sprintf('%g',targetLags(1))})
 
 
 

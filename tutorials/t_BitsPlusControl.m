@@ -19,7 +19,7 @@ VERBOSE = false;
 [rootDir,~] = fileparts(which(mfilename));
 resourcesDir = sprintf('%s/resources',rootDir);
 setpref('BrainardLabToolbox','CalDataFolder',resourcesDir);
-cal = LoadCalFile('ViewSonicProbe');
+cal = LoadCalFile('ViewSonicG220fb');
 calObj = ObjectToHandleCalOrCalStruct(cal);
 
 %% Make this a 12-bit device as far as the calibration file goes
@@ -65,6 +65,7 @@ plotAxisLimit = 100*targetContrast;
 %% Cone fundamentals and XYZ CMFs.
 psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
 psiParamsStruct.coneParams.fieldSizeDegrees = 2;
+psiParamsStruct.coneParams.ageYears = 30;
 T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,S);
 load T_xyzJuddVos % Judd-Vos XYZ Color matching function
 T_xyz = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,S);

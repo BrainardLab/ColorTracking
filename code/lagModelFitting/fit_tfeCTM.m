@@ -83,7 +83,7 @@ ctmOBJ.paramPrint(oldWayParams)
 
 targetLags = [0.35;0.4;0.45;0.5];
 numSamples = 300; 
-measuredDirections = [0,90,45,-45,75,-75,78.75,82.5,86.2,-78.75,-82.5,-86.2];
+measuredDirections = [0,90,45,315,75,285,78.75,82.5,86.2,281.25,277.5,273.8];
 [C_1, sampleBaseTheta_1, targetL_1, targetS_1,expDirPoints] = generateIsorepsoneContour(fitParams, targetLags(1), numSamples,...
     'dataDirections',measuredDirections);
 % [C_2, sampleBaseTheta_2, targetL_2, targetS_2] = generateIsorepsoneContour(fitParams, targetLags(2), numSamples);
@@ -128,6 +128,11 @@ set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
 
 legend([p1],{sprintf('%g',targetLags(1))})
 
+
+%% Get the null direction 
+nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
+
+fprintf('The null direction is: %1.2f\n',nullDirection)
 
 
 

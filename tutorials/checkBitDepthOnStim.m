@@ -10,6 +10,59 @@ clear; close all;
 % Set to true to get more output
 VERBOSE = false;
 
+%% Get the subject specific null direction 
+%% Load the data
+load('dataCache_subj3.mat')
+
+%% Make the packet
+lagVec = lags(:)';
+timebase = 1:length(lagVec);
+
+% Initialize the packet
+thePacket.response.values   = lagVec;
+thePacket.response.timebase = timebase;
+
+% The stimulus
+thePacket.stimulus.values   = [cL,cS]';
+thePacket.stimulus.timebase = timebase;
+
+
+thePacket.kernel.values = [];
+thePacket.kernel.timebase = [];
+
+thePacket.metaData.stimDirections = atand(cS./cL);
+thePacket.metaData.stimContrasts  = vecnorm([cS,cL]')';
+
+%% Make the fit object
+theDimension= size(thePacket.stimulus.values, 1);
+numMechanism = 1;
+defaultParamsInfo = [];
+fitErrorScalar    = 1000;
+
+ctmOBJ = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', numMechanism ,'fminconAlgorithm','active-set');
+
+startParams.weightL = 50;
+startParams.weightS = 2;
+% startParams.weightL_2 = 0;
+% startParams.weightS_2  = 0;
+startParams.minLag = 0.3;
+startParams.amplitude = 0.2;
+
+[fitParams,fVal,objFitResponses] = ctmOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+    'initialParams',startParams, 'fitErrorScalar',fitErrorScalar);
+
+
+%% Print the params
+fprintf('\ntfeCTM parameters:\n');
+ctmOBJ.paramPrint(fitParams)
+
+%% Get the null direction 
+nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
+fprintf('The null direction is: %1.2f\n',nullDirection)
+
+coneCompS = sind(nullDirection);
+coneCompL = cosd(nullDirection);
+
 %% Load cal file
 [rootDir,~] = fileparts(which(mfilename));
 resourcesDir = sprintf('%s/resources',rootDir);
@@ -53,8 +106,8 @@ targetBgxy = [0.326 0.372]';
 % length, as that is good convention for contrast. That is, we  express
 % contrast in any color direction relative to the unit-length contrast
 % vector for that direction.
-targetContrastDir = [1 -1 0]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
-targetContrast = 0.01;
+targetContrastDir = [coneCompL 0 coneCompS]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
+targetContrast = 0.15;
 plotAxisLimit = 100*targetContrast;
 
 %% Cone fundamentals and XYZ CMFs.

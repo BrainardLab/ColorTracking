@@ -125,6 +125,8 @@ set(gca,'FontSize',12);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
 set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
+xlim([-2 2]); ylim([-2 2]); axis('square');
+
 
 legend([p1],{sprintf('%g',targetLags(1))})
 
@@ -133,6 +135,8 @@ legend([p1],{sprintf('%g',targetLags(1))})
 nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
 
 fprintf('The null direction is: %1.2f\n',nullDirection)
+nullPoint = 1.5*[cosd(nullDirection) sind(nullDirection)];
+plot(nullPoint(1),nullPoint(2),'bo','MarkerFaceColor','b','MarkerSize',10);
 
 
 

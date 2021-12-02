@@ -45,6 +45,12 @@ SetGammaMethod(calObj,gammaMethod);
 % Set wavelength support.
 S = calObj.get('S');
 
+% Zero out ambient?
+NOAMBIENT = true;
+if (NOAMBIENT)
+    calObj.set('P_ambient',zeros(size(calObj.get('P_ambient'))));
+end
+
 %% Set key stimulus parameters
 %
 % Specify the chromaticity, but we'll chose the luminance based
@@ -59,7 +65,7 @@ targetBgxy = [0.3127 0.3290]';
 % contrast in any color direction relative to the unit-length contrast
 % vector for that direction.
 targetContrastDir = [1 -1 0]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
-targetContrast = 0.01;
+targetContrast = 0.03;
 plotAxisLimit = 100*targetContrast;
 
 %% Cone fundamentals and XYZ CMFs.
@@ -83,16 +89,22 @@ imageN = 512;
 %
 % Set color space to work in XYZ first, then find right scale factor to
 % make background near the center of the device.
-%
-% Also note that we obtain background primaries from the bgSettings, so
-% that any quantization is taken into account.
 SetSensorColorSpace(calObj,T_xyz,S);
-targetBgXYZRaw = xyYToXYZ([targetBgxy ; 1]);
-midpointXYZ = PrimaryToSensor(calObj,[0.5 0.5 0.5]');
-rawBgScale = targetBgXYZRaw\midpointXYZ;
-targetBgXYZ = rawBgScale*targetBgXYZRaw;
-bgSettings = SensorToSettings(calObj,targetBgXYZ);
-bgPrimary = SettingsToPrimary(calObj,bgSettings);
+TARGETCHROM = false;
+if (TARGETCHROM)
+    % Note that we obtain background primaries from the bgSettings, so
+    % that any quantization is taken into account.
+    targetBgXYZRaw = xyYToXYZ([targetBgxy ; 1]);
+    midpointXYZ = PrimaryToSensor(calObj,[0.5 0.5 0.5]');
+    rawBgScale = targetBgXYZRaw\midpointXYZ;
+    targetBgXYZ = rawBgScale*targetBgXYZRaw;
+    bgSettings = SensorToSettings(calObj,targetBgXYZ);
+    bgPrimary = SettingsToPrimary(calObj,bgSettings);
+else
+    bgPrimary = [0.5 0.5 0.5]';
+    bgSettings = PrimaryToSettings(calObj,bgPrimary);
+    targetBgXYZ = SettingsToSensor(calObj,bgSettings);
+end
 
 %% Now work in cones and get background cone excitations
 SetSensorColorSpace(calObj,T_cones,S);
@@ -103,11 +115,21 @@ bgExcitations = SettingsToSensor(calObj,bgSettings);
 % This doesn't take monitor ambient into account, but that effect should be
 % small and not an issue as long as we stay away from the very edge of the
 % gamut.
-targetExcitationsDir = ContrastToExcitation(targetContrastDir,bgExcitations);
-targetPrimaryDir = SensorToPrimary(calObj,targetExcitationsDir);
+%
+% First compute excitations that produced the specified targetContrastDir,
+% and subtract background to get the excitation direction and convert to
+% primary space.
+targetExcitations = ContrastToExcitation(targetContrastDir,bgExcitations);
+targetPrimaryDir = SensorToPrimary(calObj,targetExcitations-bgExcitations);
+
+% Find maximum excursion we can get
 maximumContrast = MaximizeGamutContrast(targetPrimaryDir,bgPrimary);
 fprintf('Maximum contrast available in target direction is %d%%, requested is %d%%\n', ...
     round(100*maximumContrast),round(100*targetContrast));
+fprintf('Individual cone max    contrasts: %0.2f, %0.2f, %0.2f\n',...
+    maximumContrast*targetContrastDir(1),maximumContrast*targetContrastDir(2),maximumContrast*targetContrastDir(3));
+fprintf('Individual cone target contrasts: %0.2f, %0.2f, %0.2f\n',...
+    targetContrast*targetContrastDir(1),targetContrast*targetContrastDir(2),targetContrast*targetContrastDir(3));
 if (targetContrast > maximumContrast)
     error('Requested contrast exceeds maximum available within gamut');
 end
@@ -277,8 +299,12 @@ searchContrastGaborCal = targetContrast*targetContrastDir*searchMonochromeContra
 % buffer image, but thinking through how to optimze for that case would be
 % a bit of work, and the R=G=B method works great for modulations that lie
 % along a line in color space.
-[~,lookupTableSettingsIntegersGaborCal] = SettingsFromPointCloud(ptCld,searchContrastGaborCal,lookupTableSettings','verbose',false);
-frameBufferSettingsIntegersGaborCal = lookupTableSettingsIntegersGaborCal([1 1 1]',:);
+%
+% Note that the return variable we pick up is in the range
+% [1,nFrameBufferLevels], so we subtract one to get the values that
+% go into the frame buffer.
+[~,lookupTableSettingsIntegersPlusOneGaborCal] = SettingsFromPointCloud(ptCld,searchContrastGaborCal,lookupTableSettings','verbose',false);
+frameBufferSettingsIntegersGaborCal = lookupTableSettingsIntegersPlusOneGaborCal([1 1 1]',:)-1;
 fprintf('done\n')
 
 %% Check that the lookup table and image generation code worked as desired.
@@ -295,8 +321,13 @@ fprintf('done\n')
 % assumption this part of the code will still work.
 lookedUpSettingsIntegersGaborCal = zeros(size(frameBufferSettingsIntegersGaborCal));
 for pp = 1:nPrimaries
+    % Note that we've put the frame buffer values onto the range
+    % [0 nFrameBufferLevels-1] in the code above, so we add one here when
+    % we use those values to index into the lookup table.  This would be
+    % done by the hardware when the Bits++/Bits# devices look up from the
+    % frame buffer values into their lookup tables.
     lookedUpSettingsIntegersGaborCal(pp,:) = ...
-        lookupTableSettingsIntegers(frameBufferSettingsIntegersGaborCal(pp,:)',pp)';
+        lookupTableSettingsIntegers(frameBufferSettingsIntegersGaborCal(pp,:)'+1,pp)';
 end
 
 % Convert the integer settings to settings on [0,1]

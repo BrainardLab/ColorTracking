@@ -71,8 +71,8 @@ load T_xyzJuddVos % Judd-Vos XYZ Color matching function
 T_xyz = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,S);
 
 %% Image spatial parameters.
-sineFreqCyclesPerImage = 6;
-gaborSdImageFraction = 0.1;
+sineFreqCyclesPerImage = 4;
+gaborSdImageFraction = 0.15;
 
 % Image size in pixels
 imageN = 512;

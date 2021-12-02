@@ -58,6 +58,7 @@ ctmOBJ.paramPrint(fitParams)
 
 %% Get the null direction 
 nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
+nullDirection = 90;
 fprintf('The null direction is: %1.2f\n',nullDirection)
 
 coneCompS = sind(nullDirection);
@@ -67,7 +68,7 @@ coneCompL = cosd(nullDirection);
 [rootDir,~] = fileparts(which(mfilename));
 resourcesDir = sprintf('%s/resources',rootDir);
 setpref('BrainardLabToolbox','CalDataFolder',resourcesDir);
-cal = LoadCalFile('ViewSonicG220fb');
+cal = LoadCalFile('BOLDScreen');
 calObj = ObjectToHandleCalOrCalStruct(cal);
 
 %% Make this a 12-bit device as far as the calibration file goes
@@ -234,3 +235,17 @@ if (DOSTANDARD)
     ylabel('LMS Cone Contrast (%)');
     ylim([-plotAxisLimit plotAxisLimit]);
 end
+
+%% Print out modualtion summary 
+desiredAngles = atand(desiredContrastGaborCal(3,:)./desiredContrastGaborCal(1,:));
+standardAngles = atand(standardContrastGaborCal(3,:)./standardContrastGaborCal(1,:));
+[desiredMax, desiredMax_indxmax] = max(vecnorm(desiredContrastGaborCal));
+[standardMax, standardMax_indxmax] = max(vecnorm(desiredContrastGaborCal));
+fprintf('<strong> Modulation Summary: </strong> The Contrast\n')
+fprintf('The nominal contrast set by user            : %1.4f\n',targetContrast);
+fprintf('The nominal contrast after gaussian window  : %1.4f\n',desiredMax);
+fprintf('The actual contrast after the 8-bit quantize: %1.4f\n',standardMax);
+fprintf('<strong> Modulation Summary: </strong> The Angle\n')
+fprintf('The nominal angle set by user               : %1.2f\n',nullDirection)
+fprintf('The nominal angle after gaussian window     : %1.2f\n',desiredAngles(desiredMax_indxmax))
+fprintf('The actual angle after the 8-bit quantize   : %1.2f\n',standardAngles(standardMax_indxmax))

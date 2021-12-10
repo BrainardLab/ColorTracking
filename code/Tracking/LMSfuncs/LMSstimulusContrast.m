@@ -69,9 +69,9 @@ switch p.Results.experiment
     case 'Experiment2-Pos'
         % 78.75 degree
         [lPlusS78]      = generateStimContrasts(0,78.75,expspace(.83,.13,6));
-        % 82.50 degree 
+        % 82.50 degree
         [lPlusS82]      = generateStimContrasts(0,82.5, expspace(.85,0.14,6));
-        % 86.20 degree  
+        % 86.20 degree
         [lPlusS86]  = generateStimContrasts(0,86.2,     expspace(.85,0.18,6));
         % -78.75 degree
         [lMinS78]   = generateStimContrasts(0,-78.75,   expspace(.84,.13,6));
@@ -86,7 +86,7 @@ switch p.Results.experiment
         [lPlusS78]      = -1.*generateStimContrasts(0, 78.75, expspace(.83,.13,6));
         % 82.50 degree
         [lPlusS82]      = -1.*generateStimContrasts(0, 82.5,  expspace(.85,0.14,6));
-        % 86.20 degree  
+        % 86.20 degree
         [lPlusS86]      = -1.*generateStimContrasts(0, 86.2,  expspace(.85,0.18,6));
         % -78.75 degree
         [lMinS78]       = -1.*generateStimContrasts(0,-78.75, expspace(.84,.13,6));
@@ -96,10 +96,36 @@ switch p.Results.experiment
         [lMinS86]       = -1.*generateStimContrasts(0,-86.2,  expspace(.84,.18,6));
         
         MaxContrastLMS = [lPlusS78; lPlusS82; lPlusS86; lMinS78; lMinS82; lMinS86];
-       
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %           EXTRAS         %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'directionCheck'
+        [dir1] = generateStimContrasts(0,89.6,.85);%88.6
+        
+        [dir2] = generateStimContrasts(0,88.6,.85);
+        
+        [dir3] = generateStimContrasts(0,87.6,.85);
+        
+        [dir4] = generateStimContrasts(0,22.5,.19);
+        
+        [dir5] = generateStimContrasts(0,-1.4,.18);
+        
+        [dir6] = generateStimContrasts(0,-22.5,.19);
+        
+        [dir7] = generateStimContrasts(0,89.1,.85);
+        
+        [dir8] = generateStimContrasts(0,88.1,.85);
+                
+        [dir9] = generateStimContrasts(0,87.1,.85);
+        
+        [dir10] = generateStimContrasts(0,-0.9,.18);
+        
+        [dir11] = generateStimContrasts(0,-1.9,.18);
+        
+        MaxContrastLMS = [dir1; dir2; dir3; dir4; dir5; dir6; dir7; dir8; dir9; dir10; dir11];
+        
+        
     case 'SLplane-Min'
         % l isolating
         [lIso]      = generateStimContrasts(0,0,.02);

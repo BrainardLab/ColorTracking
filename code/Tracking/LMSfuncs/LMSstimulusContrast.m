@@ -98,6 +98,102 @@ switch p.Results.experiment
         MaxContrastLMS = [lPlusS78; lPlusS82; lPlusS86; lMinS78; lMinS82; lMinS86];
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %    Experiment-3 Stim     %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'Experiment3-MAB-Pos'
+        % 89.1 degree
+        [dir1] = generateStimContrasts(0,89.6, expspace(.85,.16,6));
+        % 88.1 degree
+        [dir2] = generateStimContrasts(0,88.6, expspace(.85,.16,6)); %(the null)
+        % 87.1degree
+        [dir3] = generateStimContrasts(0,87.6, expspace(.85,.16,6));
+        % 22.5 degree
+        [dir4] = generateStimContrasts(0,22.5, expspace(.19,.03,6));
+        % -0.9 degree
+        [dir5] = generateStimContrasts(0,-1.4, expspace(.18,.03,6));
+        % -22.5 degree
+        [dir6] = generateStimContrasts(0,-22.5,expspace(.19,.03,6));
+        
+        MaxContrastLMS = [dir1; dir2; dir3; dir4; dir5; dir6];
+    case 'Experiment3-MAB-Neg'
+        % 89.1 degree
+        [dir1] = -1.* generateStimContrasts(0,89.6, expspace(.85,.16,6)); 
+        % 88.1 degree
+        [dir2] = -1.* generateStimContrasts(0,88.6, expspace(.85,.16,6)); %(the null)
+        % 87.1degree
+        [dir3] = -1.* generateStimContrasts(0,87.6, expspace(.85,.16,6));
+        % 22.5 degree
+        [dir4] = -1.* generateStimContrasts(0,22.5, expspace(.19,.03,6));
+        % -0.9 degree
+        [dir5] = -1.* generateStimContrasts(0,-1.4, expspace(.18,.03,6));
+        % -22.5 degree
+        [dir6] = -1.* generateStimContrasts(0,-22.5,expspace(.19,.03,6));
+        
+        MaxContrastLMS = [dir1; dir2; dir3; dir4; dir5; dir6];
+        
+    case 'Experiment3-BMC-Pos'
+        % 89.1 degree
+        [dir1] = generateStimContrasts(0,89.1, expspace(.85,.16,6)); %(the null)
+        % 88.1 degree
+        [dir2] = generateStimContrasts(0,88.1, expspace(.85,.16,6));
+        % 87.1degree
+        [dir3] = generateStimContrasts(0,87.1, expspace(.85,.16,6));
+        % 22.5 degree
+        [dir4] = generateStimContrasts(0,22.5, expspace(.19,.03,6));
+        % -0.9 degree
+        [dir5] = generateStimContrasts(0,-0.9, expspace(.18,.03,6));
+        % -22.5 degree
+        [dir6] = generateStimContrasts(0,-22.5,expspace(.19,.03,6));
+        
+        MaxContrastLMS = [dir1; dir2; dir3; dir4; dir5; dir6];
+    case 'Experiment3-BMC-Neg'
+        % 89.1 degree
+        [dir1] = -1.* generateStimContrasts(0,89.1, expspace(.85,.16,6)); %(the null)
+        % 88.1 degree
+        [dir2] = -1.* generateStimContrasts(0,88.1, expspace(.85,.16,6));
+        % 87.1degree
+        [dir3] = -1.* generateStimContrasts(0,87.1, expspace(.85,.16,6));
+        % 22.5 degree
+        [dir4] = -1.* generateStimContrasts(0,22.5, expspace(.19,.03,6));
+        % -0.9 degree
+        [dir5] = -1.* generateStimContrasts(0,-0.9, expspace(.18,.03,6));
+        % -22.5 degree
+        [dir6] = -1.* generateStimContrasts(0,-22.5,expspace(.19,.03,6));
+        
+        MaxContrastLMS = [dir1; dir2; dir3; dir4; dir5; dir6];
+        
+    case 'Experiment3-KAS-Pos'
+        % 89.1 degree
+        [dir1] = generateStimContrasts(0,89.1, expspace(.85,.16,6));
+        % 88.1 degree
+        [dir2] = generateStimContrasts(0,88.1, expspace(.85,.16,6)); %(the null)
+        % 87.1degree
+        [dir3] = generateStimContrasts(0,87.1, expspace(.85,.16,6));
+        % 22.5 degree
+        [dir4] = generateStimContrasts(0,22.5, expspace(.19,.03,6));
+        % -0.9 degree
+        [dir5] = generateStimContrasts(0,-1.9, expspace(.18,.03,6));
+        % -22.5 degree
+        [dir6] = generateStimContrasts(0,-22.5,expspace(.19,.03,6));
+        
+        MaxContrastLMS = [dir1; dir2; dir3; dir4; dir5; dir6];
+    case 'Experiment3-KAS-Neg'
+        % 89.1 degree
+        [dir1] = -1.* generateStimContrasts(0,89.1, expspace(.85,.16,6));
+        % 88.1 degree
+        [dir2] = -1.* generateStimContrasts(0,88.1, expspace(.85,.16,6)); %(the null)
+        % 87.1degree
+        [dir3] = -1.* generateStimContrasts(0,87.1, expspace(.85,.16,6));
+        % 22.5 degree
+        [dir4] = -1.* generateStimContrasts(0,22.5, expspace(.19,.03,6));
+        % -0.9 degree
+        [dir5] = -1.* generateStimContrasts(0,-1.9, expspace(.18,.03,6));
+        % -22.5 degree
+        [dir6] = -1.* generateStimContrasts(0,-22.5,expspace(.19,.03,6));
+        
+        MaxContrastLMS = [dir1; dir2; dir3; dir4; dir5; dir6];
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %           EXTRAS         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     case 'directionCheck'
@@ -116,7 +212,7 @@ switch p.Results.experiment
         [dir7] = generateStimContrasts(0,89.1,.85);
         
         [dir8] = generateStimContrasts(0,88.1,.85);
-                
+        
         [dir9] = generateStimContrasts(0,87.1,.85);
         
         [dir10] = generateStimContrasts(0,-0.9,.18);

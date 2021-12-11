@@ -25,6 +25,7 @@ function [stm,S] = LMSstimulusGeneration(trlPerRun,MaxContrastLMS,frqCpd,phsDeg,
 %                                   [  1   x nCmp ] -> unique bandwidth for each component
 
 D.bgd        = [0.5, 0.5, 0.5];
+D.cmpInfo = psyComputerInfo;
 
 S = struct;
 S.trlPerRun    = trlPerRun;
@@ -32,14 +33,24 @@ S.imgSzXYdeg    = repmat(2.*[2 2],[S.trlPerRun, 1]);
 S.smpPerDeg     = repmat(128,     [S.trlPerRun, 1]);
 
 nCmp = size(frqCpd,2);
-S.frqCpd     = imresize(frqCpd,[S.trlPerRun nCmp],'nearest');
-S.phsDeg     = imresize(phsDeg,[S.trlPerRun nCmp],'nearest');
+frqCpd     = imresize(frqCpd,[S.trlPerRun nCmp],'nearest');
+phsDeg     = imresize(phsDeg,[S.trlPerRun nCmp],'nearest');
 S.MaxContrastLMS = imresize(MaxContrastLMS,[S.trlPerRun nCmp*3],'nearest');
 S.ortDeg      = imresize(ortDeg,[S.trlPerRun, nCmp],'nearest');
 S.BWoct       = imresize(BWoct,[S.trlPerRun,1],'nearest');
 
-% Get Cal Data
-cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
+S.frqCpdL = frqCpd;
+S.frqCpdR = frqCpd;
+S.phsDegL = phsDeg;
+S.phsDegR = phsDeg;
+
+if     strcmp(D.cmpInfo.localHostName,'jburge-marr')
+    load('/Volumes/Data/BurgeLabCalibrationData/ViewSonicG220fb.mat');
+    cal = cals{1};
+else
+    % Get Cal Data
+    cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
+end
 
 load T_cones_ss2
 
@@ -54,7 +65,7 @@ D.correctedBgd = PrimaryToSettings(calStructOBJ,D.bgd')';
 
 for t = 1:S.trlPerRun
     
-    contrastImage = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpd(t),S.ortDeg(t),S.phsDeg(t),bandwidthOct2sigma(S.frqCpd(t),S.BWoct(t)));
+    contrastImage = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
                                                                                                                                                                                                                                                                     
     SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
   
@@ -65,5 +76,8 @@ for t = 1:S.trlPerRun
     [stm(:,:,:,t),~,~] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundExcitations,S.MaxContrastLMS(t,:)');
     
 end
+
+S.stmLE = stm;
+S.stmRE = stm;
 
 end

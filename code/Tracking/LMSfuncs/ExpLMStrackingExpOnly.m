@@ -1,21 +1,14 @@
-function [S D] = ExpLMStrackingExpOnly(subjName,IPDmm,trlPerRun, phsDspArcmin, stmSzXYdeg, device, dfcL, dfcR, vdfL, vdfR, ndfL, ndfR, stmType, mtnType, MaxContrastLMS, mchL, mchR, frqCpdL,frqCpdR, phsDegL, phsDegR, ortDeg, BWoct, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG, bStatic, axSignMATLEAP)
+function [S D] = ExpLMStrackingExpOnly(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device, dfcL, dfcR, vdfL, vdfR, ndfL, ndfR, stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG, bStatic, axSignMATLEAP)
 
-% function [S D] = ExpLMStrackingExpOnly(subjName,IPDmm,trlPerRun, phsDspArcmin, stmSzXYdeg, device, dfcL, dfcR, vdfL, vdfR, ndfL, ndfR, stmType, mtnType, MaxContrastLMS, mchL, mchR, frqCpdL,frqCpdR, phsDegL, phsDegR, ortDeg, BWoct, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG, bStatic, axSignMATLEAP)
+% function [S D] = ExpLMStrackingExpOnly(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device, dfcL, dfcR, vdfL, vdfR, ndfL, ndfR, stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG, bStatic, axSignMATLEAP)
 %
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
-%   example call: % TEST CODE (2 SECOND TRACK)
-%                 ExpLMStrackingExpOnly('JNK',65,10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', 0.1.*[1 0 0], [0.5], [0.5], [4], [4], [0], [0], 0,[0.3461], [pi*(60/180)], 0, 1, 1, 0);
-% 
-%                 % PILOT DATA
-%                 % MaxContrastLMS = 0.1.*[0 1 0]; %m-iso-10p.pdf
-%                 % MaxContrastLMS = 0.9.*[0 0 1]; %s-iso-90p.pdf
-%                 % MaxContrastLMS = 0.1.*[0.7071 0.7071 0]; %l+m-iso-10p.pdf
-%                 % MaxContrastLMS = 0.1.*[1 0 0]; %l-iso-10p.pdf
-%                 MaxContrastLMS = 0.1.*[0.7071 -0.7071 0]; %l-m-iso-10p.pdf
-%                 MaxContrastLMS = [0.1.*[0.7071 -0.7071 0]; 0.1.*[0.7071 0.7071 0]; 0.9.*[0 0 1]; 0.1.*[0 1 0]; 0.1.*[1 0 0]];
-%                 ExpLMStrackingExpOnly('JNK',65,10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', MaxContrastLMS, [0.5], [0.5], [4], [4], [0], [0], 0, [0.3461], [pi*(60/180)], 0, 1, 0, 0);
-%                 ExpLMStrackingExpOnly('JNK',65,10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', MaxContrastLMS, [0.5], [0.5], [4], [4], [0], [0], 0, [0.3461], [pi*(60/180)], 0, 1, 1, 0);
+%   example call: % TEST CODE
+%                 expDirection = 'Experiment2-Pos';
+%                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
+%                 [~,S] = LMSstimulusGeneration(1*size(MaxContrastLMS,1),MaxContrastLMS,1,0,0,0.932);
+%                 ExpLMStrackingExpOnly(S,'JNK',10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 1, 1, 0);
 %
 % run target tracking experiment to measure delays for different cone
 % contrast directions. Unlike ExpLMStracking, this function does not create
@@ -27,6 +20,7 @@ function [S D] = ExpLMStrackingExpOnly(subjName,IPDmm,trlPerRun, phsDspArcmin, s
 %
 % ANALYSIS:  plotPFTdata.m -> for analyzing all runs
 %
+% S       : stimulus struct from LMSstimulusGeneration
 % subjName:      three initial subject code
 %                'JNK'   -> Junk
 %                'JDB'   -> Johannes Daniel Burge
@@ -62,24 +56,6 @@ function [S D] = ExpLMStrackingExpOnly(subjName,IPDmm,trlPerRun, phsDspArcmin, s
 %                   [ nCnd x nCmp ]
 % mchR:           michelson contrast for right eye
 %                   [ nCnd x nCmp ]
-% frqCpdL:   frequencies for std OR left  stimulus
-%                   [ nCnd x nCmp ]
-%              if stmType='BGB' || 'BGT' -> S.frqCpdStd assigned to LE
-% frqCpdR:   frequencies for std OR left  stimulus
-%                   [ nCnd x nCmp ]
-%              if stmType='BGB' || 'BGT' -> S.frqCpdStd assigned to LE
-%              NOTE!!! codes rms contrast if stmType='1oF'!!!
-% phsDegL:     phase of std OR left stimulus in deg
-%                [    scalar   ] -> same     phase   for all  components
-%                [ nCnd x nCmp ] -> unique   phase   for each component
-% phsDegR:     phase of std OR left stimulus in deg
-%                [    scalar   ] -> same     phase   for all  components
-%                [ nCnd x nCmp ] -> unique   phase   for each component
-% ortDeg :     orientation in degrees
-%                [    scalar   ]
-% BWoct:         frequency   bandwidth in octaves
-%                [    scalar   ] -> same   bandwidth for all  components
-%                [  1   x nCmp ] -> unique bandwidth for each component
 % BWort:         orientation bandwidth in radians
 %                [    scalar   ] -> same   bandwidth for all  components
 %                [  1   x nCmp ] -> unique bandwidth for each component
@@ -163,14 +139,6 @@ else
     end
 end
 
-if mod(trlPerRun,size(MaxContrastLMS,1))~=0
-    error('ExpLMStrackingExpOnly: trlPerRun must be a multiple of number of stimulus conditions!');
-end
-
-if ~isequal(frqCpdL,frqCpdR) || ~isequal(mchL,mchR) || ~isequal(phsDegL,phsDegR)
-    error('ExpLMStrackingExpOnly: frqCpd, mchL, and phsDeg need to be the same between the left and right eye for this experiment!');
-end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % UNIFY PARAMETER VALUES IF mtnType=BLX OR mtnType=BRX %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -182,7 +150,7 @@ if strcmp(mtnType,'BRX') dfcL=dfcR; vdfL=vdfR; ndfL=ndfR; mchL=mchR; pssTypeL=ps
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nCnd = max([size(vdfL,1) size(vdfR,1) size(mchL,1) size(mchR,1)]);
 % TRIALS PER CONDITION
-trlPerCnd = trlPerRun./nCnd;
+trlPerCnd = S.trlPerRun./nCnd;
 % CHECK # TRIALS VALID GIVEN # CONDITIONS
 if mod(trlPerCnd,1) ~= 0 error(['ExpLMStrackingExpOnly: WARNING! trlPerRun=' num2str(trlPerRun) ' must be a factor of nCnd=' num2str(nCnd) '!']); end;
 % DOUBLE CHECK THAT CONDITIONS ARE MATCHED
@@ -192,9 +160,8 @@ if ~isequal(size(mchL      ),size(    mchR  )) error(['ExpLMStrackingExpOnly: WA
 %%%%%%%%%%%%%%%%%%%%%%
 % STIMULUS STRUCTURE %
 %%%%%%%%%%%%%%%%%%%%%%
-S.subjName     = repmat(subjName,    [  trlPerRun, 1]);
+S.subjName     = repmat(subjName,    [  S.trlPerRun, 1]);
 S.IPDmm        = IPDmm;
-S.trlPerRun    = trlPerRun; %number of trials
 S.rndSeed      = randi(1000, 1); rng(S.rndSeed);
 
 S.expType      = repmat(expType,     [S.trlPerRun, 1]);
@@ -230,16 +197,9 @@ else
 end
 
 % NUMBER OF COMPONENTS
-nCmp = size(frqCpdL,2);
-S.frqCpdL     = imresize(frqCpdL,[S.trlPerRun nCmp],'nearest');
-S.frqCpdR     = imresize(frqCpdR,[S.trlPerRun nCmp],'nearest');
-S.phsDegL     = imresize(phsDegL,[S.trlPerRun nCmp],'nearest');
-S.phsDegR     = imresize(phsDegR,[S.trlPerRun nCmp],'nearest');
+nCmp = size(S.frqCpdL,2);
 S.mchL        = imresize(mchL,[S.trlPerRun nCmp],'nearest');
 S.mchR        = imresize(mchR,[S.trlPerRun nCmp],'nearest');
-S.MaxContrastLMS = imresize(MaxContrastLMS,[S.trlPerRun nCmp*3],'nearest');
-S.ortDeg      = imresize(ortDeg,[S.trlPerRun, nCmp],'nearest');
-S.BWoct       = imresize(BWoct,[S.trlPerRun,1],'nearest');
 S.BWort       = imresize(BWort,[S.trlPerRun, 1],'nearest');
 
 % SCRAMBLE
@@ -278,7 +238,7 @@ S.nCycPerSec    = repmat(1,             [S.trlPerRun, 1]);
 S.Vdps          = repmat(2.5,           [S.trlPerRun, 1]); % REMOVE FROM STRUCT
 
 % PHASE DISPARITIES (TEMPORAL OFFSETS)
-S.phsDspArcmin = repmat(phsDspArcmin', [trlPerRun./length(phsDspArcmin), 1]);
+S.phsDspArcmin = repmat(phsDspArcmin', [S.trlPerRun./length(phsDspArcmin), 1]);
 % INITIAL PHASE DISPARITY (LEFT OR RIGHT SIDE START
 phsDegInit1             = 0;
 phsDegInit2             = 180;
@@ -454,25 +414,6 @@ S.meanDC(1:S.trlPerRun,1) = mean(D.correctedBgd);
 
 % Load Cone Fundamentals
 load T_cones_ss2
-
-for t = 1:S.trlPerRun;
-    
-    contrastImage = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
-                                                                                                                                                                                                                                                                    
-    SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
-  
-    SetGammaMethod(calStructOBJ,2);
-    
-    backgroundExcitations = PrimaryToSensor(calStructOBJ,D.bgd');
-    
-    [stmLE,~,imgInfo] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundExcitations,S.MaxContrastLMS(t,:)');
-    
-    stmRE = stmLE;
-    
-    % SAVE ALL STIMULI IN A STRUCTURE
-    S.stmLE(:, :, :, t) = stmLE;
-    S.stmRE(:, :, :, t) = stmRE;
-end
 
 % CREATE THE STIMULI FOR ALL THE SESSION
 S.Limg=[];

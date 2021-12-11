@@ -582,7 +582,7 @@ Screen('Flip',D.wdwPtr);
 
 % WAIT UNTIL ALL KEYS ARE RELEASED
 while KbCheck(-1); end
-
+pause(30);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   COMMENTED OUT (WAIT FOR KEYPRESS)  %
 % (USING WAIT FOR MOUSE CLICK INSTEAD) % % INSIDE psyPresentTrialTrackingBinoLMS.m

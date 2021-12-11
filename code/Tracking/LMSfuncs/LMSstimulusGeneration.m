@@ -24,14 +24,18 @@ function [stm,S] = LMSstimulusGeneration(trlPerRun,MaxContrastLMS,frqCpd,phsDeg,
 %                                   [    scalar   ] -> same   bandwidth for all  components
 %                                   [  1   x nCmp ] -> unique bandwidth for each component
 
+% DISPLAY PARAMETERS (BACKGROUND, CMPINFO)
 D.bgd        = [0.5, 0.5, 0.5];
 D.cmpInfo = psyComputerInfo;
 
 S = struct;
+
+% HARD-CODED STRUCT FIELDS
 S.trlPerRun    = trlPerRun;
 S.imgSzXYdeg    = repmat(2.*[2 2],[S.trlPerRun, 1]);
 S.smpPerDeg     = repmat(128,     [S.trlPerRun, 1]);
 
+% TURN INPUT PARAMETERS INTO STRUCT FIELDS
 nCmp = size(frqCpd,2);
 frqCpd     = imresize(frqCpd,[S.trlPerRun nCmp],'nearest');
 phsDeg     = imresize(phsDeg,[S.trlPerRun nCmp],'nearest');
@@ -44,6 +48,17 @@ S.frqCpdR = frqCpd;
 S.phsDegL = phsDeg;
 S.phsDegR = phsDeg;
 
+% RANDOMIZE
+indRnd         = randsample(S.trlPerRun,S.trlPerRun);
+S.frqCpdL = S.frqCpdL(indRnd,:);
+S.frqCpdR = S.frqCpdR(indRnd,:);
+S.phsDegL = S.phsDegL(indRnd,:);
+S.phsDegR = S.phsDegR(indRnd,:);
+S.ortDeg = S.ortDeg(indRnd,:);
+S.BWoct = S.BWoct(indRnd,:);
+S.MaxContrastLMS = S.MaxContrastLMS(indRnd,:);
+
+% LOAD CALIBRATION FILES
 if     strcmp(D.cmpInfo.localHostName,'jburge-marr')
     load('/Volumes/Data/BurgeLabCalibrationData/ViewSonicG220fb.mat');
     cal = cals{1};

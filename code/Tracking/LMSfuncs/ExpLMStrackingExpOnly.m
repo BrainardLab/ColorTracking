@@ -5,10 +5,10 @@ function [S D] = ExpLMStrackingExpOnly(S,subjName,IPDmm, phsDspArcmin, stmSzXYde
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
 %   example call: % TEST CODE
-%                 expDirection = 'Experiment2-Pos';
+%                 expDirection = 'directionCheck';
 %                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
 %                 [~,S] = LMSstimulusGeneration(1*size(MaxContrastLMS,1),MaxContrastLMS,1,0,0,0.932);
-%                 ExpLMStrackingExpOnly(S,'JNK',10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 1, 1, 0);
+%                 ExpLMStrackingExpOnly(S,'JNK',65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 1, 1, 0);
 %
 % run target tracking experiment to measure delays for different cone
 % contrast directions. Unlike ExpLMStracking, this function does not create
@@ -188,31 +188,12 @@ S.trmR         = opticaldensity2transmittance(S.vdfR, 0);     % TRANSMITTANCE OF
 
 S.ndfL         = repmat(ndfL,        [S.trlPerRun, 1]);       %  REAL   OPTICAL DENSITY IN LE
 S.ndfR         = repmat(ndfR,        [S.trlPerRun, 1]);       %  REAL   OPTICAL DENSITY IN RE
-if size(mchL(:),1) == 1
-    S.mchL         = repmat(mchL,        [S.trlPerRun, 1]);       % MICHELSON CONTRAST IN LE
-    S.mchR         = repmat(mchR,        [S.trlPerRun, 1]);       % MICHELSON CONTRAST IN RE
-    indRnd         = randsample(S.trlPerRun,S.trlPerRun);
-else
-    indRnd         = randsample(S.trlPerRun,S.trlPerRun);
-end
 
 % NUMBER OF COMPONENTS
 nCmp = size(S.frqCpdL,2);
 S.mchL        = imresize(mchL,[S.trlPerRun nCmp],'nearest');
 S.mchR        = imresize(mchR,[S.trlPerRun nCmp],'nearest');
 S.BWort       = imresize(BWort,[S.trlPerRun, 1],'nearest');
-
-% SCRAMBLE
-S.frqCpdL = S.frqCpdL(indRnd,:);
-S.frqCpdR = S.frqCpdR(indRnd,:);
-S.mchL    = S.mchL(indRnd,:);
-S.mchR    = S.mchR(indRnd,:);
-S.phsDegL = S.phsDegL(indRnd,:);
-S.phsDegR = S.phsDegR(indRnd,:);
-S.ortDeg = S.ortDeg(indRnd,:);
-S.BWoct = S.BWoct(indRnd,:);
-S.BWort = S.BWort(indRnd,:);
-S.MaxContrastLMS = S.MaxContrastLMS(indRnd,:);
 
 % S.frqCpdCutoff = repmat(frqCpdCutoff,[S.trlPerRun, 1]);       %
 

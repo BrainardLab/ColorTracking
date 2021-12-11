@@ -379,8 +379,13 @@ if ~exist('stereoMode','var') || isempty(stereoMode),
     disp(['psyPTBopenWindow: setting D.stereoMode to ' num2str(stereoMode)])
 end
 
-% Get Cal Data
-cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
+if     strcmp(D.cmpInfo.localHostName,'jburge-marr')
+    load('/Volumes/Data/BurgeLabCalibrationData/ViewSonicG220fb.mat');
+    cal = cals{1};
+else
+    % Get Cal Data
+    cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
+end
 
 % Construct a calStructOBJ from the latest calibration
 [calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cal);

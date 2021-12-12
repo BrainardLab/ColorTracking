@@ -50,6 +50,8 @@ switch localhostname
         fname = 'ViewSonicG220fb.mat';        
     case 'blobfish' % SPEED EXPERIMENT COMPUTER
         fname = 'ViewSonicG220fb.mat';
+    case 'ben-Precision-7520'
+        fname = 'ViewSonicG220fb.mat';
     otherwise
         error(['psyLoadCalibrationData: WARNING! unhandled localhostname= ' num2str(localhostname) '. Write code?']);
 end

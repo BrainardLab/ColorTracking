@@ -62,6 +62,9 @@ S.MaxContrastLMS = S.MaxContrastLMS(indRnd,:);
 if     strcmp(D.cmpInfo.localHostName,'jburge-marr')
     load('/Volumes/Data/BurgeLabCalibrationData/ViewSonicG220fb.mat');
     cal = cals{1};
+elseif strcmp(D.cmpInfo.localHostName,'ben-Precision-7520')
+    load('/home/ben/Documents/VisionScience/Data/BurgeLabCalibrationData/ViewSonicG220fb.mat');
+    cal = cals{1};
 else
     % Get Cal Data
     cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));

@@ -3,11 +3,11 @@
 % SUBJECT NAME
 subjID = 'JNK';
 % COLOR DIRECTIONS TO RUN
-expDirection1 = 'directionCheck';
+expDirection1 = 'Experiment3-BMC-Pos';
+% COLOR DIRECTIONS TO RUN
+expDirection2 = 'Experiment3-BMC-Neg';
 % COMPUTE CONTRASTS IN LMS SPACE
 MaxContrastLMS1 = LMSstimulusContrast('experiment',expDirection1);
-% COLOR DIRECTIONS TO RUN
-expDirection2 = 'directionCheck';
 % COMPUTE CONTRASTS IN LMS SPACE
 MaxContrastLMS2 = LMSstimulusContrast('experiment',expDirection2);
 if ~isequal(size(MaxContrastLMS1,1),size(MaxContrastLMS2,1))
@@ -42,6 +42,12 @@ BWort = 0.605;
 % LMSpilot(subjID,'Experiment2-Pos')
 % LMSpilot(subjID,'Experiment2-Neg')
 
+ExpLMStrackingExpOnly(S1,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
+ExpLMStrackingExpOnly(S2,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
+ExpLMStrackingExpOnly(S1,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
+ExpLMStrackingExpOnly(S2,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
+ExpLMStrackingExpOnly(S1,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
+ExpLMStrackingExpOnly(S2,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
 ExpLMStrackingExpOnly(S1,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
 ExpLMStrackingExpOnly(S2,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);
 ExpLMStrackingExpOnly(S1,subjID,65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 0, 0, 0);

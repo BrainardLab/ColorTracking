@@ -63,7 +63,6 @@ simplePlot(lags(:),[0, 0,0],lagsFromFit,[220 195 256]./256,plotNames,legendLocat
 
 %%
 % get the number of lines to plot
-uniqColorDirs = [uniqColorDirs1; uniqColorDirs2];
 
 shuffIndx = [1 2 3 4 5 6 7 10 8 11 9 12];
 

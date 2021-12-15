@@ -117,6 +117,15 @@ scatter(expDirPoints(1,:),expDirPoints(2,:),sz,'MarkerEdgeColor',[0.3 .3 .3],...
               'MarkerFaceColor',[0.75,0.5,0.5],...
               'LineWidth',1.5)
 
+          
+          %% Get the null direction 
+nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
+
+fprintf('The null direction is: %1.2f\n',nullDirection)
+nullPoint = 1.5*[cosd(nullDirection) sind(nullDirection)];
+spt = plot(nullPoint(1),nullPoint(2),'bo','MarkerFaceColor','b','MarkerSize',10);
+
+
 % set axes and figure labels
 hXLabel = xlabel('L Contrast');
 hYLabel = ylabel('S Contrast');
@@ -128,15 +137,12 @@ set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
 xlim([-2 2]); ylim([-2 2]); axis('square');
 
 
-legend([p1],{sprintf('%g',targetLags(1))})
+legend([p1,spt],{sprintf('%g',targetLags(1)),'null'})
 
+figSaveInfo.subjCode    = subjCode;
+figSaveInfo.figureSizeInches = [18 12];
+plotDirectionPairs(matrixContrastsShuff,lagsShuff,lagsFromFitMatShuff,uniqColorDirsShuff,plotColors,figSaveInfo)
 
-%% Get the null direction 
-nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
-
-fprintf('The null direction is: %1.2f\n',nullDirection)
-nullPoint = 1.5*[cosd(nullDirection) sind(nullDirection)];
-plot(nullPoint(1),nullPoint(2),'bo','MarkerFaceColor','b','MarkerSize',10);
 
 
 

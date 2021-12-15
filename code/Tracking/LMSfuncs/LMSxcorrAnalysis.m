@@ -60,7 +60,9 @@ for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
     MaxContrastLMStitle = ['Angle = ' num2str(colorAngleContrastUnq(i,1),3) ...
                            ', Contrast = '   num2str(colorAngleContrastUnq(i,2),3)];  
     % CROSS-CORRELATION FUNCTION
-    [r(:,i), rLagVal(:,i),rAll] = xcorrEasy(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr);
+    [r(:,i), rLagVal(:,i),rAll] =              xcorrEasy(         diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr);
+%     nBoot = 100; CIsz = 68;
+%     [r(:,i),rCI,rLagVal(:,i),rAll,rDSTB,rSD] = xcorrEasyBootstrap(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,nBoot,CIsz,bPLOTxcorr)
     % FIT CROSS CORRELATION FUNCTION
     if strcmp(modelType,'FLT') % FLAT-TOP COSINE FILTER IN FOURIER DOMAIN
        rSmooth(:,i) = filterTRKdataFlattopCos(r(:,i),rLagVal(:,i),[5 10],0);

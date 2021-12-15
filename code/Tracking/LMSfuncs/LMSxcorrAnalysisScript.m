@@ -2,11 +2,19 @@ close all
 clear all
 
 %% LOAD DATA
-subjID  = 'MAB';
-expName = 'LS2';
+subjID  = 'BMC';
+expName = 'LS3';
 theRuns = 1:20;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
+
+if strcmp(expName,'LS1')
+    expCode = 'Experiment1-Pos';
+elseif strcmp(expName,'LS2')
+    expCode = 'Experiment2-Pos';
+elseif strcmp(expName,'LS3')
+    expCode = ['Experiment3-' subjID '-Pos'];
+end
 
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
@@ -16,19 +24,15 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
+
 Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
 %% SORT TRIALS BY COLOR ANGLE
 plotRawData = 1;
-uniqColorDirs = unique(round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)),2));
 
-switch expName
-    
-    case 'LS1'
-        uniqColorDirs = uniqColorDirs([1 2 6 5 4 3]); %% CHECK THIS IS CORRECT
-    case 'LS2'
-        uniqColorDirs = uniqColorDirs([4 5 6 3 2 1]);
-end
+% Get the cone contrasts MaxContrastLMS
+MaxContrastLMS = LMSstimulusContrast('experiment',expCode);
+uniqColorDirs = unique(round(atand(MaxContrastLMS(:,3)./MaxContrastLMS(:,1)),2),'stable');
 
 for ii = 1:length(uniqColorDirs)
     
@@ -37,18 +41,15 @@ for ii = 1:length(uniqColorDirs)
     
     S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
     % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'GMA','bPLOTfitsAndRaw',plotRawData);
+    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs Lag
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get the lags from rParams
-%lags = flipud(squeeze(rParams(2,:,:)));
-lags = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
-
-% Get the cone contrasts
-MaxContrastLMS = LMSstimulusContrast('experiment','Experiment2-Pos');
+lags = flipud(squeeze(rParams(2,:,:)));
+%lags = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
 
 % Set the colors
 plotColors = [230 172 178; ...
@@ -79,9 +80,9 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast_' expName '.pdf']);
 % Save it
-%print(tcHndl, figNameTc, '-dpdf', '-r300');
+print(tcHndl, figNameTc, '-dpdf', '-r300');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs TIP
@@ -102,7 +103,7 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_TipVsContrast.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_TipVsContrast_' expName '.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 
@@ -122,7 +123,7 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_AmpVsContrast.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_AmpVsContrast_' expName '.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 
@@ -131,8 +132,8 @@ print(tcHndl, figNameTc, '-dpdf', '-r300');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 S_over_LS =  MaxContrastLMS(:,3) ./ (abs(MaxContrastLMS(:,1))+abs(MaxContrastLMS(:,3)));
 scaledContrasts = matrixContrasts./matrixContrasts(1,:);
-matSContrast_unsorted = reshape(S_over_LS,size(lags));
-matSContrast = matSContrast_unsorted(:,[1 2 6 5 4 3]);
+matSContrast = reshape(S_over_LS,size(lags));
+
 plotNames.title  = 'Lag Vs. Proportion S';
 plotNames.xlabel  = 'S / (S + L) (Proportion S)';
 plotNames.ylabel = 'Lag (s)';
@@ -145,7 +146,7 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_sOverLPlusS.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_sOverLPlusS_' expName '.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 
@@ -164,7 +165,7 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_lagVsTips.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_lagVsTips_' expName '.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 
@@ -183,7 +184,7 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_ampsVsTips.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_ampsVsTips_' expName '.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 
@@ -202,7 +203,7 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_ampsVsLag.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_ampsVsLag_' expName '.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 
@@ -216,11 +217,8 @@ plotNames.ylabel = 'Lag (s)';
 coneContrastLvec = MaxContrastLMS(:,1);
 coneContrastSvec = MaxContrastLMS(:,3);
 
-coneContrastL_unsorted = reshape(coneContrastLvec,size(lags));
-coneContrastS_unsorted = reshape(coneContrastSvec,size(lags));
-
-coneContrastL = coneContrastL_unsorted(:,[1 2 6 5 4 3]);
-coneContrastS = abs(coneContrastS_unsorted(:,[1 2 6 5 4 3]));
+coneContrastL = reshape(coneContrastLvec,size(lags));
+coneContrastS = reshape(coneContrastSvec,size(lags));
 
 aa = 0.4;
 bb = 1;
@@ -234,7 +232,7 @@ set(tcHndl, 'PaperUnits', 'inches');
 set(tcHndl, 'PaperSize',figureSizeInches);
 set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
 % Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_L-Cone_contrastVsLag.pdf']);
+figNameTc =  fullfile(figSavePath,[subjCode, '_L-Cone_contrastVsLag_' expName '.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 

@@ -108,11 +108,12 @@ elseif strcmp(modelType,'GMA')
 end
 
 btstrpStruct = struct;
-btstrpStruct.rSmoothBtstrp = rSmoothBtstrp;
-btstrpStruct.rParamBtstrp  = rParamBtstrp;
-btstrpStruct.tSecFitBtstrp = tSecFitBtstrp;
-btstrpStruct.negLLBtstrp   = negLLBtstrp;
-
+if p.Results.nBootstrapIter>0
+    btstrpStruct.rSmoothBtstrp = rSmoothBtstrp;
+    btstrpStruct.rParamBtstrp  = rParamBtstrp;
+    btstrpStruct.tSecFitBtstrp = tSecFitBtstrp;
+    btstrpStruct.negLLBtstrp   = negLLBtstrp;
+end
 % ---------------- END MAIN ANALYSIS SECTION -------------------
 
 if p.Results.bPLOTrawXCORR

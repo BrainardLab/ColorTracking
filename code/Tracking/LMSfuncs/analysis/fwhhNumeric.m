@@ -1,35 +1,46 @@
-%%
+function fwhh = fwhhNumeric(x,y)
 
-x = -1:0.0005:1;
+% function fwhh = fwhhNumeric(x,y)
+%
+% example call: 
+%                 x = -1:0.0005:1;
+% 
+%                 for i = 1:100
+%                    y(:,i) = normpdf(x,rand-0.5,0.1)'; 
+%                 end
+%
+% numerically computes full width at half maximum for a curve defined by x
+% and y
+%
+% inputs: 
+%         x: support over curve y
+%         y: curve 
+%
+% outputs: 
+%         fwhh: full width at half height 
 
-for i = 1:100
-   y(:,i) = normpdf(x,rand-0.5,0.1)'; 
-end
-
-% figure;
-% plot(x,y);
-% axis square;
-% formatFigure('x','y');
-
+% FIND MAXIMUM OF Y 
 [mu,muInd] = max(y);
 
-%%
+% GET THE HALF-HEIGHT POINT BEFORE THE MAXIMUM (CODE IS VECTORIZED)
+indLT = bsxfun(@lt,[1:length(x)]',muInd);
+indLT = indLT(1:max(sum(indLT,1)),:);
+yLT = y(1:size(indLT,1),:);
+yLT(~indLT)=0;
+[~,hh1ind] = min(abs(bsxfun(@minus,yLT,mu./2)));
 
-profile on;
-for i = 1:108
-    indLT = bsxfun(@lt,[1:length(x)]',muInd);
-    indLT = indLT(1:max(sum(indLT,1)),:);
-    yLT = y(1:size(indLT,1),:);
-    yLT(~indLT)=0;
-    [hh1,hh1ind] = min(abs(bsxfun(@minus,yLT,mu./2)));
+clear indLT; clear yLT; 
 
-    indGT = bsxfun(@gt,[1:length(x)]',muInd);
-    indGT = indGT(min(sum(~indGT)):end,:);
-    yGT = y(size(y,1)-size(indGT,1)+1:size(y,1),:);
-    yGT(~indGT) = 0;
-    [hh2,hh2indTmp] = min(abs(bsxfun(@minus,yGT,mu./2)));
-    [~,muInd2GT] = max(yGT);
-    hh2ind = hh2indTmp-muInd2GT+muInd+1;
+% GET THE HALF-HEIGHT POINT AFTER THE MAXIMUM 
+indGT = bsxfun(@gt,[1:length(x)]',muInd);
+indGT = indGT(min(sum(~indGT)):end,:);
+yGT = y(size(y,1)-size(indGT,1)+1:size(y,1),:);
+yGT(~indGT) = 0;
+clear indGT; 
+[~,hh2indTmp] = min(abs(bsxfun(@minus,yGT,mu./2)));
+[~,muInd2GT] = max(yGT);
+hh2ind = hh2indTmp-muInd2GT+muInd+1;
+
+fwhh = x(hh2ind)-x(hh1ind);
+
 end
-profile off;
-profile viewer; 

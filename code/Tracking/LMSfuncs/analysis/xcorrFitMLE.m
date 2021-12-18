@@ -60,7 +60,7 @@ opts.TolCon         = 1e-6;
 % OPTIMIZE PARAMETERS %
 %%%%%%%%%%%%%%%%%%%%%%%
 % NUMBER OF REPEATS
-nRpt = 200;
+nRpt = 40;
 for i = 1:nRpt % LOOP OVER RANDOM STARTS (TO PROTECT AGAINST LOCAL OPTIMA)
     % INITIAL PARAMETERS
     % rParam0  = randInterval([LB; UB]).*1/4;

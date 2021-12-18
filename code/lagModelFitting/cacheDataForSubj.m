@@ -56,23 +56,23 @@ for ii = 1:length(expNameCell)
     end
     
     % load the stilumus L and S contrast used in the experiment
-    MaxContrastLMS = LMSstimulusContrast('experiment',expCode);
-    cL = MaxContrastLMS(:,1);
-    cS = MaxContrastLMS(:,3);
-    colorDirs = round(atand(cS./cL),2);
-    uniqueColorDirs = unique(colorDirs,'stable');
+    MaxContrastLMS(:,:,ii) = LMSstimulusContrast('experiment',expCode);
+    cL(:,ii) = MaxContrastLMS(:,1,ii);
+    cS(:,ii) = MaxContrastLMS(:,3,ii);
+    colorDirs = round(atand(cS(:,ii)./cL(:,ii)),2);
+    uniqueColorDirs(:,ii) = unique(colorDirs,'stable');
     
     
-    for jj = 1:length(uniqueColorDirs)
+    for jj = 1:size(uniqueColorDirs,1)
         
         % 0 DEG IN SL PLANE
-        ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqueColorDirs(jj))<0.001;
+        ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqueColorDirs(jj,ii))<0.001;
         
         S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
         % LMS ANALYSIS TO ESTIMATE LAGS
         
         if p.Results.isBootstrap
-           [~, ~, rParams(:,:,jj), ~, ~, btstrpStruct(jj)] = LMSxcorrAnalysis(S,p.Results.fitMethod,'bPLOTfitsAndRaw',p.Results.plotRawData,'nBootstrapIter',5);
+            [~, ~, rParams(:,:,jj), ~, ~, btstrpStruct(jj)] = LMSxcorrAnalysis(S,p.Results.fitMethod,'bPLOTfitsAndRaw',p.Results.plotRawData,'nBootstrapIter',5);
         else
             [~,~,rParams(:,:,jj)] = LMSxcorrAnalysis(S,p.Results.fitMethod,'bPLOTfitsAndRaw',p.Results.plotRawData);
         end
@@ -81,14 +81,15 @@ for ii = 1:length(expNameCell)
     for kk = 1:length(btstrpStruct)
         rParamsBtstrp(:,:,:,kk) = btstrpStruct(kk).rParamBtstrp;
     end
-    
+    rParamsBtstrpStruct = struct;
+    rParamsBtstrpStruct(ii).rParamsBtstrp = rParamsBtstrp;
     % Calculate the lags
     if strcmp(p.Results.fitMethod,'LGS')
-        lags = flipud(squeeze(rParams(2,:,:)));
+         lags(:,:,ii) = flipud(squeeze(rParams(2,:,:)));
         if p.Results.isBootstrap
-        lagsBtstrp = flipud(squeeze(rParamsBtstrp(2,:,:,:)));
-        meanBtstrpLag(:,:,ii) = squeeze(mean(lagsBtstrp,2));
-        sDevBtstrpLag(:,:,ii) = squeeze(std(lagsBtstrp,0,2));
+            lagsBtstrp = flipud(squeeze(rParamsBtstrp(2,:,:,:)));
+            meanLagBtstrp(:,:,ii) = squeeze(mean(lagsBtstrp,2));
+            sDevBtstrpLag(:,:,ii) = squeeze(std(lagsBtstrp,0,2));
         end
     elseif strcmp(p.Results.fitMethod,'GMA')
         lags = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
@@ -97,3 +98,13 @@ for ii = 1:length(expNameCell)
     end
     
 end
+
+% Reshape the parameters
+lagsMat = reshape(lags,[size(lags,1) size(lags,2)*size(lags,3)]);
+meanLagBtstrpLagMat = reshape(meanLagBtstrp,[size(meanLagBtstrp,1) size(meanLagBtstrp,2)*size(meanLagBtstrp,3)]);
+sDevBtstrpLagMat    = reshape(sDevBtstrpLag,[size(sDevBtstrpLag,1) size(sDevBtstrpLag,2)*size(sDevBtstrpLag,3)]);
+
+
+
+%% save out the params and the bootstrap params
+

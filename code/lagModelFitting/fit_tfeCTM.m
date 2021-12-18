@@ -1,9 +1,22 @@
 % test the tfeCTM
+subjID = 'BMC';
 %% Load the data
-load('dataCache_subj3.mat')
+projectName = 'CorticalColorMapping';
+paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
+bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
+% get subject code
+if strcmp(subjID,'MAB')
+    subjCode = 'Subject1';
+elseif strcmp(subjID,'BMC')
+    subjCode = 'Subject2';
+elseif strcmp(subjID,'KAS')
+    subjCode = 'Subject3';
+end
+
+load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
 
 %% Make the packet
-lagVec = lags(:)';
+lagVec = lagsMat(:)';
 timebase = 1:length(lagVec);
 
 % Initialize the packet
@@ -11,15 +24,15 @@ thePacket.response.values   = lagVec;
 thePacket.response.timebase = timebase;
 
 % The stimulus
-thePacket.stimulus.values   = [cL,cS]';
+thePacket.stimulus.values   = [cL(:),cS(:)]';
 thePacket.stimulus.timebase = timebase;
 
 
 thePacket.kernel.values = [];
 thePacket.kernel.timebase = [];
 
-thePacket.metaData.stimDirections = atand(cS./cL);
-thePacket.metaData.stimContrasts  = vecnorm([cS,cL]')';
+thePacket.metaData.stimDirections = atand(cS(:)./cL(:));
+thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
 
 %% Make the fit object
 theDimension= size(thePacket.stimulus.values, 1);

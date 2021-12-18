@@ -1,6 +1,6 @@
-function [r, rSmooth, rParam, negLL, FWHH, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType,varargin)
+function [r, rSmooth, rParam, negLL, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType,varargin)
 %
-% function [r, rSmooth, rParam, negLL, FWHH, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType)
+% function [r, rSmooth, rParam, negLL, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType)
 %
 % example calls:
 %                 % LOAD DATA
@@ -84,14 +84,14 @@ for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
     end
     %    text(0.5,0.2,MaxContrastLMStitle,'FontSize',15);
     legendLMS{end+1} = MaxContrastLMStitle;
-    if strcmp(modelType,'GMA')
-        [rSmoothMax,rSmoothMaxInd] = max(rSmooth(:,i));
-        [~,hh1ind] = min(abs(rSmooth(tSecFit(:,i)>tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
-        hh1 = tSecFit(hh1ind+rSmoothMaxInd,i);
-        [~,hh2ind] = min(abs(rSmooth(tSecFit(:,i)<tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
-        hh2 = tSecFit(hh2ind,i);
-        FWHH(i) = hh1-hh2;
-    end
+%     if strcmp(modelType,'GMA')
+%         [rSmoothMax,rSmoothMaxInd] = max(rSmooth(:,i));
+%         [~,hh1ind] = min(abs(rSmooth(tSecFit(:,i)>tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
+%         hh1 = tSecFit(hh1ind+rSmoothMaxInd,i);
+%         [~,hh2ind] = min(abs(rSmooth(tSecFit(:,i)<tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
+%         hh2 = tSecFit(hh2ind,i);
+%         FWHH(i) = hh1-hh2;
+%     end
     if ~strcmp(modelType,'LGS') || ~strcmp(modelType,'GMA') % IF FITS WERE NOT DONE WITH LOG-GAUSSIAN
         % NUMERICALLY READ OUT LAG VALUES
         [~,rSmoothMaxInd] = max(rSmooth(:,i));
@@ -178,13 +178,13 @@ if p.Results.bPLOTlags
     ylim([0 0.6]);
 end
 
-if p.Results.bPLOTfwhh
-    % PLOT FULL WIDTHS AT HALF HEIGHT
-    figure;
-    plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
-    axis square;
-    formatFigure('Contrast','Integration period (s)');
-    % ylim([0 0.6]);
-end
+% if p.Results.bPLOTfwhh
+%     % PLOT FULL WIDTHS AT HALF HEIGHT
+%     figure;
+%     plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
+%     axis square;
+%     formatFigure('Contrast','Integration period (s)');
+%     % ylim([0 0.6]);
+% end
 
 end

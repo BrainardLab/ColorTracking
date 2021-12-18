@@ -39,14 +39,25 @@ userID = strtrim(userID);
 cmpInfo = psyComputerInfo;
 switch userID
     case {'brainardlab'}
-        setpref(projectName,'dropboxPath',fullfile('/home',userID,'labDropbox'));
+        dropboxPath = fullfile('/Users',userID,'labDropbox');
+        CNST_analysis = fullfile(dropboxPath,'CNST_analysis','ColorTracking');
+        setpref(projectName,'dropboxPath',dropboxPath);
+        
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
+        paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
+        bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
     case{'michael'}
-        setpref(projectName,'dropboxPath',fullfile('/Users',userID,'labDropbox'));
+        dropboxPath = fullfile('/Users',userID,'labDropbox');
+        CNST_analysis = fullfile(dropboxPath,'CNST_analysis','ColorTracking');
+        setpref(projectName,'dropboxPath',dropboxPath);
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');
+        paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
+        bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
     case{'jburge-hubel'}
         setpref(projectName,'dropboxPath',[]);
-        CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');
+        CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');      
+        paramsCacheFolder     = '';
+        bootParamsCacheFolder = '';
     case{'dhb'}
         if strcmp(cmpInfo.localHostName,'Davids-iMac')
             setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)']);
@@ -54,12 +65,24 @@ switch userID
             setpref(projectName,'dropboxPath',fullfile(['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)']));
         end
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
+        
+        CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTracking');
+        paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
+        bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+
     otherwise
         setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)']);
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
+        CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTracking');
+        paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
+        bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+        
 end
 
+setpref(projectName,'paramsCacheFolder',paramsCacheFolder);
+setpref(projectName,'bootParamsCacheFolder',bootParamsCacheFolder);
 setpref(projectName,'CalFolder',CalFolder);
+
 setpref('BrainardLabToolbox','CalDataFolder',CalFolder);
 
 if ismac

@@ -42,6 +42,21 @@ MaxContrastLMSunq = unique(Sall.MaxContrastLMS,'rows');
 
 %------------ BEGIN MAIN ANALYSIS SECTION -------------------------
 
+if strcmp(modelType,'LGS')
+   nParams = 3;
+elseif strcmp(modelType,'GMA')
+   nParams = 4;
+end
+
+% INITIALIZE ARRAYS FOR STORING SMOOTHED CURVES. ***WARNING: THE NUMBER 120
+% IS HARD-CODED!!!*** FIX THIS SOON
+if p.Results.nBootstrapIter >0
+    rSmoothBtstrp = zeros([120 size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+    rParamBtstrp =  zeros([nParams size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+    tSecFitBtstrp = zeros([120 size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+    negLLBtstrp =   zeros([1 size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+end
+
 legendLMS = {''};
 for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
     %     ind =   abs(Sall.MaxContrastLMS(:,1)-MaxContrastLMSunq(i,1))<0.001 ...

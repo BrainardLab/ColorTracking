@@ -51,6 +51,7 @@ end
 projectName = 'CorticalColorMapping';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
+rParamsBtstrpStruct = struct;
 
 
 %% Loop over the experiments
@@ -98,7 +99,6 @@ for ii = 1:length(expNameCell)
     for kk = 1:length(btstrpStruct)
         rParamsBtstrp(:,:,:,kk) = btstrpStruct(kk).rParamBtstrp;
     end
-    rParamsBtstrpStruct = struct;
     rParamsBtstrpStruct(ii).rParamsBtstrp = rParamsBtstrp;
     % Calculate the lags
     if strcmp(p.Results.fitMethod,'LGS')
@@ -140,5 +140,5 @@ save(paramsCacheFileName,'infoParams','lagsMat','MaxContrastLMS','cL','cS','uniq
 
 if p.Results.isBootstrap
     bootParamsCacheFileName = fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']);
-    save(bootParamsCacheFileName,'infoBootParams','meanLagBtstrpLagMat','sDevBtstrpLagMat');
+    save(bootParamsCacheFileName,'infoBootParams','meanLagBtstrpLagMat','sDevBtstrpLagMat','rParamsBtstrpStruct');
 end

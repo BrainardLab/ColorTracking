@@ -36,6 +36,8 @@ end
 vecContrast = sqrt(MaxContrastLMSvec(:,1).^2+MaxContrastLMSvec(:,3).^2);
 matrixContrasts = reshape(vecContrast,size(meanLagBtstrpLagMat));
 
+[upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68)
+
 % Names for plotting
 plotNames.title  = 'Lag Vs. Contrast';
 plotNames.xlabel  = 'Contrast (%)';

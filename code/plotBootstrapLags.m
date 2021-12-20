@@ -40,19 +40,30 @@ matrixContrasts = reshape(vecContrast,size(meanLagBtstrpLagMat));
 plotNames.title  = 'Lag Vs. Contrast';
 plotNames.xlabel  = 'Contrast (%)';
 plotNames.ylabel = 'Lag (s)';
-for jj = 1:length(uniqColorDirs)
-    plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
-end
-% Plot it!
-[tcHndl] =plotParams(matrixContrasts,meanLagBtstrpLagMat,plotColors',plotNames,'yLimVals', [0.3 .8],'semiLog',false);
+numExp = length(infoBootParams.expNames);
+nDirPerExp = length(uniqueColorDirs(:))./numExp;
+starts = 1:nDirPerExp:length(uniqueColorDirs);
+stops  = nDirPerExp:nDirPerExp:length(uniqueColorDirs);
 
-% Save it!
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
+for jj = 1:length(numExp)
+    
+    colorDirs = uniqueColorDirs(starts:stops);
+    for jj = 1:length(colorDirs)
+        plotNames.legend{jj} = sprintf('%s°',num2str(colorDirs(jj)));
+    end
+    % Plot it!
+    [tcHndl] =plotParams(matrixContrasts(:,starts:stops),meanLagBtstrpLagMat(:,starts:stops),...
+                         plotColors',plotNames,'yLimVals', [0.3 .8],'semiLog',false,...
+                         'errorBars',sDevBtstrpLagMat(:,starts:stops));
+    
+    % Save it!
+    figureSizeInches = [8 8];
+    set(tcHndl, 'PaperUnits', 'inches');
+    set(tcHndl, 'PaperSize',figureSizeInches);
+    set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
+    % Full file name
+    figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast_' expName '.pdf']);
+    % Save it
+    print(tcHndl, figNameTc, '-dpdf', '-r300');
+end
 

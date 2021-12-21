@@ -34,6 +34,7 @@ thePacket.kernel.timebase = [];
 thePacket.metaData.stimDirections = atand(cS(:)./cL(:));
 thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
 
+matrixContrasts = reshape(thePacket.metaData.stimContrasts,size(lagsMat));
 %% Make the fit object
 theDimension= size(thePacket.stimulus.values, 1);
 numMechanism = 1;
@@ -42,8 +43,6 @@ ctmOBJ = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', num
 
 
 %% Fit it
-
-
 % fit the old way
 [p_hat,lagsFromFit] = fitWithFmincon(thePacket.response.values ,thePacket.stimulus.values);
 if numMechanism == 1
@@ -85,7 +84,8 @@ end
 
 [fitParams,fVal,objFitResponses] = ctmOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',startParams, 'fitErrorScalar',fitErrorScalar);
-
+lagsFromFit = ctmOBJ.computeResponse(fitParams,thePacket.stimulus,thePacket.kernel);
+lagsFromFitMat = reshape(lagsFromFit.values,size(lagsMat));
 
 %% Print the params
 fprintf('\ntfeCTM parameters:\n');
@@ -94,21 +94,15 @@ ctmOBJ.paramPrint(fitParams)
 fprintf('\nThe old way parameters:\n');
 ctmOBJ.paramPrint(oldWayParams)
 
-targetLags = [0.35;0.4;0.45;0.5];
+targetLags = 0.35;
 numSamples = 300; 
-measuredDirections = [0,90,45,315,75,285,78.75,82.5,86.2,281.25,277.5,273.8];
-[C_1, sampleBaseTheta_1, targetL_1, targetS_1,expDirPoints] = generateIsorepsoneContour(fitParams, targetLags(1), numSamples,...
+measuredDirections = uniqueColorDirs(:)';
+[C_1, sampleBaseTheta_1, targetL_1, targetS_1,expDirPoints] = generateIsorepsoneContour(fitParams, targetLags, numSamples,...
     'dataDirections',measuredDirections);
-% [C_2, sampleBaseTheta_2, targetL_2, targetS_2] = generateIsorepsoneContour(fitParams, targetLags(2), numSamples);
-% [C_3, sampleBaseTheta_3, targetL_3, targetS_3] = generateIsorepsoneContour(fitParams, targetLags(3), numSamples);
-% [C_4, sampleBaseTheta_4, targetL_4, targetS_4] = generateIsorepsoneContour(fitParams, targetLags(4), numSamples);
-
 
 % plot the isolag contour
 figHndl = figure;
 hold on;
-xlim([-1 1])
-ylim([-6 6])
 
 % get current axes
 axh = gca;
@@ -121,23 +115,19 @@ line([0 0], [-6 6], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 % plot ellipse
 p1 = line(targetL_1.pos,targetS_1.pos,'color', [0 63 92]./256, 'LineWidth', 2);
 p2 = line(targetL_1.neg,targetS_1.neg,'color', [0 63 92]./256, 'LineWidth', 2);
-% line(targetL_2,targetS_2,'color', [122 81 149]./256, 'LineWidth', 2);
-% line(targetL_3,targetS_3,'color', [239 86 117]./256, 'LineWidth', 2);
-% line(targetL_4,targetS_4,'color', [255 166 0]./256, 'LineWidth', 2);
+
 %scatter the experimental directions intesect with contour
 sz = 30;
 scatter(expDirPoints(1,:),expDirPoints(2,:),sz,'MarkerEdgeColor',[0.3 .3 .3],...
               'MarkerFaceColor',[0.75,0.5,0.5],...
               'LineWidth',1.5)
-
-          
+     
           %% Get the null direction 
 nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
 
 fprintf('The null direction is: %1.2f\n',nullDirection)
 nullPoint = 1.5*[cosd(nullDirection) sind(nullDirection)];
-spt = plot(nullPoint(1),nullPoint(2),'bo','MarkerFaceColor','b','MarkerSize',10);
-
+spt = plot(nullPoint(1),nullPoint(2),'bo','MarkerFaceColor','b','MarkerSize',8);
 
 % set axes and figure labels
 hXLabel = xlabel('L Contrast');
@@ -147,14 +137,13 @@ set(gca,'FontSize',12);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
 set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
-xlim([-2 2]); ylim([-2 2]); axis('square');
+xlim([-4 4]); ylim([-4 4]); axis('square');
 
 
 legend([p1,spt],{sprintf('%g',targetLags(1)),'null'})
-
 figSaveInfo.subjCode    = subjCode;
 figSaveInfo.figureSizeInches = [18 12];
-plotDirectionPairs(matrixContrastsShuff,lagsShuff,lagsFromFitMatShuff,uniqColorDirsShuff,plotColors,figSaveInfo)
+plotDirectionPairs(matrixContrasts,lagsMat,lagsFromFitMat,uniqColorDirs(:),plotColors,figSaveInfo)
 
 
 

@@ -26,7 +26,8 @@ p.addRequired('xAxisVals',@ismatrix);
 p.addRequired('yAxisVals',@ismatrix);
 p.addRequired('plotColors',@ismatrix);
 p.addRequired('plotNames',@isstruct);
-p.addParameter('errorBars',[],@isnumeric);
+p.addParameter('errorBarsSTD',[],@isnumeric);
+p.addParameter('errorBarsCI',[],@isstruct);
 p.addParameter('sz',12,@isscalar);
 p.addParameter('yLimVals',[0.2 0.6],@isvector);
 p.addParameter('semiLog',true,@islogical);
@@ -50,8 +51,12 @@ for ii = 1:numLines
         'Color',plotColors(:,ii),...
         'LineWidth',2,...
         'MarkerSize',p.Results.sz);
-    if ~isempty(p.Results.errorBars)
-        e = errorbar(xAxisVals(:,ii),yAxisVals(:,ii),p.Results.errorBars(:,ii))
+    if ~isempty(p.Results.errorBarsSTD)
+        e = errorbar(xAxisVals(:,ii),yAxisVals(:,ii),p.Results.errorBarsSTD(:,ii))
+    elseif ~isempty(p.Results.errorBarsCI)
+        e = errorbar(xAxisVals(:,ii),yAxisVals(:,ii),p.Results.errorBarsCI.lower(:,ii),p.Results.errorBarsCI.upper(:,ii),...
+            'LineWidth',2,'Color',plotColors(:,ii))
+        
     end
 end
 

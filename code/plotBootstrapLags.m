@@ -14,6 +14,7 @@ elseif strcmp(subjID,'KAS')
 end
 load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
 load(fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']));
+figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs Lag
@@ -44,27 +45,30 @@ plotNames.xlabel  = 'Contrast (%)';
 plotNames.ylabel = 'Lag (s)';
 numExp = length(infoBootParams.expNames);
 nDirPerExp = length(uniqueColorDirs(:))./numExp;
-starts = 1:nDirPerExp:length(uniqueColorDirs);
-stops  = nDirPerExp:nDirPerExp:length(uniqueColorDirs);
+starts = 1:nDirPerExp:length(uniqueColorDirs(:));
+stops  = nDirPerExp:nDirPerExp:length(uniqueColorDirs(:));
 
-for jj = 1:length(numExp)
+for jj = 1:numExp
     
-    colorDirs = uniqueColorDirs(starts:stops);
-    for jj = 1:length(colorDirs)
-        plotNames.legend{jj} = sprintf('%s°',num2str(colorDirs(jj)));
+    colorDirs = uniqueColorDirs(starts(jj):stops(jj));
+    for kk = 1:length(colorDirs)
+        plotNames.legend{kk} = sprintf('%s°',num2str(colorDirs(kk)));
     end
     % Plot it!
-    [tcHndl] =plotParams(matrixContrasts(:,starts:stops),meanLagBtstrpLagMat(:,starts:stops),...
-                         plotColors',plotNames,'yLimVals', [0.3 .8],'semiLog',false,...
-                         'errorBars',sDevBtstrpLagMat(:,starts:stops));
+    CIs.upper = abs(upperCI(:,starts(jj):stops(jj)) - meanLagBtstrpLagMat(:,starts(jj):stops(jj)));
+    CIs.lower = abs(meanLagBtstrpLagMat(:,starts(jj):stops(jj)) - lowerCI(:,starts(jj):stops(jj)));
     
+    [tcHndl] =plotParams(matrixContrasts(:,starts(jj):stops(jj)),meanLagBtstrpLagMat(:,starts(jj):stops(jj)),...
+                         plotColors',plotNames,'yLimVals', [0.3 .8],'semiLog',false,...
+                         'errorBarsCI',CIs);
+    expName = infoBootParams.expNames{jj};
     % Save it!
     figureSizeInches = [8 8];
     set(tcHndl, 'PaperUnits', 'inches');
     set(tcHndl, 'PaperSize',figureSizeInches);
     set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
     % Full file name
-    figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast_' expName '.pdf']);
+    figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrastBoot_' expName '.pdf']);
     % Save it
     print(tcHndl, figNameTc, '-dpdf', '-r300');
 end

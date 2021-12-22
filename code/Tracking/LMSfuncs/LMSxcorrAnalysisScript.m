@@ -2,9 +2,9 @@ close all
 clear all
 
 %% LOAD DATA
-subjID  = 'BMC';
+subjID  = 'MAB';
 expName = 'LS3';
-theRuns = 1:20;
+theRuns = 1:10;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
@@ -28,7 +28,7 @@ end
 Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
 %% SORT TRIALS BY COLOR ANGLE
-plotRawData = 1;
+plotRawData = true;
 
 % Get the cone contrasts MaxContrastLMS
 MaxContrastLMS = LMSstimulusContrast('experiment',expCode);

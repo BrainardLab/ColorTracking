@@ -141,10 +141,15 @@ xlim([-4 4]); ylim([-4 4]); axis('square');
 
 
 legend([p1,spt],{sprintf('%g',targetLags(1)),'null'})
+
+plotInfo.title  = 'Lag Vs. Contrast';
+plotInfo.xlabel  = 'Contrast (%)';
+plotInfo.ylabel = 'Lag (s)';
+
 figSaveInfo.subjCode    = subjCode;
 figSaveInfo.figureSizeInches = [18 12];
-plotDirectionPairs(matrixContrasts,lagsMat,lagsFromFitMat,uniqColorDirs(:),plotColors,figSaveInfo)
+directionGroups = {[0,90],[75, -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-0.9,-22.5]};
 
 
-
+plotDirectionPairs(matrixContrasts,lagsMat,lagsFromFitMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors)
 

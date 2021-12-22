@@ -117,26 +117,6 @@ if bUseMsk == 1, tex1oF = Screen('MakeTexture', D.wdwPtr, msk1oF,[],[],2); end %
 % SCREEN CENTER
 D.scrnXYpixCtr = round(D.scrnXYpix/2);
 
-%%%%%%%%%%%%%%%%%%%%%%%%
-% INIT RESPONSE VECTOR %
-%%%%%%%%%%%%%%%%%%%%%%%%
-S.rspXpixL(:,t) = zeros(size(S.tgtXmmL(:,t)));   % ARRAY OF MOUSE CURSOR LE SCREEN POSITIONS 
-S.rspXpixR(:,t) = zeros(size(S.tgtXmmR(:,t)));   % ARRAY OF MOUSE CURSOR RE SCREEN POSITIONS 
-
-S.rspXmm(:,t)   = zeros(size(S.tgtXmm( :,t)));   % ARRAY OF MOUSE CURSOR  X-SPACE  POSITIONS 
-S.rspYmm(:,t)   = zeros(size(S.tgtYmm( :,t)));
-S.rspZmm(:,t)   = zeros(size(S.tgtZmm( :,t)));   % ARRAY OF MOUSE CURSOR  Z-SPACE  POSITIONS 
-S.rspXmmL(:,t)  = zeros(size(S.tgtXmmL(:,t)));
-S.rspXmmR(:,t)  = zeros(size(S.tgtXmmR(:,t)));
-S.rspYmmL(:,t)  = zeros(size(S.tgtYmmL(:,t)));
-S.rspYmmR(:,t)  = zeros(size(S.tgtYmmR(:,t)));
-
-%%%%%%%%%%%%%%%%%%%%%%
-% SET MOUSE POSITION % MOUSE PIX ASSUME (0,0) IS AT SCREEN CENTER
-%%%%%%%%%%%%%%%%%%%%%%
-mssXpixBgn = D.scrnXYpixCtr(1); 
-mssYpixBgn = D.scrnXYpixCtr(2); 
-SetMouse(mssXpixBgn,mssYpixBgn,D.wdwPtr);
 HideCursor();
 
 %%%%%%%%%%%%%%%%%
@@ -201,23 +181,7 @@ if S.bStatic == 0
                 bEsc = 1;
                 return;
             end
-            % START TRIAL
-            if keyCode(key_SPACE) == 1
-                SetMouse(mssXpixBgn,mssYpixBgn,D.wdwPtr);
-                break;
-            end
             while KbCheck(-1); end
-        end
-        %%%%%%%%%%%%%%%%%%%
-        % BUTTON PRESS??? %
-        %%%%%%%%%%%%%%%%%%%
-        [~,~,buttons] = GetMouse(D.wdwPtr);
-        %%%%%%%%%%%%%%%%%%%%%%
-        % SET MOUSE POSITION % 
-        %%%%%%%%%%%%%%%%%%%%%%
-        SetMouse(mssXpixBgn,mssYpixBgn,D.wdwPtr);
-        if buttons(1)
-            break
         end
     end
     
@@ -240,11 +204,6 @@ if S.bStatic == 0
     Screen('DrawTexture', D.wdwPtr, [tex1oF], [], [D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], [D.wht,D.wht,D.wht].*S.trmL(t)); 
     end
     
-    % DRAW LEFT MOUSE CURSOR AT SCREEN CENTER
-    if ~strcmp(S.mtnType(t,1),'O')
-    Screen('DrawDots', D.wdwPtr, [mssXpixBgn, mssYpixBgn], mssSzPix, mssClr.*S.trmL(t));
-    end
-    
     %%%%%%%%%%%%%%%%%%%%%%%%%
     % DRAW RIGHT EYE BUFFER %
     %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,11 +219,6 @@ if S.bStatic == 0
     Screen('DrawTexture', D.wdwPtr, [tex1oF], [], [D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], [D.wht,D.wht,D.wht].*S.trmR(t)); 
     end  
     
-    % DRAW RIGHT EYE MOUSE CURSOR AT SCREEN CENTER
-    if ~strcmp(S.mtnType(t,1),'O')
-    Screen('DrawDots', D.wdwPtr, [mssXpixBgn, mssYpixBgn], mssSzPix, mssClr.*S.trmR(t));
-    end
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % FINISH DRAWING & FLIP SCREEN IN BOTH EYES %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -276,33 +230,7 @@ if S.bStatic == 0
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % SHORT DELAY BEFORE GAME BEGINS %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    pause(0.75);
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % DETECT LEAP MOTION CONTROLLER %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % DETECT MOTION CONTROLLER: NUMBER OF SECONDS TO CHECK
-    sec2chk = 1;
-    % DETECT MOTION CONTROLLER: TRY TO DETECT FOR sec2chk 
-    bTrk = 0;
-    if     bTrk == 1 S.bUseMATLEAP(t,1) = true; 
-    elseif bTrk == 0 S.bUseMATLEAP(t,1) = false; 
-    end
-    
-    % SET THE MOUSE TO THE SCREEN CENTER
-    SetMouse(mssXpixBgn,mssYpixBgn,D.wdwPtr);
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % INITAL MOUSE OR LEAP POSITION %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if     S.bUseMATLEAP(t,1) == 0 % USE MOUSE
-        % GET MOUSE POSITION
-        [mssXpix,mssYpix] = GetMouse(D.wdwPtr); 
-    elseif S.bUseMATLEAP(t,1) == 1 % USE LEAP
-        % GET LEAP  POSITION
-        [bTrkChk,mssXYZmm0,mssXmm0,mssYmm0,mssZmm0] = psyMATLEAPpositionCheck(sec2chk,[-100 100],[30 400],[-100 100]);
-    end
-    
+    pause(0.75);    
     %%%%%%%%%%%%%%%%%%%
     % %%%%%%%%%%%%%%% %
     % % START TRIAL % %
@@ -313,26 +241,6 @@ if S.bStatic == 0
     
     % START FRAME LOOP
     for f = 1:numFrm
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % COLLECT MOUSE OR MATLEAP POSITION %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        if      S.bUseMATLEAP(t,1) == 0, 
-            % RAW MOUSE SCREEN COORDS IN PIXELS 
-            [mssXpix,mssYpix] = GetMouse(D.wdwPtr);
-            % MOUSE   XYZ COORDS IN MM W.R.T. MONITOR CENTER
-            mssXmm       =  (mssXpix-D.scrnXYpixCtr(1))./D.pixPerMmXY(1);
-            mssYmm       =  (mssYpix-D.scrnXYpixCtr(2))./D.pixPerMmXY(2); 
-            mssZmm       = -(mssYpix-D.scrnXYpixCtr(2))./D.pixPerMmXY(2); % MOUSE POS IN Zmm = MOUSE POS IN Ymm
-        elseif  S.bUseMATLEAP(t,1) == 1, 
-            % MATLEAP XYZ COORDS IN MM NORMALIZED BY 
-            [bTrk,mssXYZmm,mssXmm,mssYmm,mssZmm] = psyMATLEAPposition(mssXYZmm0,D.axSignMATLEAP);
-            
-            % LEAP TRACKING FAILED (PREVENTS EXPERIMENT FROM CRASHING)
-            if bTrk == 0
-               bTrkBad = true;
-               return;
-            end
-        end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % ZERO CERTAIN COORDINATES FOR MOTION TYPE %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -372,24 +280,6 @@ if S.bStatic == 0
             mssYmmL = mssYmm; mssYmmR = mssYmm;
         else error(['psyPresentTrialDetectionLMS: WARNING! unhandled mtnType=' num2str(S.mtnType(1,:)) '. WRITE CODE?!?']);
         end
-        % MOUSE SCREEN LR COORDS: PIXELS W.R.T. SCREEN CENTER
-        mssXpixL = mssXmmL.*D.pixPerMmXY(1) + mssXpixBgn;
-        mssXpixR = mssXmmR.*D.pixPerMmXY(1) + mssXpixBgn;
-        mssYpixL = mssYmmL.*D.pixPerMmXY(2) + mssYpixBgn;
-        mssYpixR = mssYmmR.*D.pixPerMmXY(2) + mssYpixBgn;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%% 
-        % STORE OBSERVER RESPONSE % IN COORDS W.R.T. SCREEN OR MONITOR CENTER 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%
-        S.rspXpixL(f,t) = mssXpixL - mssXpixBgn;
-        S.rspXpixR(f,t) = mssXpixR - mssXpixBgn;
-        S.rspXmm(f,t)   = mssXmm;
-        S.rspYmm(f,t)   = mssYmm;
-        S.rspZmm(f,t)   = mssZmm;
-        S.rspXmmL(f,t)  = mssXmmL;
-        S.rspXmmR(f,t)  = mssXmmR;
-        S.rspYmmL(f,t)  = mssYmmL;
-        S.rspYmmR(f,t)  = mssYmmR;
-        
         %%%%%%%%%%%%%%%%%%%%%%%%
         %% DRAW LEFT EYE BUFFER %
         %%%%%%%%%%%%%%%%%%%%%%%%
@@ -404,11 +294,6 @@ if S.bStatic == 0
         if bUseMsk, 
         Screen('DrawTexture', D.wdwPtr, [tex1oF], [],[D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], [D.wht,D.wht,D.wht].*S.trmL(t)); 
         end  
-        
-        % DRAW LEFT MOUSE CURSOR (XYZ POSITION VIA LE & RE)
-        if ~strcmp(S.mtnType(t,1),'O')
-        Screen('DrawDots', D.wdwPtr, [mssXpixL, mssYpixL], mssSzPix, mssClr.*S.trmL(t)); % 3D XZ MOUSE CURSOR POSITION   
-        end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%
         % DRAW RIGHT EYE BUFFER %
@@ -424,12 +309,7 @@ if S.bStatic == 0
         if bUseMsk,
         Screen('DrawTexture', D.wdwPtr, [tex1oF], [], [D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], [D.wht,D.wht,D.wht].*S.trmR(t)); 
         end
-        
-        % DRAW RIGHT MOUSE CURSOR (XZ POSITION VIA LE & RE)
-        if ~strcmp(S.mtnType(t,1),'O')
-        Screen('DrawDots', D.wdwPtr, [mssXpixR, mssYpixR], mssSzPix, mssClr.*S.trmR(t)); % 3D XZ MOUSE CURSOR POSITION
-        end
-        
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % FINISH DRAWING & FLIP SCREEN IN BOTH EYES %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -441,52 +321,6 @@ if S.bStatic == 0
     
     % TIMER: END TRIAL
     S.trlEndSec(t,1) = GetSecs()-trlBgnSec;
-    
-elseif S.bStatic == 1
-    % STATIC STIMULUS. TO CHECK SIZE, COLOR, ETC
-    while ~KbCheck
-        %%%%%%%%%%%%%%%%%%%%%%%%
-        % DRAW LEFT EYE BUFFER %
-        %%%%%%%%%%%%%%%%%%%%%%%%
-        Screen('SelectStereoDrawBuffer', D.wdwPtr, 0);
-        % DRAWING LEFT EYE FIXATION
-        Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmL(t), [D.fixStm]); 
-        % DRAW LEFT EYE STIMULUS
-        Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(1, t) S.tgtYpixL(1,t) S.tgtXpixL(1, t) S.tgtYpixL(1,t)] + D.plySqrPix, [], [], [], [D.wht D.wht D.wht].*S.trmL(t) );
-        % DRAW LEFT EYE 1/F TEXTURE
-        if bUseMsk,
-        Screen('DrawTexture', D.wdwPtr, [tex1oF], [],[D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], [D.wht D.wht D.wht].*S.trmL(t)); 
-        end
-        
-        % DRAW LEFT MOUSE CURSOR (XZ POSITION VIA LE & RE)
-        if ~strcmp(S.mtnType(t,1),'O')
-        Screen('DrawDots', D.wdwPtr, [mssXpixBgn, mssYpixBgn], mssSzPix, mssClr.*S.trmL(t));    % 3D XZ MOUSE CURSOR POSITION    
-        end
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%
-        % DRAW RIGHT EYE BUFFER %
-        %%%%%%%%%%%%%%%%%%%%%%%%%
-        Screen('SelectStereoDrawBuffer', D.wdwPtr, 1);
-        % DRAWING RIGHT EYE FIXATION
-        Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmR(t), [D.fixStm]);        
-        % DRAW RIGHT EYE STIMULUS
-        Screen('DrawTexture', D.wdwPtr, texRimg, [], [S.tgtXpixR(1, t) S.tgtYpixR(1,t) S.tgtXpixR(1, t) S.tgtYpixR(1,t)] + D.plySqrPix, [], [], [], [D.wht D.wht D.wht].*S.trmR(t));
-        % DRAW 1/F TEXTURE
-        if bUseMsk,
-        Screen('DrawTexture', D.wdwPtr, [tex1oF], [], [D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], [D.wht D.wht D.wht].*S.trmR(t)); 
-        end
-        
-        % DRAW RIGHT MOUSE CURSOR (XZ POSITION VIA LE & RE)
-        if ~strcmp(S.mtnType(t,1),'O')
-        Screen('DrawDots',    D.wdwPtr, [mssXpixBgn, mssYpixBgn], mssSzPix, mssClr.*S.trmR(t));    % 3D XZ MOUSE CURSOR POSITION    
-        end
-        
-        % FINISH DRAWING THIS FRAME
-        Screen('DrawingFinished', D.wdwPtr);
-        
-        % FLIP SCREEN
-        D.flipTime(t) = Screen('Flip', D.wdwPtr);
-    end
 end
         
 % CLOSE TEXTURES

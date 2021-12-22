@@ -1,6 +1,6 @@
-function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device, dfcL, dfcR, vdfL, vdfR, ndfL, ndfR, stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG, bStatic, axSignMATLEAP)
+function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device,stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 
-% function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device, dfcL, dfcR, vdfL, vdfR, ndfL, ndfR, stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG, bStatic, axSignMATLEAP)
+% function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device, stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 %
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
@@ -8,17 +8,9 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, dev
 %                 expDirection = 'directionCheck';
 %                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
 %                 [~,S] = LMSstimulusGeneration(1*size(MaxContrastLMS,1),MaxContrastLMS,1,0,0,0.932);
-%                 ExpLMSdetection(S,'JNK',65,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', [0.5], [0.5],[pi*(60/180)], 0, 1, 1, 0);
 %
-% run target tracking experiment to measure delays for different cone
-% contrast directions. Unlike ExpLMStracking, this function does not create
-% the stimuli themselves. Instead, it takes in the stimuli as an input
-% parameter. 
-%
-% TASK:      subjects must use the mouse or LEAP motion controller to
-%            track the target as accurately and precisely as possible
-%
-% ANALYSIS:  plotPFTdata.m -> for analyzing all runs
+% run target detection experiment to measure thresholds for different cone
+% contrast directions. 
 %
 % S       : stimulus struct from LMSstimulusGeneration
 % subjName:      three initial subject code
@@ -33,12 +25,6 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, dev
 % device:        version of SimVis device used in the current experiment
 %                'UPENN' -> Victor's stay UPenn (April-18) device
 %                'SV2'   -> second version
-% dfcL:           defocus in the left  eye in diopters
-% dfcR:           defocus in the right eye in diopters
-% vdfL:           optical density of virtual neutral density filter in left  eye
-% vdfR:           optical density of virtual neutral density filter in right eye
-% ndfL:           optical density of  real   neutral density filter in left  eye
-% ndfR:           optical density of  real   neutral density filter in right eye
 % stmType:        stimulus type
 %                'CGB'   -> compound   gabor  in one eye, gabor in other
 % mtnType:        motion type
@@ -70,14 +56,6 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, dev
 % bDEBUG:        flag for debugging
 %                1 -> DEBUGGIN!
 %                0 -> run for serious
-% bStatic:       flag for static experiment, to check on the screen the stimulus
-%                1 -> connect and run it
-%                0 -> not connect
-% axSignMATLEAP: sign convention for MATLEAP positions on each coordinate axis
-%                [ 1  1 -1] ->*rightside up*LEAP controller
-%                              righthand to lefthand coord system
-%                [-1 -1 -1] ->*updside down*LEAP controller
-%                              righthand to lefthand coord system
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % S:             stimulus parameters and subject responses
 % D:         	 display  parameters
@@ -89,8 +67,6 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, dev
 if ~exist('bSKIPSYNCTEST','var') || isempty(bSKIPSYNCTEST)  bSKIPSYNCTEST = 0; end
 if ~exist('bUseFeedback','var')  || isempty(bUseFeedback)   bUseFeedback = 0;  end
 if ~exist('bDEBUG','var')        || isempty(bDEBUG)         bDEBUG = 0;        end
-if ~exist('bStatic','var')       || isempty(bStatic)        bStatic = 0;       end
-if ~exist('axSignMATLEAP','var') || isempty(axSignMATLEAP)  axSignMATLEAP = [1 1 -1]; end
 
 %%%%%%%%%%%%%%%%%%
 % INPUT CHECKING % % ENSURE INPUTS ARE CONSISTENT WITH EXPERIMENT TYPES
@@ -98,63 +74,17 @@ if ~exist('axSignMATLEAP','var') || isempty(axSignMATLEAP)  axSignMATLEAP = [1 1
 
 % *** FIX INPUT CHECKS BEFORE FORGET ***
 
-expType = 'TRK';
-
-% VALID DEFOCUS INPUTS? (IF ANY ARE NON-ZERO...) ONE PAIR PER RUN ONLY
-if dfcL ~= 0 || dfcR ~= 0
-    if ~strcmp(expType,'STB') && ~strcmp(expType,'SBF')
-        error(['ExpLMSdetection: WARNING! dfcL=[' num2str(dfcL) '] and dfcR=[' num2str(dfcR) '] are INVALID inputs for expType=' expType]);
-    end
-end
-% VALID VDF INPUTS? (IF ANY ARE NON-ZERO...)
-if ~isempty(find(vdfL ~= 0, 1)) || ~isempty(find(vdfR ~= 0, 1))
-    if ~strcmp(expType,'VDF') && ~strcmp(expType,'SBF')
-        error(['ExpLMSdetection: WARNING! vdfL=[' num2str(vdfL) '] and vdfR=[' num2str(vdfR) '] are INVALID inputs for expType=' expType]);
-    end
-end
-% VALID NDF INPUTS? (IF ANY ARE NON-ZERO...) ONE PAIR PER RUN ONLY
-if ndfL ~= 0 || ndfR ~= 0
-    if ~strcmp(expType,'LVF') && ~strcmp(expType,'LSB')
-        error(['ExpLMSdetection: WARNING! ndfL=[' num2str(ndfL) '] and ndfR=[' num2str(ndfR) '] are INVALID inputs for expType=' expType]);
-    end
-end
-
-% *** SHOULD HAVE INPUT CHECKING FOR MICHELSON CONTRAST? THINK ***
-
-% % CHECK MICHELSON CONTRAST INPUTS
-% if ~isempty(find(mchL ~= 1, 1)) || ~isempty(find(mchR ~= 1, 1))
-%     if ~strcmp(expType,'CPE') && ~strcmp(expType,'CGB') && ~strcmp(expType,'MGB')
-%     error(['ExpLMSdetection: WARNING! mchL=[' num2str(mchL) '] and mchR[=' num2str(mchR) '] are INVALID inputs for expType=' expType]);
-%     end
-% end
-% CHECK MATLEAP SIGNED COORDINATE AXES
-if numel(axSignMATLEAP) ~= 3 || (~isequal(axSignMATLEAP,[1 1 -1]) & ~isequal(axSignMATLEAP,[-1 -1 -1]))
-    error(['ExpLMSdetection: WARNING! axSignMATLEAP must equal [1 1 -1] for rightside up) OR [-1 -1 -1] for upside down. axSignMATLEAP=[' num2str(axSignMATLEAP) ']']);
-else
-    D.axSignMATLEAP = axSignMATLEAP;
-    if     isequal(axSignMATLEAP,[ 1  1 -1]);
-        D.orientMATLEAP = 'rightsideup';
-    elseif isequal(axSignMATLEAP,[-1 -1 -1]);
-        D.orientMATLEAP = 'upsidedown';
-    end
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% UNIFY PARAMETER VALUES IF mtnType=BLX OR mtnType=BRX %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if strcmp(mtnType,'BLX') dfcR=dfcL; vdfR=vdfL; ndfR=ndfL; mchR=mchL; pssTypeR=pssTypeL; end
-if strcmp(mtnType,'BRX') dfcL=dfcR; vdfL=vdfR; ndfL=ndfR; mchL=mchR; pssTypeL=pssTypeR; end
+expType = 'DTC';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NUMBER OF CONDITIONS IN RUN %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-nCnd = max([size(vdfL,1) size(vdfR,1) size(mchL,1) size(mchR,1)]);
+nCnd = max([size(mchL,1) size(mchR,1)]);
 % TRIALS PER CONDITION
 trlPerCnd = S.trlPerRun./nCnd;
 % CHECK # TRIALS VALID GIVEN # CONDITIONS
 if mod(trlPerCnd,1) ~= 0 error(['ExpLMSdetection: WARNING! trlPerRun=' num2str(trlPerRun) ' must be a factor of nCnd=' num2str(nCnd) '!']); end;
 % DOUBLE CHECK THAT CONDITIONS ARE MATCHED
-if ~isequal(size(vdfL      ),size(    vdfR  )) error(['ExpLMSdetection: WARNING! vdfL     and vdfR     must be the same size. Check inputs!']); end;
 if ~isequal(size(mchL      ),size(    mchR  )) error(['ExpLMSdetection: WARNING! mchL     and mchR     must be the same size. Check inputs!']); end;
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -171,23 +101,8 @@ S.device       = repmat(device,      [S.trlPerRun, 1]);
 
 S.stmSzXYdeg   = repmat(stmSzXYdeg,  [S.trlPerRun, 1]);
 
-S.dfcL         = repmat(dfcL,        [S.trlPerRun, 1]);       % DEFOCUS IN LE (IN DIOPTERS)
-S.dfcR         = repmat(dfcR,        [S.trlPerRun, 1]);      % DEFOCUS IN RE (IN DIOPTERS)
-if size(vdfL(:),1) == 1
-    S.vdfL         = repmat(vdfL,        [S.trlPerRun, 1]);       % VIRTUAL OPTICAL DENSITY IN LE
-    S.vdfR         = repmat(vdfR,        [S.trlPerRun, 1]);       % VIRTUAL OPTICAL DENSITY IN RE
-else
-    S.vdfL         = imresize(vdfL(:),[S.trlPerRun,1],'nearest'); % VIRTUAL OPTICAL DENSITY IN LE
-    S.vdfR         = imresize(vdfR(:),[S.trlPerRun,1],'nearest'); % VIRTUAL OPTICAL DENSITY IN RE
-    indRnd         = randsample(S.trlPerRun,S.trlPerRun);
-    S.vdfL         = S.vdfL(indRnd,:);
-    S.vdfR         = S.vdfR(indRnd,:);
-end
 S.trmL         = opticaldensity2transmittance(S.vdfL, 0);     % TRANSMITTANCE OF VIRTUAL FILTER IN LE
 S.trmR         = opticaldensity2transmittance(S.vdfR, 0);     % TRANSMITTANCE OF VIRTUAL FILTER IN RE
-
-S.ndfL         = repmat(ndfL,        [S.trlPerRun, 1]);       %  REAL   OPTICAL DENSITY IN LE
-S.ndfR         = repmat(ndfR,        [S.trlPerRun, 1]);       %  REAL   OPTICAL DENSITY IN RE
 
 % NUMBER OF COMPONENTS
 nCmp = size(S.frqCpdL,2);
@@ -199,7 +114,6 @@ S.BWort       = imresize(BWort,[S.trlPerRun, 1],'nearest');
 
 S.magORval     = repmat('val',       [S.trlPerRun, 1]);       % SUBJ RESPONDS ACCORDING TO MAGNITUDE OF VARIABLE VS. SIGN OF VARIABLE?
 S.bUseFeedback = repmat(bUseFeedback,[S.trlPerRun, 1]);
-S.bStatic      = bStatic;
 
 % STIMULUS PARAMETERS IMAGE PARAMETERS
 S.imgSzXYdeg    = repmat(2.*[2 2],         [S.trlPerRun, 1]);
@@ -220,9 +134,6 @@ S.Vdps          = repmat(2.5,           [S.trlPerRun, 1]); % REMOVE FROM STRUCT
 
 % PHASE DISPARITIES (TEMPORAL OFFSETS)
 S.phsDspArcmin = repmat(phsDspArcmin', [S.trlPerRun./length(phsDspArcmin), 1]);
-% INITIAL PHASE DISPARITY (LEFT OR RIGHT SIDE START
-phsDegInit1             = 0;
-phsDegInit2             = 180;
 % S.phsDegInit   = repmat([phsDegInit1; phsDegInit2], [S.trlPerRun(1)/2, 1]);
 S.phsDegInit = round(rand([S.trlPerRun 1])).*180;
 % RANDOM INDEX
@@ -236,22 +147,7 @@ S.phsDspDeg    = S.phsDspArcmin./60;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 D.computer   = computer;
 D.cmpInfo    = psyComputerInfo();
-if     strcmp(D.cmpInfo.localHostName,'jburge-wheatstone')
-    D.stereoMode = 6;
-elseif strcmp(D.cmpInfo.localHostName,'Mac-mini-de-VioBioMac-11')
-    D.stereoMode = 2;
-elseif strcmp(D.cmpInfo.localHostName,'PORTATILVIOBIO')
-    D.stereoMode = 2;
-elseif strcmp(D.cmpInfo.localHostName, 'DESKTOP-1B5EIAM')
-    D.stereoMode = 2;
-elseif strcmp(D.cmpInfo.localHostName,'jburge')
-    % D.stereoMode = 0;   % NO STEREO MODE
-    D.stereoMode = 4;   % LEFT / RIGHT SPLIT SCREEN
-    %     D.stereoMode = 8; % RED  / BLUE  ANAGLYPH
-else
-    disp(['ExpLMSdetection: WARNING! running in stereoMode b/c D.cmpInfo.localHostName~=jburge-wheatstone. Rather D.cmpInfo.localHostName' D.cmpInfo.localHostName ]);
-    D.stereoMode = 0;
-end
+D.stereoMode = 0;
 
 %%%%%%%%%%%%%%%%%%%%
 % SET COLOR VALUES %
@@ -278,8 +174,6 @@ disp(['                            Stimulus type  = '         stmType      ]);
 disp(['                              Motion type  = '         mtnType      ]);
 disp(['                        Total trls in Exp  = ' num2str(S.trlPerRun) ]);
 disp(['                              Trls in Run  = ' num2str(S.trlPerRun) ]);
-disp(['                              Fcs Err Dff  = ' num2str(dfcR-dfcL)   ]);
-disp(['                              Opt Dns Dff  = ' num2str(vdfR-vdfL)   ]);
 for i=1,
     disp(['                 Saving PSYdata to fdirLoc = ' num2str(S.fdirLoc(1,:)) ]);
     disp(['                 Saving PSYdata to fdirSrv = ' num2str(S.fdirSrv(1,:)) ]);
@@ -532,7 +426,6 @@ end
 % D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||||',[],0,0.60);
 D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],2.*[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||||||',[],0,0.50);
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % MAKE 1/F TEXTURE MASK % (OR NOT)
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -586,18 +479,6 @@ Screen('Flip',D.wdwPtr);
 % WAIT UNTIL ALL KEYS ARE RELEASED
 while KbCheck(-1); end
 pause(30);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   COMMENTED OUT (WAIT FOR KEYPRESS)  %
-% (USING WAIT FOR MOUSE CLICK INSTEAD) % % INSIDE psyPresentTrialTrackingBinoLMS.m
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % WAIT FOR KEYPRESS
-% while 1
-%     [ keyIsDown, ~, keyCode ] = KbCheck(-1);
-%     if keyIsDown
-%         pause(.15);
-%         break;
-%     end
-% end
 
 %%%%%%%%%%%%%%%%%%%%%%
 % FONT SIZE AND TYPE %
@@ -773,12 +654,6 @@ end
 %%%%%%%%%%%%%
 % PLOT DATA %
 %%%%%%%%%%%%%
-maxLagSec = 2;
-smpBgnEnd = 1;
-bPLOTxcorr = 1;
-tLbl='X'; rLbl='X'; xcorrEasy(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr); xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--'); formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[35  386 476 420]);
-tLbl='Z'; rLbl='Z'; xcorrEasy(diff(S.tgtZmm),diff(S.rspZmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr); xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--'); formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[479 386 476 420]);
-tLbl='X'; rLbl='Z'; xcorrEasy(diff(S.tgtXmm),diff(S.rspZmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr); xlim([-0.5 1.5]); ylim([-.1 .25]); plot([0 0],ylim,'k--'); formatFigure(['Lag (sec)'],['Correlation'],['Q=' num2str(S.sigmaQmm(1)) '; Tgt' tLbl ' vs Rsp' rLbl]); set(gcf,'position',[917 386 476 420]);
 
 %%%%%%%%%%%%%
 % SAVE DATA %
@@ -789,26 +664,6 @@ if strcmp(D.cmpInfo.localHostName,'jburge-hubel')
 else
     savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'local',0,S,'S');
 end
-% if strcmp(S.expType(1,:),'BPF')
-%     S.stmLE = S.stmLE(:,:,1);
-%     S.stmRE = S.stmRE(:,:,1);
-%     for i = 1:5, disp(['ExpPulfrich: SAVING ONLY ONE stmLE AND stmRE IMAGE MATRIX B/C ALL ARE IDENTICAL...']); end
-% else
-%     for i = 1:5,
-%     disp(['ExpLMSdetection: WARNING! make sure to decide carefully whether or not to save all S.stmLE and S.stmRE fields w. expType=' expType(1,:)]);
-%     end
-% end
-%
-% if ismac == 1
-%     if strcmp(D.cmpInfo.localHostName, 'Mac-mini-de-VioBioMac-11') == 1;
-%         savePSYdataPFTlaptop(S.fname(1,:),S.expType(1, :),S.subjName(1, :),0,S,'S', [], D);
-%     else
-%         savePSYdataPFT(S.fname(1,:),S.expType(1, :),S.subjName(1, :),'both',0,S,'S',D,'D');
-%       % savePSYdataPRJ('PFT',S.fname(1,:),S.expType(1, :),S.subjName(1, :),'local',0,S,'S',D,'D');
-%     end
-% elseif ismac == 0
-%    savePSYdataPFTlaptop(S.fname(1,:),S.expType(1, :),S.subjName(1, :),0,S,'S', [], D);
-% end
 
 %%%%%%%%%%%%%%%%%
 % CLOSE SCREENS %

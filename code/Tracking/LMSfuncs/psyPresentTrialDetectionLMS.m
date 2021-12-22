@@ -98,6 +98,11 @@ HideCursor();
 %%%%%%%%%%%%%%%%%%%%
 numFrm = size(S.tgtXpixL(:,t),1);
 texLimg = Screen('MakeTexture', D.wdwPtr, S.stmLE(:, :, :, t), [], [], 2);
+stmBG = ones([0 0 0]);
+stmBG(:,:,1) = D.correctedBgd(1).*ones([size(S.stmLE,1) size(S.stmLE,2)]);
+stmBG(:,:,2) = D.correctedBgd(2).*ones([size(S.stmLE,1) size(S.stmLE,2)]);
+stmBG(:,:,3) = D.correctedBgd(3).*ones([size(S.stmLE,1) size(S.stmLE,2)]);
+texSimg = Screen('MakeTexture', D.wdwPtr, stmBG, [], [], 2);
 
 %%%%%%%%%%%%%%%%%%%
 % %%%%%%%%%%%%%%% %
@@ -107,29 +112,56 @@ texLimg = Screen('MakeTexture', D.wdwPtr, S.stmLE(:, :, :, t), [], [], 2);
 % TIMER: BEGIN TRIAL
 trlBgnSec = GetSecs();
 
-% START FRAME LOOP
-for f = 1:numFrm
-    %%%%%%%%%%%%%%%%%%%%%%%%
-    %% DRAW LEFT EYE BUFFER %
-    %%%%%%%%%%%%%%%%%%%%%%%%
-    % DRAW LEFT EYE BACKGROUND
-    Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmL(t), D.wdwXYpix);
-    % DRAWING LEFT EYE FIXATION STIMULUS
-    Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], [D.fixStm]); 
-    % DRAW LEFT EYE STIMULUS
-    Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix, [], [], [], []);
-    % DRAW LEFT EYE 1/F TEXTURE
-    if bUseMsk, 
-    Screen('DrawTexture', D.wdwPtr, [tex1oF], [],[D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], []); 
-    end  
+for j = 0:[S.numIntrvl-1]
+    sound(sin(0.54.*[0:1439]).*cosWindowFlattop([1 1440],720,720,0));
+    % START FRAME LOOP
+    for f = 1:numFrm
+        %%%%%%%%%%%%%%%%%%%%%%%%
+        %% DRAW LEFT EYE BUFFER %
+        %%%%%%%%%%%%%%%%%%%%%%%%
+        % DRAW LEFT EYE BACKGROUND
+        Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmL(t), D.wdwXYpix);
+        % DRAWING LEFT EYE FIXATION STIMULUS
+        Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], [D.fixStm]); 
+        % DRAW LEFT EYE STIMULUS
+ %       Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix, [], [], [], []);
+        %%%%%%%%%%%%%%
+        % INTERVAL 1 % PRESENT STD or CMP STIMULUS (AS APPROPRIATE)
+        %%%%%%%%%%%%%%
+        if j == 0
+            if     S.cmpIntrvl(t) == 0
+                Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+            elseif S.cmpIntrvl(t) == 1
+                Screen('DrawTexture', D.wdwPtr, texSimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+            end
+        end
+        %%%%%%%%%%%%%%
+        % INTERVAL 2 % PRESENT CMP or STD STIMULUS (AS APPROPRIATE)
+        %%%%%%%%%%%%%%
+        if j == 1
+            if     S.cmpIntrvl(t) == 0
+                % t0 = GetSecs;
+                Screen('DrawTexture', D.wdwPtr, texSimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                % Secs_DrawTexture(t) = GetSecs-t0;
+            elseif S.cmpIntrvl(t) == 1
+                % t0 = GetSecs;
+                Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                % Secs_DrawTexture(t) = GetSecs-t0;
+            end
+        end
+        % DRAW LEFT EYE 1/F TEXTURE
+        if bUseMsk, 
+        Screen('DrawTexture', D.wdwPtr, [tex1oF], [],[D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], []); 
+        end  
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % FINISH DRAWING & FLIP SCREEN IN BOTH EYES %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % FINISH DRAWING & FLIP
-    Screen('DrawingFinished', D.wdwPtr);
-    Screen('Flip', D.wdwPtr);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % FINISH DRAWING & FLIP SCREEN IN BOTH EYES %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % FINISH DRAWING & FLIP
+        Screen('DrawingFinished', D.wdwPtr);
+        Screen('Flip', D.wdwPtr);
 
+    end
 end
 
 % TIMER: END TRIAL

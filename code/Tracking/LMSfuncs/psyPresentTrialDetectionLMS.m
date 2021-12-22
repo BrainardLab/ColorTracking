@@ -74,12 +74,10 @@ end
 GetSecs();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ADD trmL and trmR TO STRUCT IF IT DOESN'T ALREADY EXIST %
+% ADD trm TO STRUCT IF IT DOESN'T ALREADY EXIST %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if ~isfield(S,'trmL') S.trmL(t) = 1; end
-if length(S.trmL) < t S.trmL(t) = 1; end
-if ~isfield(S,'trmR') S.trmR(t) = 1; end
-if length(S.trmR) < t S.trmR(t) = 1; end
+if ~isfield(S,'trm') S.trm(t) = 1; end
+if length(S.trm) < t S.trm(t) = 1; end
 
 % MAKE 1/F MASK TEXTURE
 if bUseMsk == 1, tex1oF = Screen('MakeTexture', D.wdwPtr, msk1oF,[],[],2); end % WARNING! REMEMBER TO CLOSE TEXTURES!
@@ -97,12 +95,8 @@ HideCursor();
 % STIMULUS TEXTURE %
 %%%%%%%%%%%%%%%%%%%%
 numFrm = size(S.tgtXpixL(:,t),1);
-texLimg = Screen('MakeTexture', D.wdwPtr, S.stmLE(:, :, :, t), [], [], 2);
-stmBG = ones([0 0 0]);
-stmBG(:,:,1) = D.correctedBgd(1).*ones([size(S.stmLE,1) size(S.stmLE,2)]);
-stmBG(:,:,2) = D.correctedBgd(2).*ones([size(S.stmLE,1) size(S.stmLE,2)]);
-stmBG(:,:,3) = D.correctedBgd(3).*ones([size(S.stmLE,1) size(S.stmLE,2)]);
-texSimg = Screen('MakeTexture', D.wdwPtr, stmBG, [], [], 2);
+texCmpImg = Screen('MakeTexture', D.wdwPtr, S.stmLE(:, :, :, t), [], [], 2);
+texStdImg = Screen('MakeTexture', D.wdwPtr, reshape(D.correctedBgd,[1 1 3]), [], [], 2);
 
 %%%%%%%%%%%%%%%%%%%
 % %%%%%%%%%%%%%%% %
@@ -120,19 +114,18 @@ for j = 0:[S.numIntrvl-1]
         %% DRAW LEFT EYE BUFFER %
         %%%%%%%%%%%%%%%%%%%%%%%%
         % DRAW LEFT EYE BACKGROUND
-        Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmL(t), D.wdwXYpix);
+        Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trm(t), D.wdwXYpix);
         % DRAWING LEFT EYE FIXATION STIMULUS
         Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], [D.fixStm]); 
         % DRAW LEFT EYE STIMULUS
- %       Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix, [], [], [], []);
         %%%%%%%%%%%%%%
         % INTERVAL 1 % PRESENT STD or CMP STIMULUS (AS APPROPRIATE)
         %%%%%%%%%%%%%%
         if j == 0
             if     S.cmpIntrvl(t) == 0
-                Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                Screen('DrawTexture', D.wdwPtr, texCmpImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
             elseif S.cmpIntrvl(t) == 1
-                Screen('DrawTexture', D.wdwPtr, texSimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                Screen('DrawTexture', D.wdwPtr, texStdImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
             end
         end
         %%%%%%%%%%%%%%
@@ -141,11 +134,11 @@ for j = 0:[S.numIntrvl-1]
         if j == 1
             if     S.cmpIntrvl(t) == 0
                 % t0 = GetSecs;
-                Screen('DrawTexture', D.wdwPtr, texSimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                Screen('DrawTexture', D.wdwPtr, texStdImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
                 % Secs_DrawTexture(t) = GetSecs-t0;
             elseif S.cmpIntrvl(t) == 1
                 % t0 = GetSecs;
-                Screen('DrawTexture', D.wdwPtr, texLimg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                Screen('DrawTexture', D.wdwPtr, texCmpImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
                 % Secs_DrawTexture(t) = GetSecs-t0;
             end
         end
@@ -168,8 +161,8 @@ end
 S.trlEndSec(t,1) = GetSecs()-trlBgnSec;
         
 % CLOSE TEXTURES
-Screen('Close', texLimg);
-clear('texLimg');
+Screen('Close', texCmpImg);
+clear('texCmpImg');
 
 % CLOSE 1/F TEXTURE
 if bUseMsk,

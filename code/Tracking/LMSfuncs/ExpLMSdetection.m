@@ -283,15 +283,6 @@ S.Apix          = S.Adeg.*D.pixPerDegXY(1);
 % S.lumR(1:S.trlPerRun,1)  = D.correctedBgd;
 S.meanDC(1:S.trlPerRun,1) = mean(D.correctedBgd);
 
-
-% Speficy LMS contrast vector
-% MaxContrastLMS = 0.1.*[0 1 0]; %m-iso-10p.pdf
-% MaxContrastLMS = 0.9.*[0 0 1]; %s-iso-90p.pdf
-% MaxContrastLMS = 0.1.*[0.7071 0.7071 0]; %l+m-iso-10p.pdf
-% MaxContrastLMS = 0.1.*[1 0 0]; %l-iso-10p.pdf
-% MaxContrastLMS = 0.1.*[0.7071 -0.7071 0]; %l-m-iso-10p.pdf
-% CREATE STIMULUS
-
 % Load Cone Fundamentals
 load T_cones_ss2
 
@@ -299,13 +290,6 @@ load T_cones_ss2
 S.Limg=[];
 S.Rimg=[];
 for t = 1:S.trlPerRun
-    Apix       = S.Apix(t);                % AMPLITUDE       (PIX)
-    phsDspDeg  = S.phsDspDeg(t);      % PHASE DISPARITY (RAD)
-    nCycPerSec = S.nCycPerSec(t);        % NUM CYCLE
-    phsDegInit = S.phsDegInit(t);
-    phsDspDeg  = S.phsDspDeg(t);      % PHASE DISPARITY (RAD)
-    stmSzXYpix = S.stmSzXYpix(t, :); % STIM SIZE IN XY (PIX)
-    
     % NUM FRAMES COMPUTED VIA DESIRED DURATION
     if strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
         %% STIMULUS DURATION IN SECONDS
@@ -408,6 +392,7 @@ end
 % D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||||',[],0,0.60);
 D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],2.*[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||||||',[],0,0.50);
 [fPosX,fPosY] = RectCenter(D.wdwXYpix);
+D.fixStm(:,end+1) = [fPosX-3 fPosY-3 fPosX+3 fPosY+3]';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % MAKE 1/F TEXTURE MASK % (OR NOT)
@@ -429,14 +414,11 @@ end
 S.mskScale = repmat(mskScale,[S.trlPerRun, 1]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% SECOND PRE-EXPERIMENT SCREEN
+% PRE-EXPERIMENT SCREEN
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BRING SCREEN UP TO DESIRED GRAY LEVEL
 Screen('FillRect', D.wdwPtr, D.correctedBgd);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% THIRD PRE-EXPERIMENT SCREEN
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % WAIT UNTIL ALL KEYS ARE RELEASED
 while KbCheck(-1); end
 Screen('TextSize', D.wdwPtr, 20);

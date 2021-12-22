@@ -101,9 +101,6 @@ S.device       = repmat(device,      [S.trlPerRun, 1]);
 
 S.stmSzXYdeg   = repmat(stmSzXYdeg,  [S.trlPerRun, 1]);
 
-S.trmL         = opticaldensity2transmittance(S.vdfL, 0);     % TRANSMITTANCE OF VIRTUAL FILTER IN LE
-S.trmR         = opticaldensity2transmittance(S.vdfR, 0);     % TRANSMITTANCE OF VIRTUAL FILTER IN RE
-
 % NUMBER OF COMPONENTS
 nCmp = size(S.frqCpdL,2);
 S.mchL        = imresize(mchL,[S.trlPerRun nCmp],'nearest');
@@ -305,29 +302,9 @@ for t = 1:S.trlPerRun
     stmSzXYpix = S.stmSzXYpix(t, :); % STIM SIZE IN XY (PIX)
     
     % NUM FRAMES COMPUTED VIA DESIRED DURATION
-    if     strcmp(S.mtnType(1,1),'S') % SINUSOIDAL MOTION
-        % STIMULUS DURATION IN SECONDS
-        secPerTrl     = 11;
-        % STIMULUS DURATION IN MILLSECONDS
-        S.durationMs  = repmat(secPerTrl.*1000,[S.trlPerRun 1]);;
-        % ENSURE THAT INTERFRAME INTERVAL (IN SEC) IS A NICE ROUND NUMBER
-        D.fps          = round(1./D.ifi);
-        D.ifi          = 1./D.fps;
-        % FRAME SAMPLES IN SECS
-        S.tSec         = [0:D.ifi:nSecPerTrial]';
-        % STIMULUS DURATION IN FRAMES
-        numFrm         = length(S.tSec);
-        sigmaQmm       = 0;
-        S.sigmaQmm     = repmat(sigmaQmm,[S.trlPerRun, 1]);
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % ONSCREEN IMAGE POSITION %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % DISPARITY CREATED SHIFTING THE LEFT EYE (phase difference added to LE)
-        S.tgtXpixL(:, t)=Apix.*cosd((2*pi*nCycPerSec).*S.tSec + phsDegInit + phsDspDeg);
-        S.tgtXpixR(:, t)=Apix.*cosd((2*pi*nCycPerSec).*S.tSec + phsDegInit);
-    elseif strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
+    if strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
         %% STIMULUS DURATION IN SECONDS
-        secPerTrl    = 11;
+        secPerTrl    = 1;
         % STIMULUS DURATION IN MILLISECONDS
         S.durationMs  = repmat(secPerTrl.*1000,[S.trlPerRun 1]);
         % ENSURE THAT INTERFRAME INTERVAL (IN SEC) IS A NICE ROUND NUMBER
@@ -425,6 +402,7 @@ end
 % D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||',[],0,0.75);
 % D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||||',[],0,0.60);
 D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],2.*[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||||||',[],0,0.50);
+[fPosX,fPosY] = RectCenter(D.wdwXYpix);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % MAKE 1/F TEXTURE MASK % (OR NOT)
@@ -445,211 +423,214 @@ end
 
 S.mskScale = repmat(mskScale,[S.trlPerRun, 1]);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% START RUNNING EXPERIMENT %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DRAW LEFT EYE CONTENT
-Screen('SelectStereoDrawBuffer', D.wdwPtr, 0);
-% DRAW LEFT EYE BACKGROUND
-Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmL(1), D.wdwXYpix);
-% DRAW LEFT EYE FIXATION
-Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmL(1), D.fixStm); % Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht]           , D.fixStm);
-% DRAW LEFT EYE 1/F MASK (IF NECESSARY)
-if bUseMsk == 1 % Screen('BlendFunction', D.wdwPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    Screen('DrawTexture', D.wdwPtr, tex1oF, [], [D.scrnXYpix.*(1-mskScale)/2 D.scrnXYpix-D.scrnXYpix.*(1-mskScale)/2], [], [], [], [D.wht D.wht D.wht].*S.trmL(1) );
-end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SECOND PRE-EXPERIMENT SCREEN
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BRING SCREEN UP TO DESIRED GRAY LEVEL
+Screen('FillRect', D.wdwPtr, D.correctedBgd);
 
-% DRAW RIGHT EYE CONTENT
-Screen('SelectStereoDrawBuffer', D.wdwPtr, 1);
-% DRAW RIGHT EYE BACKGROUND
-Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmR(1), D.wdwXYpix);
-% DRAW RIGHT EYE FIXATION
-Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmR(1), D.fixStm); % Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
-% DRAW RIGHT EYE 1/F MASK (IF NECESSARY)
-if bUseMsk == 1 % Screen('BlendFunction', D.wdwPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    Screen('DrawTexture', D.wdwPtr, tex1oF, [], [D.scrnXYpix.*(1-mskScale)/2 D.scrnXYpix-D.scrnXYpix.*(1-mskScale)/2], [], [], [], [D.wht D.wht D.wht].*S.trmR(1) );
-end
-
-% FINISH DRAWING AND FLIP
-Screen('DrawingFinished', D.wdwPtr);
+while KbCheck(-1); end
+if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+% PRESENT INSTRUCTIONS
+Screen('TextSize', D.wdwPtr, 20);
+%     Screen('DrawText',D.wdwPtr, ['Signal = ' num2str(tgtRMS2display) ' Noise = ' num2str(nseRMS2display)], ...
+%            0.8.*[fPosX], 0.65.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+Screen('DrawText',D.wdwPtr, ['Press the down arrow key to view the target in the crosshairs.'], ...
+       0.6.*[fPosX], 0.7.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+Screen('DrawText',D.wdwPtr, ['Press the up arrow key to start the experiment.'], ...
+       0.7.*[fPosX], 0.75.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
 Screen('Flip',D.wdwPtr);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THIRD PRE-EXPERIMENT SCREEN
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % WAIT UNTIL ALL KEYS ARE RELEASED
 while KbCheck(-1); end
-pause(30);
+Screen('TextSize', D.wdwPtr, 20);
+if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+Screen('DrawText',D.wdwPtr, ['First trial starts exactly one second after you hit the down arrow.'], ...
+       0.6.*[fPosX], 0.8.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+Screen('Flip',D.wdwPtr);
+% WAIT FOR KEYPRESS
+while 1
+    [ keyIsDown, ~, keyCode ] = KbCheck(-1);
+    if keyIsDown & find(keyCode) == key_D_ARROW
+        break;
+    end
+end
+% DRAW FIXATION STIM
+if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+Screen('Flip',D.wdwPtr);
+pause(1.0);
 
-%%%%%%%%%%%%%%%%%%%%%%
-% FONT SIZE AND TYPE %
-%%%%%%%%%%%%%%%%%%%%%%
-Screen('TextSize', D.wdwPtr, 24);
-Screen('TextFont', D.wdwPtr, 'Helvetica');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EXPERIMENT ITSELF
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% START PRESENTING TRIALS %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CREATE & DISPLAY STIMULI
 for t = 1:S.trlPerRun
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % CHANGE LUMINANCE (IF NECESSARY) %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%
-    % DRAW LEFT SCREEN %
-    %%%%%%%%%%%%%%%%%%%%
-    Screen('SelectStereoDrawBuffer', D.wdwPtr, 0);
-    % DRAW LEFT EYE BACKGROUND
-    Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmL(t), D.wdwXYpix);
-    % DRAW LEFT EYE FIXATION
-    Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmL(t), D.fixStm);
-    % DRAW LEFT EYE 1/F MASK
-    if bUseMsk == 1,
-        Screen('DrawTexture', D.wdwPtr, tex1oF, [],[D.scrnXYpix.*(1-mskScale)/2 D.scrnXYpix-D.scrnXYpix.*(1-mskScale)/2], [], [], [], [D.wht D.wht D.wht].*S.trmL(t) ); % Screen('BlendFunction', D.wdwPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%
-    % DRAW RIGHT SCREEN %
-    %%%%%%%%%%%%%%%%%%%%%
-    Screen('SelectStereoDrawBuffer', D.wdwPtr, 1);
-    % Screen('BlendFunction', D.wdwPtr, 'GL_ONE', 'GL_ONE');
-    % DRAW RIGHT EYE BACKGROUND
-    Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmR(t), D.wdwXYpix);
-    % DRAW RIGHT EYE FIXATION
-    Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmR(t), D.fixStm);
-    % DRAW RIGHT EYE 1/F MASK
-    if bUseMsk == 1,
-        Screen('DrawTexture', D.wdwPtr, tex1oF, [],[D.scrnXYpix.*(1-mskScale)/2 D.scrnXYpix-D.scrnXYpix.*(1-mskScale)/2], [], [], [], [D.wht D.wht D.wht].*S.trmR(t) ); % Screen('BlendFunction', D.wdwPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % FINISH DRAWING AND FLIP %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Screen('DrawingFinished', D.wdwPtr);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % INDIVIDUAL TRIAL CODE STARTS HERE %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+    % PRESENT TRIAL
+    psyPresentTrial2IFCmov(D,S,t,stdIphtXYTrgb(:,:,:,:,t),cmpIphtXYTrgb(:,:,:,:,t),msk1oF);
+    if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+    Screen('TextSize', D.wdwPtr, 14);
+    % MAKE & DRAW FIXATION CROSS
+    Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+    Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], [D.wht],[D.wht D.wht D.wht]);
+    % FLIP
     Screen('Flip', D.wdwPtr);
-    
-    pause(.2);
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % SET DEFAULT PRIORITY TO DEFAULT (DEFENSIVE MOVE) %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if t == 1 psySetPriorityDefault(); end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % SET MATLAB PRIORITY TO MAX PRIORITY %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    [oldPriority,maxPriority,bPriorityMax] = psySetPriorityMax();
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % PRESENT INDIVIDUAL TRIAL %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    [S,bLostTrack,bEscKeyPressed] = psyPresentTrialTrackingBinoLMS(D, S, t, msk1oF);
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % SET MATLAB PRIORITY TO OLD PRIORITY %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    bPriorityMax = psySetPriorityOld(oldPriority,maxPriority,bPriorityMax);
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % SALVAGE TRIAL IF PROBLEM OCCURED (IF POSSIBLE) %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if bLostTrack == 0 % NO ISSUES... PROCEED NORMALLY
-        S.lostTrackCnt(t,1) = 0;
-    elseif bLostTrack == 1 % LOST TRACK (FROM MATLEAP)
-        % COUNT NUMBER OF LOST TRACKS PER TRIAL
-        S.lostTrackCnt(t,1) = 1;
-        % TRY AGAIN (UP TO THREE TIMES)
-        while bLostTrack == 1 && S.lostTrackCnt(t) <= 3
-            % RETRY TRIAL
-            [S,bLostTrack,bEscKeyPressed] = psyPresentTrialTrackingBinoLMS(D, S, t, msk1oF);
-            % COUNT NUMBER OF LOST TRACKS DURING TRIALS
-            if bLostTrack == 1
-                S.lostTrackCnt(t,1) = S.lostTrackCnt(t) + 1;
-            end
-        end
-        % QUIT IF MANY TRACKS ARE LOST ON SAME TRIAL (SOMETHING IS WRONG)
-        if S.lostTrackCnt(t,1) > 3
-            % SHOW CURSOR
-            ShowCursor();
-            % CLOSE 1/F MASK TEXTURE
-            if bUseMsk == 1,
-                Screen('Close', tex1oF);
-            end
-            % CLOSE SCREEN
-            Screen('CloseAll');
-            sca
-            disp(['ExpLMSdetection: WARNING! Experiment quit b/c of MULTIPLE lost tracks']);
-            return;
-        end
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%
-    % DRAW LEFT SCREEN %
-    %%%%%%%%%%%%%%%%%%%%
-    Screen('SelectStereoDrawBuffer', D.wdwPtr, 0);
-    % DRAW LEFT EYE BACKGROUND
-    Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmL(t), D.wdwXYpix);
-    % DRAW LEFT EYE FIXATION
-    Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmL(t), D.fixStm);
-    % DRAW LEFT EYE 1/F MASK
-    if bUseMsk == 1,
-        Screen('DrawTexture', D.wdwPtr, tex1oF, [],[D.scrnXYpix.*(1-mskScale)/2 D.scrnXYpix-D.scrnXYpix.*(1-mskScale)/2], [], [], [], [D.wht D.wht D.wht].*S.trmL(t) ); % Screen('BlendFunction', D.wdwPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%
-    % DRAW RIGHT SCREEN %
-    %%%%%%%%%%%%%%%%%%%%%
-    Screen('SelectStereoDrawBuffer', D.wdwPtr, 1);
-    % Screen('BlendFunction', D.wdwPtr, 'GL_ONE', 'GL_ONE');
-    % DRAW RIGHT EYE BACKGROUND
-    Screen('FillRect', D.wdwPtr, D.correctedBgd.*S.trmR(t), D.wdwXYpix);
-    % DRAW RIGHT EYE FIXATION
-    Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht].*S.trmR(t), D.fixStm);
-    % DRAW RIGHT EYE 1/F MASK
-    if bUseMsk == 1,
-        Screen('DrawTexture', D.wdwPtr, tex1oF, [],[D.scrnXYpix.*(1-mskScale)/2 D.scrnXYpix-D.scrnXYpix.*(1-mskScale)/2], [], [], [], [D.wht D.wht D.wht].*S.trmR(t) ); % Screen('BlendFunction', D.wdwPtr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % FINISH DRAWING AND FLIP %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Screen('DrawingFinished', D.wdwPtr);
-    Screen('Flip', D.wdwPtr);
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % WAIT UNTIL ALL KEYS ARE RELEASED %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     while KbCheck(-1); end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % EXIT IF ESCAPE KEY PRESSED IN TRACKING TRIAL %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if bEscKeyPressed == 1
-        % SHOW CURSOR
-        ShowCursor();
-        % RETURN PRIORITY TO DEFAULT STATE
-        psySetPriorityDefault()
-        % CLOSE 1/F MASK TEXTURE
-        if bUseMsk == 1,
-            Screen('Close', tex1oF);
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % WAIT FOR SUBJECT RESPONSE %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    while 1
+        % WAIT FOR KEYPRESS
+        [ keyIsDown, ~, keyCode ] = KbCheck(-1);
+        if keyIsDown
+
+            % DOWN ARROW RESPONSE
+            if find(keyCode) == key_D_ARROW
+
+                % 1ST INTERVAL SELECTED
+                chsIntrvl = 0;
+                S = psyCollectResponse(S,t,chsIntrvl,S.magORval);
+
+                % FEEDBACK
+                if S.bUseFeedback(t) == 1
+                    psyFeedbackSound(S.Rcorrect(t));
+                end
+                % TIMING CHECKS
+                S.clock(t,:) = fix(clock);
+                break % breaks out of while loop and moves to next trial OR ends experiment
+            end
+
+            % UP  ARROW RESPONSE
+            if find(keyCode) == key_U_ARROW
+
+                % 2ND INTERVAL SELECTED
+                chsIntrvl = 1;
+                S = psyCollectResponse(S,t,chsIntrvl,S.magORval);
+
+                % FEEDBACK
+                if S.bUseFeedback(t) == 1
+                    psyFeedbackSound(S.Rcorrect(t));
+                end
+                % TIMING CHECKS
+                S.clock(t,:) = fix(clock);
+                break % breaks out of while loop and moves to next trial OR ends experiment
+            end
+
+            % % SPACE BAR RESPONSE (REPEAT TRIAL?)
+            % if find(keyCode) == key_SPACE_BAR
+            %
+            % % DO STUFF
+            %
+            %     break
+            % end
+
+            % EXIT EXPERIMENT
+            if keyCode(key_ESCAPE)
+                Screen('CloseAll');
+                % CLOSE VIDEO SWITCHER
+                % PsychVideoSwitcher('SwitchMode', D.sid, 0, 1); 
+                disp(['ExpEqvInputNse: WARNING! Experiment quit b/c of ESCAPE key press']);
+                return;
+                break;
+            end
+
+            while KbCheck(-1); end
         end
-        % CLOSE SCREEN
-        Screen('CloseAll');
-        sca
-        disp(['ExpLMSdetection: WARNING! Experiment quit b/c of ESCAPE key press']);
-        return;
     end
-    
-    % COUNTER TO CHANGE THE TEXTURE EVERY D.mskReset TRIALS
-    if bUseMsk == 1
-        if mod(t + 1, D.mskReset) == 0
-            Screen('Close', tex1oF);
-            % msk1oF = psyMask1overF(D.scrnXYpix,[kWidth kHeight],[0 0],0,1);
-            msk1oF = psyMask1overF(D.scrnXYpix.*mskScale,kRadius,[0 0],0,1);
-            tex1oF = Screen('MakeTexture', D.wdwPtr, msk1oF, [], [], 2);
-        end
-    end
-    
     pause(.15);
+
+    % BREAK 1/3 AND 2/3 OF THE WAY THROUGH THE EXP
+    if mod(t,breakEvery) == 0 & t ~=S.trlPerRun
+        % RELEASE ALL KEYS
+        while KbCheck(-1); end
+        
+        if   D.bUseMsk %MAKE MASK TEXTURE IF USING
+           Screen('Close',tex1oF);
+           clear msk1oF;
+           % MAKE 1/F TEXTURE AND CIRCLE
+           [~,mskNoise,mskCrcle] = psyMask1overF(D.scrnXYpix,D.kRadius,[0 0],0);
+           % SCALE 1/F MASK
+           mskNoise = mskNoise.*(D.gryNoVideoSwitcher./mean(mskNoise(:)));
+           % ADD CIRCLE
+           msk1oF   = cat(3,repmat(mskNoise,[1 1 3]),mskCrcle);
+           % CONVERT TO R+B
+           msk1oF = psyVideoSwitcherPHT2RGB(msk1oF,D.gamFncX,D.gamFncY,0);
+           tex1oF   = Screen('MakeTexture', D.wdwPtr, msk1oF,[],[],2);
+        else
+           msk1oF = [];
+        end
+        
+        % PRESENT INSTRUCTIONS
+        Screen('TextSize', D.wdwPtr, 20);
+        if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+        Screen('DrawText',D.wdwPtr, ['Press the down arrow key to view the target in the crosshairs.'], ...
+                0.6.*[fPosX], 0.7.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+        Screen('DrawText',D.wdwPtr, ['Press the up arrow key to continue the experiment.'], ...
+                0.7.*[fPosX], 0.75.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+        Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+        Screen('Flip',D.wdwPtr);
+
+        while 1
+            % MONITOR KEY PRESS
+            [ keyIsDown, ~, keyCode, ~] = KbCheck(-1);
+            % IF PRESS DOWN KEY, PRESENT PRACTICE TARGET
+            if keyIsDown & find(keyCode) == key_D_ARROW
+                for i = 1:size(practiceTargetCrt,4)
+                   Screen('TextSize', D.wdwPtr, 20);
+                   if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+                   Screen('DrawText',D.wdwPtr, ['Press the down arrow key to view the target in the crosshairs.'], ...
+                           0.6.*[fPosX], 0.7.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+                   Screen('DrawText',D.wdwPtr, ['Press the up arrow key to continue the experiment.'], ...
+                           0.7.*[fPosX], 0.75.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+                   tgt2lookAt  = Screen('MakeTexture', D.wdwPtr, squeeze(practiceTargetCrt(:,:,:,i)),[],[],2);
+                   Screen('DrawTexture', D.wdwPtr, tgt2lookAt, [], D.plySqrPix);
+                   Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+                   Screen('Flip',D.wdwPtr);
+                end
+            elseif keyIsDown & find(keyCode) == key_U_ARROW
+                break;
+            end
+        end
+        
+        % WAIT UNTIL ALL KEYS ARE RELEASED
+        while KbCheck(-1); end
+        Screen('TextSize', D.wdwPtr, 20);
+        if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+        Screen('DrawText',D.wdwPtr, ['Down arrow to continue.'], ...
+                0.6.*[fPosX], 0.8.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
+        Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+        Screen('Flip',D.wdwPtr);
+        % WAIT FOR KEYPRESS
+        while 1
+            % MONITOR KEY PRESS
+            [ keyIsDown, ~, keyCode ] = KbCheck(-1);
+            if keyIsDown & find(keyCode) == key_D_ARROW
+                break;
+            end
+        end
+        if   D.bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+        % DRAW FIXATION STIM
+        Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+        Screen('Flip',D.wdwPtr);
+        pause(1.0);
+    end
 end
+
 %% ------------------END OF SESSION--------------------
 %%%%%%%%%%%%%
 % PLOT DATA %

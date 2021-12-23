@@ -1,6 +1,6 @@
-function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device,stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
+function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg,stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 
-% function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, device, stmType, mtnType, mchL, mchR, BWort, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
+% function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 %
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
@@ -8,6 +8,7 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, dev
 %                 expDirection = 'directionCheck';
 %                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
 %                 [~,S] = LMSstimulusGeneration(1*size(MaxContrastLMS,1),MaxContrastLMS,1,0,0,0.932);
+%                 ExpLMSdetection(S,'JNK',65,[0],[15 60]./60,'CGB', 'BXZ', 1, 0, 1);
 %
 % run target detection experiment to measure thresholds for different cone
 % contrast directions. 
@@ -22,9 +23,6 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, dev
 % phsDspArcmin:  phase differences to introduce disparity in arcmin  [nPhaseDif x 1]
 %                phase to temporal offset with phased2offset.m and back with offset2phased.m
 % stmSzXYdeg:    stimulus size in X and Y dimensions in Arcmin       [2 x 1]
-% device:        version of SimVis device used in the current experiment
-%                'UPENN' -> Victor's stay UPenn (April-18) device
-%                'SV2'   -> second version
 % stmType:        stimulus type
 %                'CGB'   -> compound   gabor  in one eye, gabor in other
 % mtnType:        motion type
@@ -38,13 +36,6 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, dev
 %                        elliptical motion in depth (XZ    )
 % MaxContrastLMS: cone contrasts 
 %                   [nCnd x 3]
-% mchL:           michelson contrast for left eye
-%                   [ nCnd x nCmp ]
-% mchR:           michelson contrast for right eye
-%                   [ nCnd x nCmp ]
-% BWort:         orientation bandwidth in radians
-%                [    scalar   ] -> same   bandwidth for all  components
-%                [  1   x nCmp ] -> unique bandwidth for each component
 % bUseFeedback:  boolean indicating whether to use feedback or not
 %                1 -> use feedback
 %                0 -> don't
@@ -76,17 +67,6 @@ if ~exist('bDEBUG','var')        || isempty(bDEBUG)         bDEBUG = 0;        e
 
 expType = 'DTC';
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% NUMBER OF CONDITIONS IN RUN %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-nCnd = max([size(mchL,1) size(mchR,1)]);
-% TRIALS PER CONDITION
-trlPerCnd = S.trlPerRun./nCnd;
-% CHECK # TRIALS VALID GIVEN # CONDITIONS
-if mod(trlPerCnd,1) ~= 0 error(['ExpLMSdetection: WARNING! trlPerRun=' num2str(trlPerRun) ' must be a factor of nCnd=' num2str(nCnd) '!']); end;
-% DOUBLE CHECK THAT CONDITIONS ARE MATCHED
-if ~isequal(size(mchL      ),size(    mchR  )) error(['ExpLMSdetection: WARNING! mchL     and mchR     must be the same size. Check inputs!']); end;
-
 %%%%%%%%%%%%%%%%%%%%%%
 % STIMULUS STRUCTURE %
 %%%%%%%%%%%%%%%%%%%%%%
@@ -97,15 +77,8 @@ S.rndSeed      = randi(1000, 1); rng(S.rndSeed);
 S.expType      = repmat(expType,     [S.trlPerRun, 1]);
 S.stmType      = repmat(stmType,     [S.trlPerRun, 1]);      % STIMULUS TYPE
 S.mtnType      = repmat(mtnType,     [S.trlPerRun, 1]);      % MOTION   TYPE
-S.device       = repmat(device,      [S.trlPerRun, 1]);
 
 S.stmSzXYdeg   = repmat(stmSzXYdeg,  [S.trlPerRun, 1]);
-
-% NUMBER OF COMPONENTS
-nCmp = size(S.frqCpdL,2);
-S.mchL        = imresize(mchL,[S.trlPerRun nCmp],'nearest');
-S.mchR        = imresize(mchR,[S.trlPerRun nCmp],'nearest');
-S.BWort       = imresize(BWort,[S.trlPerRun, 1],'nearest');
 
 % S.frqCpdCutoff = repmat(frqCpdCutoff,[S.trlPerRun, 1]);       %
 
@@ -164,8 +137,8 @@ D.wht        = 1.0; % 255; % 1.0000;
 
 S.fname         = buildFilenamePSYdataLMS(expType,S.subjName(1,:),S.stmType(1,:),[],[]);
 S.fname         = repmat(S.fname,[S.trlPerRun 1]);
-S.fdirLoc       = buildFolderNamePSY('LS2',expType,S.subjName(1,:),'local');
-S.fdirSrv       = buildFolderNamePSY('LS2',expType,S.subjName(1,:),'server');
+S.fdirLoc       = buildFolderNamePSY('LS3',expType,S.subjName(1,:),'local');
+S.fdirSrv       = buildFolderNamePSY('LS3',expType,S.subjName(1,:),'server');
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % PRINT DATA TO SCREEN %
@@ -452,7 +425,7 @@ for t = 1:S.trlPerRun
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     % PRESENT TRIAL
  %   psyPresentTrial2IFCmov(D,S,t,stdIphtXYTrgb(:,:,:,:,t),cmpIphtXYTrgb(:,:,:,:,t),msk1oF);
-     psyPresentTrialDetectionLMS(D,S,t,msk1oF)
+     S = psyPresentTrialDetectionLMS(D,S,t,msk1oF);
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     Screen('TextSize', D.wdwPtr, 14);
     % MAKE & DRAW FIXATION CROSS

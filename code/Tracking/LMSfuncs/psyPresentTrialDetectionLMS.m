@@ -163,6 +163,8 @@ S.trlEndSec(t,1) = GetSecs()-trlBgnSec;
 % CLOSE TEXTURES
 Screen('Close', texCmpImg);
 clear('texCmpImg');
+Screen('Close', texStdImg);
+clear('texStdImg');
 
 % CLOSE 1/F TEXTURE
 if bUseMsk,

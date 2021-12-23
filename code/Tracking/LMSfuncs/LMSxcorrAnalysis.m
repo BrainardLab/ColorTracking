@@ -33,7 +33,7 @@ p.addParameter('sizeCI',68,@isnumeric);
 p.parse(Sall,modelType,varargin{:});
 
 % CONVERT MaxContrastLMS MATRIX TO ANGLE AND CONTRAST IN COLOR SPACE
-colorAngle = round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)));
+colorAngle    = round(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1)));
 colorContrast = round(sqrt(Sall.MaxContrastLMS(:,3).^2+Sall.MaxContrastLMS(:,1).^2),3);
 % OBTAIN UNIQUE COMBINATIONS OF ANGLE AND CONTRAST
 colorAngleContrastUnq = unique([colorAngle colorContrast],'rows');

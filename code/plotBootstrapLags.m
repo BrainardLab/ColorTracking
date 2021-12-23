@@ -1,5 +1,5 @@
 % test the tfeCTM
-subjID = 'BMC';
+subjID = 'MAB';
 %% Load the data
 projectName = 'CorticalColorMapping';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');

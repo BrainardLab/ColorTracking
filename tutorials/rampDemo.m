@@ -15,12 +15,15 @@ end
 % EITHER [] OR 2
 % bPlusPlusMode = [];
 bPlusPlusMode = 2;
-
-bUsePhotoDiode = 1;
+% USE PHOTODIODE OR NOT? 
+bUsePhotoDiode = 0;
 % CREATE NEW GAMMA TABLE
-newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
+newCLUT1 = repmat(linspace(0,0.0625,256)',[1 3]);
 % CREATE ANOTHER GAMMA TABLE
-newCLUT2 = repmat(linspace(0,0.0625,256)',[1 3]);
+newCLUT2 = repmat(linspace(0,1,256)',[1 3]);
+newCLUT2(:,1) = newCLUT2(randperm(size(newCLUT2,1)),1);
+newCLUT2(:,2) = newCLUT2(randperm(size(newCLUT2,1)),2);
+newCLUT2(:,3) = newCLUT2(randperm(size(newCLUT2,1)),3);
 leaveOutGuns = [];
 if ~isempty(leaveOutGuns)
     newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
@@ -30,7 +33,7 @@ if ~isempty(leaveOutGuns)
 end
 % HOW LONG TO DISPLAY EACH GAMMA TABLE
 tSecCLUT1 = 5;
-tSecCLUT2 = 80;
+tSecCLUT2 = 40;
 rampTest = 12;
 % DURATION OF MEASUREMENT IF MEASURING
 durationInSeconds = tSecCLUT2*0.8;

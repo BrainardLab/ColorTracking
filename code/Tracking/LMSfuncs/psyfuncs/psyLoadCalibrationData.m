@@ -62,7 +62,7 @@ if strcmp(localhostname,'ben-Precision-7520')
 elseif strcmp(localhostname,'jburge-marr')   
    fdir = ['/Users/Shared/VisionScience/BurgeLabCalibrationData/'];    
 elseif strcmp(localhostname,'blobfish')
-   fdir = '/home/brainardlab/labDropbox/CNST_materials/ColorTracking/calData/';
+   fdir = '/home/brainardlab/labDropbox/CNST_materials/ColorTrackingTask/calData/';
 elseif strcmp(localhostname,'BrainardLab-21-01')   
    fdir = ['/Users/michael/Documents/MATLAB/toolboxes/Psychtoolbox-3/Psychtoolbox/PsychCalDemoData/']; 
 else
@@ -73,18 +73,7 @@ if flag == 0 || exist([fdir fname],'file') ~= 2
     % TRY LOADING DATA FROM SERVER
     fdir = ['/Volumes/Data/BurgeLabCalibrationData/'];
 end
-% HARD CODED DIRECTORY ON VICTOR RODRIGUEZ'S COMPUTER
-if flag == 0 && (strcmp(localhostname, 'Mac-mini-de-VioBioMac-11') || strcmp(localhostname, 'PORTATILVIOBIO') || strcmp(localhostname, 'IVIO-2'))
-    if strcmp(localhostname, 'Mac-mini-de-VioBioMac-11')
-        fdir = '/Users/victor/Documents/burgelabtoolbox/BurgeLabCalibrationData/';
-    elseif strcmp(localhostname, 'PORTATILVIOBIO') || strcmp(localhostname, 'IVIO-2')
-        fdir = ['F:/burgelabtoolbox/BurgeLabCalibrationData/'];
-    elseif strcmp(localhostname, 'DESKTOP-1B5EIAM')
-        fdir = ['C:\Users\PerceptionLab\Documents\BurgeLabCalibrationData\BurgeLabCalibrationData\'];
-    else
-        disp('psyLoadCalibrationData: WARNING! could not load calibration data. Computer not recognized')
-    end
-end
+
 cal  = psyLoadCalFile(fname,[],fdir);
 
 % CONVERT GAMMA DATA IN cal STRUCT TO STANDARD FORMAT

@@ -40,7 +40,7 @@ cmpInfo = psyComputerInfo;
 switch userID
     case {'brainardlab'}
         setpref(projectName,'dropboxPath',fullfile('/home',userID,'labDropbox'));
-        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
+        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');
     case{'michael'}
         setpref(projectName,'dropboxPath',fullfile('/Users',userID,'labDropbox'));
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');

@@ -10,7 +10,7 @@ function gradientDemo(benchmark)
 % EITHER [] OR 2
 % bPlusPlusMode = [];
 bPlusPlusMode = 2;
-
+nBitsSystem = 256;
 % Default to mode 0 - Just a nice demo.
 if nargin < 1
     benchmark = 0;
@@ -20,7 +20,7 @@ end
 PsychDefaultSetup(2);
 
 % Disable synctests for this quick demo:
-oldSyncLevel = Screen('Preference', 'SkipSyncTests', 2);
+oldSyncLevel = Screen('Preference', 'SkipSyncTests', 0);
 
 % Choose screen with maximum id - the secondary display:
 screenid = max(Screen('Screens'));
@@ -30,33 +30,33 @@ PsychImaging('PrepareConfiguration');
 
 % OPEN WINDOW WITH BITS++ FUNCTION
 % [win,winRect]= PsychImaging('OpenWindow', screenid, 0.5);
-[win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid,[0.5 0.5 0.5].*256);
+[win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid,[0.5 0.5 0.5].*nBitsSystem);
 
 % SIZE OF STIMULUS ON SCREEN
 stimRect = [0 round((winRect(4)*0.4)) winRect(3) round((winRect(4)*0.6))];
 % CREATE NEW GAMMA TABLE
-newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
+newCLUT1 = repmat(linspace(0,1.0,nBitsSystem)',[1 3]);
 % CREATE ANOTHER GAMMA TABLE
-newCLUT2 = repmat(linspace(0,0.1,256)',[1 3]);
+newCLUT2 = repmat(linspace(0,0.05,nBitsSystem)',[1 3]);
 leaveOutGuns = [];
 if ~isempty(leaveOutGuns)
-    newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
-    newCLUT1(:,leaveOutGuns(2)) = zeros([256 1]);
-    newCLUT2(:,leaveOutGuns(1)) = zeros([256 1]);
-    newCLUT2(:,leaveOutGuns(2)) = zeros([256 1]);
+    newCLUT1(:,leaveOutGuns(1)) = zeros([nBitsSystem 1]);
+    newCLUT1(:,leaveOutGuns(2)) = zeros([nBitsSystem 1]);
+    newCLUT2(:,leaveOutGuns(1)) = zeros([nBitsSystem 1]);
+    newCLUT2(:,leaveOutGuns(2)) = zeros([nBitsSystem 1]);
 end
 % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',win);
 
 % HOW LONG TO DISPLAY EACH GAMMA TABLE
-tSecCLUT1 = 5;
-tSecCLUT2 = 20;
+tSecCLUT1 = 10;
+tSecCLUT2 = 10;
 
 % LOAD NEW GAMMA TABLE
 Screen('LoadNormalizedGammaTable', win, newCLUT1,bPlusPlusMode);
 
 % CREATE GRADIENT RUNNING FROM MIN TO MAX VALUE
-gradientTest = linspace(0,1,256).*256;
+gradientTest = -1+linspace(0,1,nBitsSystem).*nBitsSystem;
 % Build a procedural gabor texture for a grating with a support of tw x th
 % pixels, and a RGB color offset of 0.5 -- a 50% gray.
 % squarewavetex = CreateProceduralSquareWaveGrating(win, res, res, [.5 .5 .5 0], res/2);

@@ -11,12 +11,12 @@ function [data,timeAxis] = rampDemoNoBitsPlus(benchmark)
 if nargin < 1
     benchmark = 0;
 end
-
-bUsePhotoDiode = 1;
+% USE PHOTODIODE OR NOT? 
+bUsePhotoDiode = 0;
 % CREATE NEW GAMMA TABLE
 newCLUT1 = repmat(linspace(0,1.0,256)',[1 3]);
 % CREATE ANOTHER GAMMA TABLE
-newCLUT2 = repmat(linspace(0,0.0625,256)',[1 3]);
+newCLUT2 = repmat(linspace(0.375,0.625,256)',[1 3]);
 leaveOutGuns = [];
 if ~isempty(leaveOutGuns)
     newCLUT1(:,leaveOutGuns(1)) = zeros([256 1]);
@@ -26,7 +26,7 @@ if ~isempty(leaveOutGuns)
 end
 % HOW LONG TO DISPLAY EACH GAMMA TABLE
 tSecCLUT1 = 5;
-tSecCLUT2 = 80;
+tSecCLUT2 = 40;
 rampTest = 12./256;
 % DURATION OF MEASUREMENT IF MEASURING
 durationInSeconds = tSecCLUT2*0.8;

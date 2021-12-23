@@ -1,6 +1,6 @@
-function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg,stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
+function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 
-% function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg, stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
+% function [S D] = ExpLMSdetection(S,subjName,IPDmm, stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 %
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
@@ -8,7 +8,7 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg,stmT
 %                 expDirection = 'directionCheck';
 %                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
 %                 [~,S] = LMSstimulusGeneration(1*size(MaxContrastLMS,1),MaxContrastLMS,1,0,0,0.932);
-%                 ExpLMSdetection(S,'JNK',65,[0],[15 60]./60,'CGB', 'BXZ', 1, 0, 1);
+%                 ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', 1, 0, 1);
 %
 % run target detection experiment to measure thresholds for different cone
 % contrast directions. 
@@ -19,10 +19,6 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm, phsDspArcmin, stmSzXYdeg,stmT
 %                'JDB'   -> Johannes Daniel Burge
 %                'LKC'   -> Larry K Cormack
 %                'VRL'   -> Victor Rodriguez Lopez
-% trlPerRun:     trials per run.  must be multiple of number of phase disparities (phsDspArcmin)
-% phsDspArcmin:  phase differences to introduce disparity in arcmin  [nPhaseDif x 1]
-%                phase to temporal offset with phased2offset.m and back with offset2phased.m
-% stmSzXYdeg:    stimulus size in X and Y dimensions in Arcmin       [2 x 1]
 % stmType:        stimulus type
 %                'CGB'   -> compound   gabor  in one eye, gabor in other
 % mtnType:        motion type
@@ -78,8 +74,6 @@ S.expType      = repmat(expType,     [S.trlPerRun, 1]);
 S.stmType      = repmat(stmType,     [S.trlPerRun, 1]);      % STIMULUS TYPE
 S.mtnType      = repmat(mtnType,     [S.trlPerRun, 1]);      % MOTION   TYPE
 
-S.stmSzXYdeg   = repmat(stmSzXYdeg,  [S.trlPerRun, 1]);
-
 % S.frqCpdCutoff = repmat(frqCpdCutoff,[S.trlPerRun, 1]);       %
 
 S.magORval     = 'mag';       % SUBJ RESPONDS ACCORDING TO MAGNITUDE OF VARIABLE VS. SIGN OF VARIABLE?
@@ -106,16 +100,6 @@ S.Adeg          = repmat(2.5,           [S.trlPerRun, 1]);
 S.nCycPerSec    = repmat(1,             [S.trlPerRun, 1]);
 % VELOCITY
 S.Vdps          = repmat(2.5,           [S.trlPerRun, 1]); % REMOVE FROM STRUCT
-
-% PHASE DISPARITIES (TEMPORAL OFFSETS)
-S.phsDspArcmin = repmat(phsDspArcmin', [S.trlPerRun./length(phsDspArcmin), 1]);
-% S.phsDegInit   = repmat([phsDegInit1; phsDegInit2], [S.trlPerRun(1)/2, 1]);
-S.phsDegInit = round(rand([S.trlPerRun 1])).*180;
-% RANDOM INDEX
-indRnd = randsample(S.trlPerRun, S.trlPerRun);
-S.phsDegInit   = S.phsDegInit(indRnd);
-S.phsDspArcmin = S.phsDspArcmin(indRnd);
-S.phsDspDeg    = S.phsDspArcmin./60;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DETERMINE RIG IDENTITY & STEREO MODE %
@@ -243,7 +227,6 @@ D.plySqrPix    = CenterRect([0 0 D.plyXYpix(1, 1) D.plyXYpix(1, 2)], D.wdwXYpix)
 plySqrPixCrdXY = D.plySqrPix(1:2);
 
 % STIMULUS PARAMETERS IN PIXELS (REQUIRES DISPLAY INFO)
-S.stmSzXYpix    = bsxfun(@times,S.stmSzXYdeg,D.pixPerDegXY);
 S.imgSzXYpix    = bsxfun(@times,S.imgSzXYdeg,D.pixPerDegXY);
 S.fixStmSzXYpix = bsxfun(@times,S.fixStmSzXYdeg,D.pixPerDegXY);
 S.Apix          = S.Adeg.*D.pixPerDegXY(1);

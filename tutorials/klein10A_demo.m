@@ -65,8 +65,8 @@ screenNumber = max(screens);
 
 
 % ------ OPEN THE DEVICE ----------------------------------------------
-status = K10A_device('open', '/dev/tty.usbserial-KU000000');
-if (status == 0)
+ status = K10A_device('open', '/dev/ttyUSB0');
+ if (status == 0)
     disp('Opened Klein port');
 elseif (status == -1)
     disp('Could not open Klein port');
@@ -137,8 +137,8 @@ disp('Hit enter to turn lights off'); pause;
 [status, response] = K10A_device('sendCommand', 'LockInRange2');
 
 % ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
-[xDesired, yDesired, YDesired] = YZToxyY(targetXYZ);
-fprintf('CIE (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xDesired, yDesired, YDesired);
+[xyYDesired] = XYZToxyY(targetXYZ);
+fprintf('CIE (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
 
 for k = 1:5
     [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');

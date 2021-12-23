@@ -46,6 +46,8 @@ switch userID
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+        figureSavePath = fullfile(CNST_analysis, 'Results');
+        
     case{'michael'}
         dropboxPath = fullfile('/Users',userID,'labDropbox');
         CNST_analysis = fullfile(dropboxPath,'CNST_analysis','ColorTracking');
@@ -53,9 +55,10 @@ switch userID
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+        figureSavePath = fullfile(CNST_analysis, 'Results');
     case{'jburge-hubel'}
         setpref(projectName,'dropboxPath',[]);
-        CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');      
+        CalFolder = fullfile('/Users','Shared','Matlab','BurgeLabCalibrationData');
         paramsCacheFolder     = '';
         bootParamsCacheFolder = '';
     case{'dhb'}
@@ -69,20 +72,23 @@ switch userID
         CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTracking');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
-
+        figureSavePath = fullfile(CNST_analysis, 'Results');
+        
+        
     otherwise
         setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)']);
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
         CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTracking');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+        figureSavePath = fullfile(CNST_analysis, 'Results');
         
 end
 
 setpref(projectName,'paramsCacheFolder',paramsCacheFolder);
 setpref(projectName,'bootParamsCacheFolder',bootParamsCacheFolder);
 setpref(projectName,'CalFolder',CalFolder);
-
+setpref(projectName,'figureSavePath',figureSavePath);
 setpref('BrainardLabToolbox','CalDataFolder',CalFolder);
 
 if ismac

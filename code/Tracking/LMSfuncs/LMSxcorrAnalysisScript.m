@@ -4,7 +4,7 @@ clear all
 %% LOAD DATA
 subjID  = 'MAB';
 expName = 'LS3';
-theRuns = 1:10;
+theRuns = 1:20;
 
 figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
 
@@ -72,7 +72,7 @@ for jj = 1:length(uniqColorDirs)
     plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
 end
 % Plot it!
-[tcHndl] =plotParams(matrixContrasts,lags,plotColors',plotNames,'yLimVals', [0.3 .8],'semiLog',false);
+[tcHndl] =plotParams(matrixContrasts,lags,plotColors',plotNames,'yLimVals', [0.3 .9],'semiLog',false);
 
 % Save it!
 figureSizeInches = [8 8];
@@ -138,7 +138,7 @@ plotNames.title  = 'Lag Vs. Proportion S';
 plotNames.xlabel  = 'S / (S + L) (Proportion S)';
 plotNames.ylabel = 'Lag (s)';
 
-[tcHndl] = scatterParams(matSContrast,lags,plotColors',plotNames,'yLimVals', [.3 .8],'semiLog',false,'xTickVals',[],'sz',12.^2,'contrastAlpha',scaledContrasts);
+[tcHndl] = scatterParams(matSContrast,lags,plotColors',plotNames,'yLimVals', [.3 .9],'semiLog',false,'xTickVals',[],'sz',12.^2,'contrastAlpha',scaledContrasts);
 
 set(tcHndl, 'Renderer', 'Painters');
 figureSizeInches = [8 8];

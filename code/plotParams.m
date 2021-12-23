@@ -28,6 +28,7 @@ p.addRequired('plotColors',@ismatrix);
 p.addRequired('plotNames',@isstruct);
 p.addParameter('errorBarsSTD',[],@isnumeric);
 p.addParameter('errorBarsCI',[],@isstruct);
+p.addParameter('bootstrapMeans',[],@ismatrix);
 p.addParameter('sz',12,@isscalar);
 p.addParameter('yLimVals',[0.2 0.6],@isvector);
 p.addParameter('semiLog',true,@islogical);
@@ -35,8 +36,10 @@ p.addParameter('legendLocation','northeastoutside',@ischar);
 p.parse(xAxisVals,yAxisVals,plotColors, plotNames, varargin{:});
 
 %% init the plot
+
 tcHndl = figure;
-hold on;
+
+
 
 % get the number of lines to plot
 numLines = size(yAxisVals,2);
@@ -45,19 +48,20 @@ numLines = size(yAxisVals,2);
 % Loop over the lines
 for ii = 1:numLines
     
+    hold on;
+    if ~isempty(p.Results.errorBarsSTD)
+        e = errorbar(xAxisVals(:,ii),yAxisVals(:,ii),p.Results.errorBarsSTD(:,ii))
+    elseif ~isempty(p.Results.errorBarsCI)
+        e = errorbar(xAxisVals(:,ii),yAxisVals(:,ii),p.Results.errorBarsCI.lower(:,ii),p.Results.errorBarsCI.upper(:,ii),...
+            'LineWidth',2,'Color',plotColors(:,ii))
+    end
+    
     plot(xAxisVals(:,ii),yAxisVals(:,ii),'o--', ...
         'MarkerEdgeColor',.3*plotColors(:,ii),...
         'MarkerFaceColor',plotColors(:,ii),...
         'Color',plotColors(:,ii),...
         'LineWidth',2,...
         'MarkerSize',p.Results.sz);
-    if ~isempty(p.Results.errorBarsSTD)
-        e = errorbar(xAxisVals(:,ii),yAxisVals(:,ii),p.Results.errorBarsSTD(:,ii))
-    elseif ~isempty(p.Results.errorBarsCI)
-        e = errorbar(xAxisVals(:,ii),yAxisVals(:,ii),p.Results.errorBarsCI.lower(:,ii),p.Results.errorBarsCI.upper(:,ii),...
-            'LineWidth',2,'Color',plotColors(:,ii))
-        
-    end
 end
 
 axis square;

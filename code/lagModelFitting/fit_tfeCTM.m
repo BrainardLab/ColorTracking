@@ -4,6 +4,8 @@ subjID = 'BMC';
 projectName = 'CorticalColorMapping';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
+plotInfo.figSavePath = getpref(projectName,'figureSavePath');
+
 % get subject code
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
@@ -14,7 +16,9 @@ elseif strcmp(subjID,'KAS')
 end
 
 load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
-
+load(fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']));
+% Get the CIs
+[upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68);
 %% Make the packet
 lagVec = lagsMat(:)';
 timebase = 1:length(lagVec);
@@ -95,7 +99,7 @@ fprintf('\nThe old way parameters:\n');
 ctmOBJ.paramPrint(oldWayParams)
 
 targetLags = 0.35;
-numSamples = 300; 
+numSamples = 300;
 measuredDirections = uniqueColorDirs(:)';
 [C_1, sampleBaseTheta_1, targetL_1, targetS_1,expDirPoints] = generateIsorepsoneContour(fitParams, targetLags, numSamples,...
     'dataDirections',measuredDirections);
@@ -119,10 +123,10 @@ p2 = line(targetL_1.neg,targetS_1.neg,'color', [0 63 92]./256, 'LineWidth', 2);
 %scatter the experimental directions intesect with contour
 sz = 30;
 scatter(expDirPoints(1,:),expDirPoints(2,:),sz,'MarkerEdgeColor',[0.3 .3 .3],...
-              'MarkerFaceColor',[0.75,0.5,0.5],...
-              'LineWidth',1.5)
-     
-          %% Get the null direction 
+    'MarkerFaceColor',[0.75,0.5,0.5],...
+    'LineWidth',1.5)
+
+%% Get the null direction
 nullDirection = atand(fitParams.weightL ./ fitParams.weightS);
 
 fprintf('The null direction is: %1.2f\n',nullDirection)
@@ -145,11 +149,14 @@ legend([p1,spt],{sprintf('%g',targetLags(1)),'null'})
 plotInfo.title  = 'Lag Vs. Contrast';
 plotInfo.xlabel  = 'Contrast (%)';
 plotInfo.ylabel = 'Lag (s)';
+plotInfo.figureSizeInches = [19 12];
+plotInfo.subjCode    = subjCode;
 
-figSaveInfo.subjCode    = subjCode;
-figSaveInfo.figureSizeInches = [18 12];
 directionGroups = {[0,90],[75, -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-0.9,-22.5]};
 
+CIs.upper = abs(upperCI - meanLagBtstrpLagMat);
+CIs.lower = abs(meanLagBtstrpLagMat - lowerCI);
 
-plotDirectionPairs(matrixContrasts,lagsMat,lagsFromFitMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors)
+
+plotDirectionPairs(matrixContrasts,lagsMat,lagsFromFitMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',[],'errorBarsCI',CIs,'yLimVals',[0.2 0.6])
 

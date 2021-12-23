@@ -1,6 +1,6 @@
-function [r, rSmooth, rParam, negLL] = LMSxcorrAnalysis(Sall,modelType,varargin)
+function [r, rSmooth, rParam, negLL, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType,varargin)
 %
-% function [r, rSmooth, rParam] = LMSxcorrAnalysis(Sall,modelType)
+% function [r, rSmooth, rParam, negLL, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType)
 %
 % example calls:
 %                 % LOAD DATA
@@ -25,9 +25,11 @@ p.addRequired('Sall',@isstruct);
 p.addRequired('modelType',@ischar);
 p.addParameter('bPLOTrawXCORR',0,@isnumeric);
 p.addParameter('bPLOTfitsOnly',0,@isnumeric);
-p.addParameter('bPLOTfitsAndRaw',0,@isnumeric);
+p.addParameter('bPLOTfitsAndRaw',0,@islogical);
 p.addParameter('bPLOTlags',0,@isnumeric);
 p.addParameter('bPLOTfwhh',0,@isnumeric);
+p.addParameter('nBootstrapIter',0,@isnumeric);
+p.addParameter('sizeCI',68,@isnumeric);
 p.parse(Sall,modelType,varargin{:});
 
 % CONVERT MaxContrastLMS MATRIX TO ANGLE AND CONTRAST IN COLOR SPACE
@@ -40,61 +42,93 @@ MaxContrastLMSunq = unique(Sall.MaxContrastLMS,'rows');
 
 %------------ BEGIN MAIN ANALYSIS SECTION -------------------------
 
+if strcmp(modelType,'LGS')
+   nParams = 3;
+elseif strcmp(modelType,'GMA')
+   nParams = 4;
+end
+
+% INITIALIZE ARRAYS FOR STORING SMOOTHED CURVES. ***WARNING: THE NUMBER 120
+% IS HARD-CODED!!!*** FIX THIS SOON
+if p.Results.nBootstrapIter >0
+    rSmoothBtstrp = zeros([120 size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+    rParamBtstrp =  zeros([nParams size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+    tSecFitBtstrp = zeros([120 size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+    negLLBtstrp =   zeros([1 size(colorAngleContrastUnq,1) p.Results.nBootstrapIter]);
+end
+
 legendLMS = {''};
 for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
-%     ind =   abs(Sall.MaxContrastLMS(:,1)-MaxContrastLMSunq(i,1))<0.001 ...
-%           & abs(Sall.MaxContrastLMS(:,2)-MaxContrastLMSunq(i,2))<0.001 ...
-%           & abs(Sall.MaxContrastLMS(:,3)-MaxContrastLMSunq(i,3))<0.001;
+    %     ind =   abs(Sall.MaxContrastLMS(:,1)-MaxContrastLMSunq(i,1))<0.001 ...
+    %           & abs(Sall.MaxContrastLMS(:,2)-MaxContrastLMSunq(i,2))<0.001 ...
+    %           & abs(Sall.MaxContrastLMS(:,3)-MaxContrastLMSunq(i,3))<0.001;
     % COMPUTE INDICES FOR EACH CONDITION, AND CREATE NEW STRUCT CONTAINING
     % ONLY THOSE CONDITIONS
     ind =   abs(colorAngle-colorAngleContrastUnq(i,1))<0.001 ...
-          & abs(colorContrast-colorAngleContrastUnq(i,2))<0.001;      
+        & abs(colorContrast-colorAngleContrastUnq(i,2))<0.001;
     S = structElementSelect(Sall,ind,size(Sall.MaxContrastLMS,1));
     % PARAMETERS FOR PLOTTING--PASSED INTO xcorrEasy
     maxLagSec = 2;
     smpBgnEnd = 1;
     bPLOTxcorr = 0;
-%     MaxContrastLMStitle = ['LMS = ' '[' num2str(MaxContrastLMSunq(i,1),3) ...
-%                                   ' '   num2str(MaxContrastLMSunq(i,2),3) ...
-%                                   ' '   num2str(MaxContrastLMSunq(i,3),3) ']'];
+    %     MaxContrastLMStitle = ['LMS = ' '[' num2str(MaxContrastLMSunq(i,1),3) ...
+    %                                   ' '   num2str(MaxContrastLMSunq(i,2),3) ...
+    %                                   ' '   num2str(MaxContrastLMSunq(i,3),3) ']'];
     MaxContrastLMStitle = ['Angle = ' num2str(colorAngleContrastUnq(i,1),3) ...
-                           ', Contrast = '   num2str(colorAngleContrastUnq(i,2),3)];  
+        ', Contrast = '   num2str(colorAngleContrastUnq(i,2),3)];
     % CROSS-CORRELATION FUNCTION
-    [r(:,i), rLagVal(:,i),rAll] = xcorrEasy(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr);
+    if p.Results.nBootstrapIter == 0
+        [r(:,i), rLagVal(:,i),rAll] = xcorrEasy(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr);
+    elseif  p.Results.nBootstrapIter > 0
+        [r(:,i),rCI,rLagVal(:,i),rAll,rDSTB(:,:,i),rSD(:,i)] = xcorrEasyBootstrap(diff(S.tgtXmm),diff(S.rspXmm),[S.tSec; 15],...
+            maxLagSec,'coeff',smpBgnEnd,p.Results.nBootstrapIter,p.Results.sizeCI,bPLOTxcorr);
+    end
     % FIT CROSS CORRELATION FUNCTION
     if strcmp(modelType,'FLT') % FLAT-TOP COSINE FILTER IN FOURIER DOMAIN
-       rSmooth(:,i) = filterTRKdataFlattopCos(r(:,i),rLagVal(:,i),[5 10],0);
+        rSmooth(:,i) = filterTRKdataFlattopCos(r(:,i),rLagVal(:,i),[5 10],0);
     else % OTHERWISE, FIT WITH xcorrFitMLE
-       rStdK = 1.5;
-       initType = 'RND';
-       rhoXXstd = std(rAll,[],2);
-       [rSmooth(:,i),rParam(:,i),tSecFit(:,i),negLL(:,i)] = xcorrFitMLE(rLagVal(:,i),r(:,i),rhoXXstd,rStdK,modelType,initType);
+        rStdK = 1.5;
+        initType = 'RND';
+        rhoXXstd = std(rAll,[],2);
+        [rSmooth(:,i),rParam(:,i),tSecFit(:,i),negLL(:,i)] = xcorrFitMLE(rLagVal(:,i),r(:,i),rhoXXstd,rStdK,modelType,initType);
+        if p.Results.nBootstrapIter >0
+            parfor jj = 1:p.Results.nBootstrapIter
+                [rSmoothBtstrp(:,i,jj),rParamBtstrp(:,i,jj),tSecFitBtstrp(:,i,jj),negLLBtstrp(:,i,jj)] = xcorrFitMLE(rLagVal(:,i),rDSTB(:,jj,i),rhoXXstd,rStdK,modelType,initType);
+            end
+        end
     end
-%    text(0.5,0.2,MaxContrastLMStitle,'FontSize',15);
+    %    text(0.5,0.2,MaxContrastLMStitle,'FontSize',15);
     legendLMS{end+1} = MaxContrastLMStitle;
-    if strcmp(modelType,'GMA')
-        [rSmoothMax,rSmoothMaxInd] = max(rSmooth(:,i));
-        [~,hh1ind] = min(abs(rSmooth(tSecFit(:,i)>tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
-        hh1 = tSecFit(hh1ind+rSmoothMaxInd,i);
-        [~,hh2ind] = min(abs(rSmooth(tSecFit(:,i)<tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
-        hh2 = tSecFit(hh2ind,i);
-        FWHH(i) = hh1-hh2;
-    end
+%     if strcmp(modelType,'GMA')
+%         [rSmoothMax,rSmoothMaxInd] = max(rSmooth(:,i));
+%         [~,hh1ind] = min(abs(rSmooth(tSecFit(:,i)>tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
+%         hh1 = tSecFit(hh1ind+rSmoothMaxInd,i);
+%         [~,hh2ind] = min(abs(rSmooth(tSecFit(:,i)<tSecFit(rSmoothMaxInd),i)-rSmoothMax./2));
+%         hh2 = tSecFit(hh2ind,i);
+%         FWHH(i) = hh1-hh2;
+%     end
     if ~strcmp(modelType,'LGS') || ~strcmp(modelType,'GMA') % IF FITS WERE NOT DONE WITH LOG-GAUSSIAN
-        % NUMERICALLY READ OUT LAG VALUES 
+        % NUMERICALLY READ OUT LAG VALUES
         [~,rSmoothMaxInd] = max(rSmooth(:,i));
         lagXXms(i) = tSecFit(rSmoothMaxInd,i);
     end
 end
 
 if strcmp(modelType,'LGS') % IF FITS WERE DONE WITH LOG-GAUSSIAN
-   % LAG = MEAN OF LOG-GAUSSIAN FIT
-   lagXXms = rParam(2,:);
-   FWHH = exp(log(rParam(2,:))+rParam(3,:).*sqrt(log(4))) - exp(log(rParam(2,:))-rParam(3,:).*sqrt(log(4)));
+    % LAG = MEAN OF LOG-GAUSSIAN FIT
+    lagXXms = rParam(2,:);
+    FWHH = exp(log(rParam(2,:))+rParam(3,:).*sqrt(log(4))) - exp(log(rParam(2,:))-rParam(3,:).*sqrt(log(4)));
 elseif strcmp(modelType,'GMA')
-   lagXXms = (rParam(3,:)-1).*rParam(2,:)+rParam(4,:);
+    lagXXms = (rParam(3,:)-1).*rParam(2,:)+rParam(4,:);
 end
 
+btstrpStruct = struct;
+if p.Results.nBootstrapIter>0
+    btstrpStruct.rSmoothBtstrp = rSmoothBtstrp;
+    btstrpStruct.rParamBtstrp  = rParamBtstrp;
+    btstrpStruct.tSecFitBtstrp = tSecFitBtstrp;
+    btstrpStruct.negLLBtstrp   = negLLBtstrp;
+end
 % ---------------- END MAIN ANALYSIS SECTION -------------------
 
 if p.Results.bPLOTrawXCORR
@@ -118,9 +152,9 @@ if p.Results.bPLOTfitsOnly
     hold on;
     for i = 1:size(rSmooth,2)
         if strcmp(modelType,'FLT')
-           plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1);
+            plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1);
         else
-           plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
+            plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
         end
     end
     axis square;
@@ -140,9 +174,9 @@ if p.Results.bPLOTfitsAndRaw
         hold on;
         plot(rLagVal(:,i),r(:,i),'LineWidth',1);
         if strcmp(modelType,'FLT')
-           plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1); 
+            plot(rLagVal(:,i),rSmooth(:,i),'LineWidth',1);
         else
-           plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
+            plot(tSecFit(:,i),rSmooth(:,i),'LineWidth',1);
         end
         axis square;
         formatFigure('Lag (ms)','Response');
@@ -159,13 +193,13 @@ if p.Results.bPLOTlags
     ylim([0 0.6]);
 end
 
-if p.Results.bPLOTfwhh
-    % PLOT FULL WIDTHS AT HALF HEIGHT
-    figure;
-    plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
-    axis square;
-    formatFigure('Contrast','Integration period (s)');
-    % ylim([0 0.6]);
-end
+% if p.Results.bPLOTfwhh
+%     % PLOT FULL WIDTHS AT HALF HEIGHT
+%     figure;
+%     plot(sqrt(sum(colorAngleContrastUnq(:,2).^2,2)),FWHH,'ko','LineWidth',1.5,'MarkerSize',10);
+%     axis square;
+%     formatFigure('Contrast','Integration period (s)');
+%     % ylim([0 0.6]);
+% end
 
 end

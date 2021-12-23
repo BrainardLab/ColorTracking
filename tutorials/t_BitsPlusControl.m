@@ -55,7 +55,7 @@ end
 %
 % Specify the chromaticity, but we'll chose the luminance based
 % on the range available in the device.
-targetBgxy = [0.3127 0.3290]';
+targetBgxy = [0.326 0.372]';
 
 % Target color direction and max contrasts.
 %
@@ -64,7 +64,7 @@ targetBgxy = [0.3127 0.3290]';
 % length, as that is good convention for contrast. That is, we  express
 % contrast in any color direction relative to the unit-length contrast
 % vector for that direction.
-targetContrastDir = [1 -1 0]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
+targetContrastDir = [1 0 1]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
 targetContrast = 0.03;
 plotAxisLimit = 100*targetContrast;
 

@@ -154,3 +154,26 @@ end
 
 % Clear the screen.
 sca;
+
+% % OPENING NEW WINDOW WITH BITS PLUS PLUS IN MIND
+% [win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid,[0.5 0.5 0.5].*256);
+% 
+% % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
+% [saveGamma,~]=Screen('ReadNormalizedGammaTable',win);
+% 
+% bPlusPlusMode = 2;
+% % LOAD NEW GAMMA TABLE
+% Screen('LoadNormalizedGammaTable', win, newCLUT1,bPlusPlusMode);
+% 
+% % RESTORE GAMMA TABLE
+% Screen('LoadNormalizedGammaTable', win, saveGamma,bPlusPlusMode);
+% 
+% % LOOPING AND UPDATING TEXTURE. REMEMBER THAT imSettings IS INTEGER
+% pause;
+% for k = 1:5
+%     imSettings = imSettings+1;
+%     texTest = Screen('MakeTexture', window, imSettings, [], [], 2);
+%     Screen('DrawTexture', window, texTest, [], [200 200 windowRect(3)-200 windowRect(4)-200]);
+%     Screen('Flip', window);
+%     pause;
+% end

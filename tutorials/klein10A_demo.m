@@ -44,10 +44,10 @@ T_xyz = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,S);
 
 SetSensorColorSpace(calObj,T_xyz,S);
 
-target_xy = [.27,.39]';
+target_xy = [.5,.2]';
 
 targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-midpointXYZ = PrimaryToSensor(calObj,[0.5 0.5 0.5]');
+midpointXYZ = PrimaryToSensor(calObj,[1 1 1]');
 rawScale = targetXYZRaw\midpointXYZ;
 targetXYZ = rawScale*targetXYZRaw;
 imSettings = SensorToSettings(calObj,targetXYZ);
@@ -65,8 +65,8 @@ screenNumber = max(screens);
 
 
 % ------ OPEN THE DEVICE ----------------------------------------------
- status = K10A_device('open', '/dev/ttyUSB0');
- if (status == 0)
+status = K10A_device('open', '/dev/ttyUSB0');
+if (status == 0)
     disp('Opened Klein port');
 elseif (status == -1)
     disp('Could not open Klein port');
@@ -140,10 +140,11 @@ disp('Hit enter to turn lights off'); pause;
 [xyYDesired] = XYZToxyY(targetXYZ);
 fprintf('CIE (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
 
-for k = 1:5
-    [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-    fprintf('response[%d]:%s\n', k, response);
-end
+[status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+fprintf('response[%d]:%s\n', 1, response);
+
+[status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+fprintf('response[%d]:%s\n', 2, response);
 
 status = K10A_device('close');
 if (status == 0)
@@ -157,17 +158,17 @@ sca;
 
 % % OPENING NEW WINDOW WITH BITS PLUS PLUS IN MIND
 % [win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid,[0.5 0.5 0.5].*256);
-% 
+%
 % % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
 % [saveGamma,~]=Screen('ReadNormalizedGammaTable',win);
-% 
+%
 % bPlusPlusMode = 2;
 % % LOAD NEW GAMMA TABLE
 % Screen('LoadNormalizedGammaTable', win, newCLUT1,bPlusPlusMode);
-% 
+%
 % % RESTORE GAMMA TABLE
 % Screen('LoadNormalizedGammaTable', win, saveGamma,bPlusPlusMode);
-% 
+%
 % % LOOPING AND UPDATING TEXTURE. REMEMBER THAT imSettings IS INTEGER
 % pause;
 % for k = 1:5

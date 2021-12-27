@@ -46,6 +46,7 @@ switch userID
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+        crossValCacheFolder = fullfile(CNST_analysis,'dataCache','crossVal');
         figureSavePath = fullfile(CNST_analysis, 'Results');
         
     case{'michael'}
@@ -55,6 +56,7 @@ switch userID
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+        crossValCacheFolder = fullfile(CNST_analysis,'dataCache','crossVal');
         figureSavePath = fullfile(CNST_analysis, 'Results');
     case{'jburge-hubel'}
         setpref(projectName,'dropboxPath',[]);
@@ -72,8 +74,8 @@ switch userID
         CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTracking');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
+        crossValCacheFolder = fullfile(CNST_analysis,'dataCache','crossVal');
         figureSavePath = fullfile(CNST_analysis, 'Results');
-        
         
     otherwise
         setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)']);
@@ -87,6 +89,7 @@ end
 
 setpref(projectName,'paramsCacheFolder',paramsCacheFolder);
 setpref(projectName,'bootParamsCacheFolder',bootParamsCacheFolder);
+setpref(projectName,'crossValCacheFolder',crossValCacheFolder);
 setpref(projectName,'CalFolder',CalFolder);
 setpref(projectName,'figureSavePath',figureSavePath);
 setpref('BrainardLabToolbox','CalDataFolder',CalFolder);

@@ -47,7 +47,7 @@ SetSensorColorSpace(calObj,T_xyz,S);
 target_xy = [.5,.2]';
 
 targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-midpointXYZ = PrimaryToSensor(calObj,[1 1 1]');
+midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
 rawScale = targetXYZRaw\midpointXYZ;
 targetXYZ = rawScale*targetXYZRaw;
 imSettings = SensorToSettings(calObj,targetXYZ);

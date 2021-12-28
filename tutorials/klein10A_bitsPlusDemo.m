@@ -16,7 +16,7 @@ setpref('BrainardLabToolbox','CalDataFolder',resourcesDir);
 cal = LoadCalFile('ViewSonicG220fb');
 calObj = ObjectToHandleCalOrCalStruct(cal);
 
-%% Make this a 8-bit device as far as the calibration file goes (FOR NOW)
+%% Make this a 14-bit device as far as the calibration file goes (FOR NOW)
 nDeviceBits = 14;
 nDeviceLevels = 2^nDeviceBits;
 CalibrateFitGamma(calObj, nDeviceLevels);
@@ -53,7 +53,7 @@ targetXYZ = rawScale*targetXYZRaw;
 bgSettings = SensorToSettings(calObj,targetXYZ);
 bgPrimary = SettingsToPrimary(calObj,bgSettings);
 bgExcitations = SettingsToSensor(calObj,bgSettings);
-imSettings = 128;
+imSettings = [108 118 128 138 148];
 
 %% MAKING LOOKUP TABLE
 
@@ -83,14 +83,14 @@ screens = Screen('Screens');
 screenNumber = max(screens);
 
 % OPENING NEW WINDOW WITH BITS PLUS PLUS IN MIND
-[window,windowRect] = BitsPlusPlus('OpenWindowBits++',screenNumber,imSettings.*[1 1 1]);
+[window,windowRect] = BitsPlusPlus('OpenWindowBits++',screenNumber,128.*[1 1 1]);
 
 % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
-[saveGamma,~]=Screen('ReadNormalizedGammaTable',window);
+% [saveGamma,~]=Screen('ReadNormalizedGammaTable',window);
+saveGamma = repmat(linspace(0,1,256)',[1 3]);
 
-% lookupTableSettings = repmat(linspace(0,1,256)',[1 3]);
 bPlusPlusMode = 2;
-% LOAD NEW GAMMA TABLE
+% LOAD NEW GAMMA TABLE AND FLIP
 Screen('LoadNormalizedGammaTable', window, lookupTableSettings,bPlusPlusMode);
 Screen('Flip', window);
 pause;
@@ -170,14 +170,20 @@ pause;
 % 
 % % ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
 
-for k = 1:20
-    texTest = Screen('MakeTexture', window, (1/255).*(imSettings+k*5), [], [], 2);
-    Screen('DrawTexture', window, texTest, [], [200 200 windowRect(3)-200 windowRect(4)-200]);
-    Screen('Flip', window);
-%    [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-%    fprintf('response[%d]:%s\n', k, response);
-    imSettings+k*10
-    pause;
+nMeasurements = 3;
+
+for m = 1:nMeasurements
+    testPermInds = randperm(length(imSettings));
+    for k = 1:length(testPermInds)
+        texTest = Screen('MakeTexture', window, imSettings(testPermInds(k)));
+        Screen('DrawTexture', window, texTest, [], [200 200 windowRect(3)-200 windowRect(4)-200]);
+        Screen('Flip', window);
+    %    [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+    %    fprintf('response[%d]:%s\n', k, response);
+        pause;
+        m
+        k
+    end
 end
 
 % status = K10A_device('close');
@@ -187,32 +193,9 @@ end
 %     disp('Could not close previously-opened Klein port');
 % end
 
-% saveGamma = repmat(linspace(0,1,256)',[1 3]);
-% RESTORE GAMMA TABLE
+% RESTORE GAMMA TABLE AND FLIP
 Screen('LoadNormalizedGammaTable', window, saveGamma,bPlusPlusMode);
+Screen('Flip', window);
 
 % Clear the screen.
 sca;
-
-% % OPENING NEW WINDOW WITH BITS PLUS PLUS IN MIND
-% [win,winRect] = BitsPlusPlus('OpenWindowBits++',screenid,[0.5 0.5 0.5].*256);
-%
-% % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
-% [saveGamma,~]=Screen('ReadNormalizedGammaTable',win);
-%
-% bPlusPlusMode = 2;
-% % LOAD NEW GAMMA TABLE
-% Screen('LoadNormalizedGammaTable', win, newCLUT1,bPlusPlusMode);
-%
-% % RESTORE GAMMA TABLE
-% Screen('LoadNormalizedGammaTable', win, saveGamma,bPlusPlusMode);
-%
-% % LOOPING AND UPDATING TEXTURE. REMEMBER THAT imSettings IS INTEGER
-% pause;
-% for k = 1:5
-%     imSettings = imSettings+1;
-%     texTest = Screen('MakeTexture', window, imSettings, [], [], 2);
-%     Screen('DrawTexture', window, texTest, [], [200 200 windowRect(3)-200 windowRect(4)-200]);
-%     Screen('Flip', window);
-%     pause;
-% end

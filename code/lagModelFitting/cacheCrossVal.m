@@ -58,7 +58,7 @@ for ii = 1:length(expNameCell)
         for kk = 1:size(colorAngleContrastUnq,1)
             ind =   abs(colorAngle-colorAngleContrastUnq(kk,1))<0.001 ...
                 & abs(colorContrast-colorAngleContrastUnq(kk,2))<0.001;
-            Ssplit{jj,kk,ii} = structElementSelect(Sdir,ind,size(Sdir.MaxContrastLMS,1));
+            Ssplit(jj,kk,ii) = structElementSelect(Sdir,ind,size(Sdir.MaxContrastLMS,1));
         end
     end
 end
@@ -68,6 +68,6 @@ cacheInfo.cacheDate = date;
 
 % save the split data struct 
 outFileName = fullfile(crossValCacheFolder,[subjCode '_crossVal_chached.mat']);
-save(Ssplit,'outFileName','cacheInfo')
+save(outFileName,'Ssplit','cacheInfo')
 
 end

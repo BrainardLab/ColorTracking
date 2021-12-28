@@ -53,13 +53,12 @@ targetXYZ = rawScale*targetXYZRaw;
 bgSettings = SensorToSettings(calObj,targetXYZ);
 bgPrimary = SettingsToPrimary(calObj,bgSettings);
 bgExcitations = SettingsToSensor(calObj,bgSettings);
-% imSettings = [48 88 128 168 208];
-% imSettings = [128.*ones([1 60]) 129 130 131 132 133];
-imSettings = fliplr([0 255 0 255 0 255 0 255 0 255 0 255 0 255]);
+imSettings = [88:10:148];
+% imSettings = 124:132;
 
 %% MAKING LOOKUP TABLE
-
-targetContrastDir = [1 0 0]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
+        
+targetContrastDir = [1 1 0]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
 targetContrast = 0.3;
 
 fprintf('Building lookup table ...');
@@ -172,39 +171,39 @@ disp('Hit enter to turn lights off'); pause;
 % 
 % % ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
 
-nMeasurements = 300;
+nMeasurements = 40;
 lumMeas = [];
 imSettingsMeas = [];
 
-% for m = 1:nMeasurements
-% %    testPermInds = randperm(length(imSettings));
-%     testPermInds = 1:length(imSettings);
-%     for k = 1:length(testPermInds)
-%         texTest = Screen('MakeTexture', window, imSettings(testPermInds(k)));
-%         Screen('DrawTexture', window, texTest, [], [100 100 windowRect(3)-100 windowRect(4)-100]);
-%         Screen('Flip', window);
-%         pause(1);
-%        [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-%        fprintf('response[%d]:%s\n', k, response);
-%        indLum = strfind(response,'Lum:');
-%        lumMeas(end+1) = str2num(response(indLum+4:indLum+9));
-%        imSettingsMeas(end+1) = imSettings(testPermInds(k));
-%        display(['Measurement ' num2str(length(lumMeas))]);
-%     end
-% end
-
-for k = 1:length(imSettings)
-    texTest = Screen('MakeTexture', window, imSettings(k));
-    Screen('DrawTexture', window, texTest, [], [100 100 windowRect(3)-100 windowRect(4)-100]);
-    Screen('Flip', window);
-    pause(1);
-   [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-   fprintf('response[%d]:%s\n', k, response);
-   indLum = strfind(response,'Lum:');
-   lumMeas(end+1) = str2num(response(indLum+4:indLum+9));
-   imSettingsMeas(end+1) = imSettings(k);
-   display(['Measurement ' num2str(length(lumMeas))]);
+for m = 1:nMeasurements
+    testPermInds = randperm(length(imSettings));
+%    testPermInds = 1:length(imSettings);
+    for k = 1:length(testPermInds)
+        texTest = Screen('MakeTexture', window, imSettings(testPermInds(k)));
+        Screen('DrawTexture', window, texTest, [], [100 100 windowRect(3)-100 windowRect(4)-100]);
+        Screen('Flip', window);
+        pause(0.1);
+       [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+       fprintf('response[%d]:%s\n', k, response);
+       indLum = strfind(response,'Lum:');
+       lumMeas(end+1) = str2num(response(indLum+4:indLum+10));
+       imSettingsMeas(end+1) = imSettings(testPermInds(k));
+       display(['Measurement ' num2str(length(lumMeas))]);
+    end
 end
+
+% for k = 1:length(imSettings)
+%     texTest = Screen('MakeTexture', window, imSettings(k));
+%     Screen('DrawTexture', window, texTest, [], [100 100 windowRect(3)-100 windowRect(4)-100]);
+%     Screen('Flip', window);
+%     pause(1);
+%    [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+%    fprintf('response[%d]:%s\n', k, response);
+%    indLum = strfind(response,'Lum:');
+%    lumMeas(end+1) = str2num(response(indLum+4:indLum+9));
+%    imSettingsMeas(end+1) = imSettings(k);
+%    display(['Measurement ' num2str(length(lumMeas))]);
+% end
 
 status = K10A_device('close');
 if (status == 0)
@@ -228,3 +227,7 @@ for i = 1:length(imSettings)
     ind = imSettingsMeas == imSettings(i);
     meanLum(i) = mean(lumMeas(ind));
 end
+
+figure; 
+plot(imSettings,meanLum,'ko');
+formatFigure('Settings','Y');

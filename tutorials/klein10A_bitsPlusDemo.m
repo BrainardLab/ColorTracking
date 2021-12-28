@@ -53,7 +53,9 @@ targetXYZ = rawScale*targetXYZRaw;
 bgSettings = SensorToSettings(calObj,targetXYZ);
 bgPrimary = SettingsToPrimary(calObj,bgSettings);
 bgExcitations = SettingsToSensor(calObj,bgSettings);
-imSettings = [108 118 128 138 148];
+% imSettings = [48 88 128 168 208];
+% imSettings = [128.*ones([1 60]) 129 130 131 132 133];
+imSettings = fliplr([0 255 0 255 0 255 0 255 0 255 0 255 0 255]);
 
 %% MAKING LOOKUP TABLE
 
@@ -96,102 +98,120 @@ Screen('Flip', window);
 pause;
 %% KLEIN STUFF
 
-% % ------ OPEN THE DEVICE ----------------------------------------------
-% status = K10A_device('open', '/dev/ttyUSB0');
-% if (status == 0)
-%     disp('Opened Klein port');
-% elseif (status == -1)
-%     disp('Could not open Klein port');
-% elseif (status == 1)
-%     disp('Klein port was already opened');
-% elseif (status == -99)
-%     disp('Invalided serial port');
-% end
-% 
-% % ----- SETUP DEFAULT COMMUNICATION PARAMS ----------------------------
-% speed     = 9600;
-% wordSize  = 8;
-% parity    = 'n';
-% timeOut   = 50000;
-% 
-% status = K10A_device('updateSettings', speed, wordSize, parity,timeOut);
-% if (status == 0)
-%     disp('Update communication settings in Klein port');
-% elseif (status == -1)
-%     disp('Could not update settings in Klein port');
-% elseif (status == 1)
-%     disp('Klein port is not open');
-% end
-% 
-% 
-% % ----- READ ANY DATA AVAILABLE AT THE PORT ---------------------------
-% [status, dataRead] = K10A_device('readPort');
-% if ((status == 0) && (length(dataRead) > 0))
-%     fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
-% end
-% 
-% 
-% % ----- WRITE SOME DUMMY DATA TO THE PORT -----------------------------
-% status = K10A_device('writePort', 'Do you feel lucky, punk?');
-% 
-% 
-% % ----- READ ANY DATA AVAILABLE AT THE PORT ----------------------------
-% [status, dataRead] = K10A_device('readPort');
-% if ((status == 0) && (length(dataRead) > 0))
-%     fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
-% end
-% 
-% 
-% % ------------- GET THE SERIAL NO OF THE KLEIN METER ------------------
-% [status, modelAndSerialNo] = ...
-%     K10A_device('sendCommand', 'Model and SerialNo');
-% fprintf('Serial no and model: %s\n', modelAndSerialNo);
-% 
-% 
-% % ------------ GET THE FIRMWARE REVISION OF THE KLEIN METER -----------
-% [status, response] = K10A_device('sendCommand', 'FlickerCal & Firmware');
-% fprintf('>>> Firmware version: %s\n', response(20:20+7-1));
-% 
-% 
-% % ------------ TURN AIMING LIGHTS ON ----------------------------------
-% [status] = K10A_device('sendCommand', 'Lights ON');
-% 
-% % ------------ TURN AIMING LIGHTS OFF ---------------------------------
-% disp('Hit enter to turn lights off'); pause;
-% [status] = K10A_device('sendCommand', 'Lights OFF');
-% 
-% 
-% % ------------- ENABLE AUTO-RANGE -------------------------------------
-% [status, response] = K10A_device('sendCommand', 'EnableAutoRanging');
-% 
-% % ----------- LOCK THE RANGE FOR STREAMING -----------------------
-% [status, response] = K10A_device('sendCommand', 'DisableAutoRanging');
-% [status, response] = K10A_device('sendCommand', 'LockInRange2');
+% ------ OPEN THE DEVICE ----------------------------------------------
+status = K10A_device('open', '/dev/ttyUSB0');
+if (status == 0)
+    disp('Opened Klein port');
+elseif (status == -1)
+    disp('Could not open Klein port');
+elseif (status == 1)
+    disp('Klein port was already opened');
+elseif (status == -99)
+    disp('Invalided serial port');
+end
+
+% ----- SETUP DEFAULT COMMUNICATION PARAMS ----------------------------
+speed     = 9600;
+wordSize  = 8;
+parity    = 'n';
+timeOut   = 50000;
+
+status = K10A_device('updateSettings', speed, wordSize, parity,timeOut);
+if (status == 0)
+    disp('Update communication settings in Klein port');
+elseif (status == -1)
+    disp('Could not update settings in Klein port');
+elseif (status == 1)
+    disp('Klein port is not open');
+end
+
+
+% ----- READ ANY DATA AVAILABLE AT THE PORT ---------------------------
+[status, dataRead] = K10A_device('readPort');
+if ((status == 0) && (length(dataRead) > 0))
+    fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
+end
+
+
+% ----- WRITE SOME DUMMY DATA TO THE PORT -----------------------------
+status = K10A_device('writePort', 'Do you feel lucky, punk?');
+
+
+% ----- READ ANY DATA AVAILABLE AT THE PORT ----------------------------
+[status, dataRead] = K10A_device('readPort');
+if ((status == 0) && (length(dataRead) > 0))
+    fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
+end
+
+
+% ------------- GET THE SERIAL NO OF THE KLEIN METER ------------------
+[status, modelAndSerialNo] = ...
+    K10A_device('sendCommand', 'Model and SerialNo');
+fprintf('Serial no and model: %s\n', modelAndSerialNo);
+
+
+% ------------ GET THE FIRMWARE REVISION OF THE KLEIN METER -----------
+[status, response] = K10A_device('sendCommand', 'FlickerCal & Firmware');
+fprintf('>>> Firmware version: %s\n', response(20:20+7-1));
+
+
+% ------------ TURN AIMING LIGHTS ON ----------------------------------
+[status] = K10A_device('sendCommand', 'Lights ON');
+
+% ------------ TURN AIMING LIGHTS OFF ---------------------------------
+disp('Hit enter to turn lights off'); pause;
+[status] = K10A_device('sendCommand', 'Lights OFF');
+
+
+% ------------- ENABLE AUTO-RANGE -------------------------------------
+[status, response] = K10A_device('sendCommand', 'EnableAutoRanging');
+
+% ----------- LOCK THE RANGE FOR STREAMING -----------------------
+[status, response] = K10A_device('sendCommand', 'DisableAutoRanging');
+[status, response] = K10A_device('sendCommand', 'LockInRange2');
 % 
 % % ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
 
-nMeasurements = 3;
+nMeasurements = 300;
+lumMeas = [];
+imSettingsMeas = [];
 
-for m = 1:nMeasurements
-    testPermInds = randperm(length(imSettings));
-    for k = 1:length(testPermInds)
-        texTest = Screen('MakeTexture', window, imSettings(testPermInds(k)));
-        Screen('DrawTexture', window, texTest, [], [200 200 windowRect(3)-200 windowRect(4)-200]);
-        Screen('Flip', window);
-    %    [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-    %    fprintf('response[%d]:%s\n', k, response);
-        pause;
-        m
-        k
-    end
+% for m = 1:nMeasurements
+% %    testPermInds = randperm(length(imSettings));
+%     testPermInds = 1:length(imSettings);
+%     for k = 1:length(testPermInds)
+%         texTest = Screen('MakeTexture', window, imSettings(testPermInds(k)));
+%         Screen('DrawTexture', window, texTest, [], [100 100 windowRect(3)-100 windowRect(4)-100]);
+%         Screen('Flip', window);
+%         pause(1);
+%        [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+%        fprintf('response[%d]:%s\n', k, response);
+%        indLum = strfind(response,'Lum:');
+%        lumMeas(end+1) = str2num(response(indLum+4:indLum+9));
+%        imSettingsMeas(end+1) = imSettings(testPermInds(k));
+%        display(['Measurement ' num2str(length(lumMeas))]);
+%     end
+% end
+
+for k = 1:length(imSettings)
+    texTest = Screen('MakeTexture', window, imSettings(k));
+    Screen('DrawTexture', window, texTest, [], [100 100 windowRect(3)-100 windowRect(4)-100]);
+    Screen('Flip', window);
+    pause(1);
+   [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+   fprintf('response[%d]:%s\n', k, response);
+   indLum = strfind(response,'Lum:');
+   lumMeas(end+1) = str2num(response(indLum+4:indLum+9));
+   imSettingsMeas(end+1) = imSettings(k);
+   display(['Measurement ' num2str(length(lumMeas))]);
 end
 
-% status = K10A_device('close');
-% if (status == 0)
-%     disp('Closed previously-opened Klein port');
-% elseif (status == -1)
-%     disp('Could not close previously-opened Klein port');
-% end
+status = K10A_device('close');
+if (status == 0)
+    disp('Closed previously-opened Klein port');
+elseif (status == -1)
+    disp('Could not close previously-opened Klein port');
+end
 
 % RESTORE GAMMA TABLE AND FLIP
 Screen('LoadNormalizedGammaTable', window, saveGamma,bPlusPlusMode);
@@ -199,3 +219,12 @@ Screen('Flip', window);
 
 % Clear the screen.
 sca;
+
+%%
+
+meanLum = [];
+
+for i = 1:length(imSettings)
+    ind = imSettingsMeas == imSettings(i);
+    meanLum(i) = mean(lumMeas(ind));
+end

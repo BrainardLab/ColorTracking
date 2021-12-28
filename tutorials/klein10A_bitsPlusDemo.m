@@ -83,7 +83,7 @@ screens = Screen('Screens');
 screenNumber = max(screens);
 
 % OPENING NEW WINDOW WITH BITS PLUS PLUS IN MIND
-[window,windowRect] = BitsPlusPlus('OpenWindowBits++',screenNumber,imSettings.*[1 1 1]);
+[window,windowRect] = BitsPlusPlus('OpenWindowBits++',screenNumber,128.*[1 1 1]);
 
 % SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
 % [saveGamma,~]=Screen('ReadNormalizedGammaTable',window);

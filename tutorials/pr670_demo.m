@@ -95,6 +95,33 @@ for ii = 1:size(target_xy,2)
     fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
 end
 
+theSettings  = [[1,0,0]',[0,1,0]',[0,0,1]'];
+
+for jj = 1:size(theSettings,2)
+    % Calc the settings from the xy
+   
+    imSettings = theSettings(:,jj);
+    imPrimary = SettingsToPrimary(calObj,imSettings);
+    
+    % put up the sqaure
+    Screen('FillRect', window, imSettings, centeredRect);
+    Screen('Flip', window);
+    
+    % print stuff
+    xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
+    fprintf('\n ** MEASUREMENT %2.0f **\n',ii)
+    fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
+    
+    % measure 
+    rawMeasurement= pr670obj.measure;
+    compute the xyY if the measured spectrum
+    A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
+    measuredXYZ = A * rawMeasurement';
+    measured_xyY = XYZToxyY(measuredXYZ);
+    fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
+end
+
+
 %% end of measurements
 
 pr670obj.shutDown();

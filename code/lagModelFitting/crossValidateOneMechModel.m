@@ -124,6 +124,7 @@ for ii = 1:nCrossValIter
     lagsRMSEperDir(:,:,ii) = sqrt((tmpTestMat - lagsFromFitMat).^2);
     stabilityEst(:,:,ii) = lagsTestMat(:,:,ii) - lagsTrainMat(:,:,ii);
 end
+saveCrossVal = fullfile(crossValCacheFolder, [subjCode '_crossVal_out.mat']);
 
-
+save(saveCrossVal,'lagsRMSEglobal','lagsRMSEperDir','stabilityEst')
 end

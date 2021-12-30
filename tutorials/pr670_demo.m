@@ -53,183 +53,73 @@ PsychDefaultSetup(2);
 screens = Screen('Screens');
 screenNumber = max(screens);
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %  MEASUREMENT 1
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% target_xy = [.39,.48]';
-% targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-% midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-% rawScale = targetXYZRaw\midpointXYZ;
-% targetXYZ = rawScale*targetXYZRaw;
-% imSettings = SensorToSettings(calObj,targetXYZ);
-% imPrimary = SettingsToPrimary(calObj,imSettings);
-% 
-% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-% [xyYDesired] = XYZToxyY(targetXYZ);
-% fprintf('\n ** MEASUREMENT 1 **\n')
-% fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-% 
-% rawMeasurement= pr670obj.measure;
-% A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-% measuredXYZ = A * rawMeasurement';
-% measured_xyY = XYZToxyY(measuredXYZ);
-% fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %  MEASUREMENT 2
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% target_xy = [.3,.3]';
-% targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-% midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-% rawScale = targetXYZRaw\midpointXYZ;
-% targetXYZ = rawScale*targetXYZRaw;
-% imSettings = SensorToSettings(calObj,targetXYZ);
-% imPrimary = SettingsToPrimary(calObj,imSettings);
-% 
-% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-% [xyYDesired] = XYZToxyY(targetXYZ);
-% fprintf('\n ** MEASUREMENT 2 **\n')
-% fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-% 
-% rawMeasurement= pr670obj.measure;
-% A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-% measuredXYZ = A * rawMeasurement';
-% measured_xyY = XYZToxyY(measuredXYZ);
-% fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
-% 
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %  MEASUREMENT 3
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% target_xy = [.62,.33]';
-% targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-% midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-% rawScale = targetXYZRaw\midpointXYZ;
-% targetXYZ = rawScale*targetXYZRaw;
-% imSettings = SensorToSettings(calObj,targetXYZ);
-% imPrimary = SettingsToPrimary(calObj,imSettings);
-% 
-% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-% [xyYDesired] = XYZToxyY(targetXYZ);
-% fprintf('\n ** MEASUREMENT 3 **\n')
-% fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-% 
-% rawMeasurement= pr670obj.measure;
-% A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-% measuredXYZ = A * rawMeasurement';
-% measured_xyY = XYZToxyY(measuredXYZ);
-% fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %  MEASUREMENT 4
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% target_xy = [.297,.607]';
-% targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-% midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-% rawScale = targetXYZRaw\midpointXYZ;
-% targetXYZ = rawScale*targetXYZRaw;
-% imSettings = SensorToSettings(calObj,targetXYZ);
-% imPrimary = SettingsToPrimary(calObj,imSettings);
-% 
-% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-% [xyYDesired] = XYZToxyY(targetXYZ);
-% fprintf('\n ** MEASUREMENT 4 **\n')
-% fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-% 
-% rawMeasurement= pr670obj.measure;
-% A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-% measuredXYZ = A * rawMeasurement';
-% measured_xyY = XYZToxyY(measuredXYZ);
-% fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %  MEASUREMENT 5
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% target_xy = [.158,.08]';
-% targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-% midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-% rawScale = targetXYZRaw\midpointXYZ;
-% targetXYZ = rawScale*targetXYZRaw;
-% imSettings = SensorToSettings(calObj,targetXYZ);
-% imPrimary = SettingsToPrimary(calObj,imSettings);
-% 
-% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-% [xyYDesired] = XYZToxyY(targetXYZ);
-% fprintf('\n ** MEASUREMENT 5 **\n')
-% fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-% 
-% rawMeasurement= pr670obj.measure;
-% A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-% measuredXYZ = A * rawMeasurement';
-% measured_xyY = XYZToxyY(measuredXYZ);
-% fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
-
+%% get the background settings
+bgSettings = PrimaryToSettings(calObj,[0.5,0.5,0.5]');
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSettings);
+[screenXpixels, screenYpixels] = Screen('WindowSize', window);
+[xCenter, yCenter] = RectCenter(windowRect);
+baseRect = [0 0 150 150];
+centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  MEASUREMENT 6
+%  MEASUREMENT 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-target_xy = [.637,.333]';
-targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-rawScale = targetXYZRaw\midpointXYZ;
-targetXYZ = rawScale*targetXYZRaw;
-imSettings = SensorToSettings(calObj,targetXYZ);
-imPrimary = SettingsToPrimary(calObj,imSettings)
-
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-[xyYDesired] = XYZToxyY(targetXYZ);
-fprintf('\n ** MEASUREMENT 6 **\n')
-fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-
-rawMeasurement= pr670obj.measure;
-A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-measuredXYZ = A * rawMeasurement';
-measured_xyY = XYZToxyY(measuredXYZ);
-fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  MEASUREMENT 7
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-target_xy = [.295,.611]';
-targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-rawScale = targetXYZRaw\midpointXYZ;
-targetXYZ = rawScale*targetXYZRaw;
-imSettings = SensorToSettings(calObj,targetXYZ);
-imPrimary = SettingsToPrimary(calObj,imSettings)
-
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-[xyYDesired] = XYZToxyY(targetXYZ);
-fprintf('\n ** MEASUREMENT 7 **\n')
-fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-
-rawMeasurement= pr670obj.measure;
-A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-measuredXYZ = A * rawMeasurement';
-measured_xyY = XYZToxyY(measuredXYZ);
-fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
+target_xy = [[.39,.48]',[.3,.3]',[.62,.33]',[.297,.607]',[.158,.08]'];
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  MEASUREMENT 8
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-target_xy = [.154,.075]';
-targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-rawScale = targetXYZRaw\midpointXYZ;
-targetXYZ = rawScale*targetXYZRaw;
-imSettings = SensorToSettings(calObj,targetXYZ);
-imPrimary = SettingsToPrimary(calObj,imSettings)
+for ii = 1:size(target_xy,2)
+    % Calc the settings from the xy
+    targetXYZRaw = xyYToXYZ([target_xy(:,ii) ; 1]);
+    midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
+    rawScale = targetXYZRaw\midpointXYZ;
+    targetXYZ = rawScale*targetXYZRaw;
+    imSettings = SensorToSettings(calObj,targetXYZ);
+    imPrimary = SettingsToPrimary(calObj,imSettings);
+    
+    % put up the sqaure
+    Screen('FillRect', window, imSettings, centeredRect);
+    Screen('Flip', window);
+    
+    % print stuff
+    [xyYDesired] = XYZToxyY(targetXYZ);
+    xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
+    fprintf('\n ** MEASUREMENT %2.0f **\n',ii)
+    fprintf('CIE Desired   (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
+    fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
+    
+    % measure 
+    rawMeasurement= pr670obj.measure;
+    compute the xyY if the measured spectrum
+    A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
+    measuredXYZ = A * rawMeasurement';
+    measured_xyY = XYZToxyY(measuredXYZ);
+    fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
+end
 
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, imSettings');
-[xyYDesired] = XYZToxyY(targetXYZ);
-fprintf('\n ** MEASUREMENT 8 **\n')
-fprintf('CIE Desired (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
+theSettings  = [[1,0,0]',[0,1,0]',[0,0,1]'];
 
-rawMeasurement= pr670obj.measure;
-A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-measuredXYZ = A * rawMeasurement';
-measured_xyY = XYZToxyY(measuredXYZ);
-fprintf('CIE MEasured (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
+for jj = 1:size(theSettings,2)
+    % Calc the settings from the xy
+   
+    imSettings = theSettings(:,jj);
+    imPrimary = SettingsToPrimary(calObj,imSettings);
+    
+    % put up the sqaure
+    Screen('FillRect', window, imSettings, centeredRect);
+    Screen('Flip', window);
+    
+    % print stuff
+    xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
+    fprintf('\n ** MEASUREMENT %2.0f **\n',ii)
+    fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
+    
+    % measure 
+    rawMeasurement= pr670obj.measure;
+    compute the xyY if the measured spectrum
+    A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
+    measuredXYZ = A * rawMeasurement';
+    measured_xyY = XYZToxyY(measuredXYZ);
+    fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
+end
 
 %% end of measurements
 

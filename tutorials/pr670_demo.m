@@ -60,6 +60,12 @@ bgSettings = PrimaryToSettings(calObj,[0.5,0.5,0.5]');
 [xCenter, yCenter] = RectCenter(windowRect);
 baseRect = [0 0 150 150];
 centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
+% put up the sqaure
+imSettings = [.3,.7,1];
+Screen('FillRect', window, imSettings, centeredRect);
+Screen('Flip', window);
+pause;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  MEASUREMENT 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -86,9 +92,9 @@ for ii = 1:size(target_xy,2)
     fprintf('CIE Desired   (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
     fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
     
-    % measure 
+    % measure
     rawMeasurement= pr670obj.measure;
-    compute the xyY if the measured spectrum
+    % compute the xyY if the measured spectrum
     A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
     measuredXYZ = A * rawMeasurement';
     measured_xyY = XYZToxyY(measuredXYZ);
@@ -99,7 +105,7 @@ theSettings  = [[1,0,0]',[0,1,0]',[0,0,1]'];
 
 for jj = 1:size(theSettings,2)
     % Calc the settings from the xy
-   
+    
     imSettings = theSettings(:,jj);
     imPrimary = SettingsToPrimary(calObj,imSettings);
     
@@ -109,12 +115,12 @@ for jj = 1:size(theSettings,2)
     
     % print stuff
     xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
-    fprintf('\n ** MEASUREMENT %2.0f **\n',ii)
+    fprintf('\n ** MEASUREMENT %2.0f **\n',ii+jj)
     fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
     
-    % measure 
+    % measure
     rawMeasurement= pr670obj.measure;
-    compute the xyY if the measured spectrum
+    % compute the xyY if the measured spectrum
     A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
     measuredXYZ = A * rawMeasurement';
     measured_xyY = XYZToxyY(measuredXYZ);

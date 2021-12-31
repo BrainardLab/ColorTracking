@@ -91,6 +91,7 @@ setpref(projectName,'bootParamsCacheFolder',bootParamsCacheFolder);
 setpref(projectName,'crossValCacheFolder',crossValCacheFolder);
 setpref(projectName,'figureSavePath',figureSavePath);
 setpref(projectName,'CalDataFolder',CalFolder);
+setpref(projectName,'CalFolder',CalFolder)
 setpref('BrainardLabToolbox','CalDataFolder',CalFolder);
 
 if ismac

@@ -1,23 +1,23 @@
 function CorticalColorMappingLocalHook
-%  LFContrastAnalsysisLocalHook
+%  CorticalColorMappingLocalHook
 %
-% Configure things for working on the  LFContrastAnalysis project.
+% Configure things for working on the  CorticalColorMapping project.
 %
 % For use with the ToolboxToolbox.
 %
-% If you 'git clone' ILFContrastAnalsysis into your ToolboxToolbox "projectRoot"
+% If you 'git clone' CorticalColorMapping into your ToolboxToolbox "projectRoot"
 % folder, then run in MATLAB
-%   tbUseProject('LFContrastAnalysis')
-% ToolboxToolbox will set up IBIOColorDetect and its dependencies on
+%   tbUseProject('CorticalColorMapping')
+% ToolboxToolbox will set up CorticalColorMapping and its dependencies on
 % your machine.
 %
 % As part of the setup process, ToolboxToolbox will copy this file to your
 % ToolboxToolbox localToolboxHooks directory (minus the "Template" suffix).
 % The defalt location for this would be
-%   ~/localToolboxHooks/LFContrastAnalsysisLocalHook.m
+%   ~/localToolboxHooks/CorticalColorMappingLocalHook.m
 %
-% Each time you run tbUseProject('LFContrastAnalysis'), ToolboxToolbox will
-% execute your local copy of this file to do setup for LFContrastAnalsysis.
+% Each time you run tbUseProject('CorticalColorMapping'), ToolboxToolbox will
+% execute your local copy of this file to do setup for CorticalColorMapping.
 %
 % You should edit your local copy with values that are correct for your
 % local machine, for example the output directory location.
@@ -68,9 +68,9 @@ switch userID
         else
             setpref(projectName,'dropboxPath',fullfile(['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)']));
         end
-        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
+        CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');
         
-        CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTracking');
+        CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTrackingTask');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
         crossValCacheFolder = fullfile(CNST_analysis,'dataCache','crossVal');
@@ -91,6 +91,7 @@ setpref(projectName,'bootParamsCacheFolder',bootParamsCacheFolder);
 setpref(projectName,'crossValCacheFolder',crossValCacheFolder);
 setpref(projectName,'figureSavePath',figureSavePath);
 setpref(projectName,'CalDataFolder',CalFolder);
+setpref('BrainardLabToolbox','CalDataFolder',CalFolder);
 
 if ismac
     % Code to run on Mac plaform

@@ -53,7 +53,7 @@ PsychDefaultSetup(2);
 screens = Screen('Screens');
 screenNumber = max(screens);
 
-%% get the background settings
+% get the background settings
 bgSettings = PrimaryToSettings(calObj,[0.5,0.5,0.5]');
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSettings);
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
@@ -64,12 +64,13 @@ centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
 imSettings = [.3,.7,1];
 Screen('FillRect', window, imSettings, centeredRect);
 Screen('Flip', window);
+fprintf('Aim/focus the radiometer and hit enter:\n');
 pause;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  MEASUREMENT 1
+%  MEASUREMENT SET 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-target_xy = [[.39,.48]',[.3,.3]',[.62,.33]',[.297,.607]',[.158,.08]'];
+target_xy = [[.39,.48]',[.3,.3]',[.4,.4]',[.297,.607]',[.158,.08]'];
 
 
 for ii = 1:size(target_xy,2)
@@ -78,7 +79,7 @@ for ii = 1:size(target_xy,2)
     midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
     rawScale = targetXYZRaw\midpointXYZ;
     targetXYZ = rawScale*targetXYZRaw;
-    imSettings = SensorToSettings(calObj,targetXYZ);
+    [imSettings,badSetting] = SensorToSettings(calObj,targetXYZ);
     imPrimary = SettingsToPrimary(calObj,imSettings);
     
     % put up the sqaure
@@ -89,6 +90,10 @@ for ii = 1:size(target_xy,2)
     [xyYDesired] = XYZToxyY(targetXYZ);
     xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
     fprintf('\n ** MEASUREMENT %2.0f **\n',ii)
+    if badSetting ~= 0
+        fprintf('WARNING: SETTING OUT OF GAMUT\n');
+    end
+    fprintf('The Settings  (R,G,B): (%4.2f, %4.2f, %4.2f)\n', imSettings(1), imSettings(2), imSettings(3));
     fprintf('CIE Desired   (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
     fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
     
@@ -100,6 +105,10 @@ for ii = 1:size(target_xy,2)
     measured_xyY = XYZToxyY(measuredXYZ);
     fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  MEASUREMENT SET 2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 theSettings  = [[1,0,0]',[0,1,0]',[0,0,1]'];
 
@@ -116,6 +125,7 @@ for jj = 1:size(theSettings,2)
     % print stuff
     xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
     fprintf('\n ** MEASUREMENT %2.0f **\n',ii+jj)
+    fprintf('The Settings  (R,G,B): (%4.2f, %4.2f, %4.2f)\n', imSettings(1), imSettings(2), imSettings(3));
     fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
     
     % measure

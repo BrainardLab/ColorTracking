@@ -53,13 +53,13 @@ targetXYZ = rawScale*targetXYZRaw;
 bgSettings = SensorToSettings(calObj,targetXYZ);
 bgPrimary = SettingsToPrimary(calObj,bgSettings);
 bgExcitations = SettingsToSensor(calObj,bgSettings);
-imSettings = [88:10:148];
-% imSettings = 124:132;
+% imSettings = [88:10:148];
+imSettings = 124:132;
 
 %% MAKING LOOKUP TABLE
         
 targetContrastDir = [1 1 0]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
-targetContrast = 0.3;
+targetContrast = 0.12;
 
 fprintf('Building lookup table ...');
 lookupTableMethod = 'targetContrast';
@@ -171,7 +171,7 @@ disp('Hit enter to turn lights off'); pause;
 % 
 % % ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
 
-nMeasurements = 40;
+nMeasurements = 1000;
 lumMeas = [];
 imSettingsMeas = [];
 

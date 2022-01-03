@@ -30,7 +30,6 @@ load(dataCacheName);
 modelType = p.Results.fitMethod;
 nCrossValIter = p.Results.nCrossValIter;
 fitErrorScalar = p.Results.fitErrorScalar;
-% function to take out the relvant  subfields and split the struct in half for train test
 
 rStdK = 1.5;
 initType = 'RND';

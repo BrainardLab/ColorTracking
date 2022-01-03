@@ -41,7 +41,7 @@ thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
 matrixContrasts = reshape(thePacket.metaData.stimContrasts,size(lagsMat));
 %% Make the fit object
 theDimension= size(thePacket.stimulus.values, 1);
-numMechanism = 1;
+numMechanism = 2;
 
 ctmOBJ = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', numMechanism ,'fminconAlgorithm','active-set');
 
@@ -74,10 +74,10 @@ tfeFValCheck = ctmOBJ.fitError(ctmOBJ.paramsToVec(oldWayParams),thePacket,'fitEr
 
 %% Compute the fit based on the timebase of the stimulus
 clear startParams
-startParams.weightL = 50;
-startParams.weightS = 2;
-% startParams.weightL_2 = 0;
-% startParams.weightS_2  = 0;
+startParams.weightL_1 = 50;
+startParams.weightS_1 = 2;
+startParams.weightL_2 = 0;
+startParams.weightS_2  = 0;
 startParams.minLag = 0.3;
 startParams.amplitude = 0.2;
 modelResponseStruct = ctmOBJ.computeResponse(oldWayParams,thePacket.stimulus,thePacket.kernel);

@@ -7,6 +7,7 @@ function Sall = loadPSYdataLMSall(expType, subjNames, expName, stmType, dataFile
 %
 % expType:       experiment type code
 %                'TRK'   -> tracking experiment
+%                'JND'   -> just-noticeable difference
 % subjName:      subject name
 % stmType:       stimulus type
 %                'CGB' -> compound Gabor

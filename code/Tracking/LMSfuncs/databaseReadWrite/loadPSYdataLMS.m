@@ -10,6 +10,7 @@ function S = loadPSYdataLMS(expType,subjName,expName,stmType,dataFileNums,localH
 %                'SDL'   -> Stimulus DeLay
 %                'RNR'   -> Rigid VS Non-Rigid (still working out details)
 %                'TRK'   -> tracking experiment
+%                'JND'   -> just-noticeable difference
 % subjName:      subject name
 % stmType:       stimulus type
 %                'MGB'   -> monocular Gabor
@@ -38,7 +39,7 @@ for i = 1:length(dataFileNums)
     load([fdir filesep fname]);
     disp(['loadPSYdataLMS: BRAVO! successfully loaded: ' fname ' ...'])
     % COMBINE STRUCTS
-    if strcmp(expType,'TRK')
+    if strcmp(expType,'TRK') || strcmp(expType,'JND')
        S = rmfield(S,'fname');
        S = rmfield(S,'stmRE');
        S = rmfield(S,'stmLE');

@@ -121,8 +121,8 @@ D.wht        = 1.0; % 255; % 1.0000;
 
 S.fname         = buildFilenamePSYdataLMS(expType,S.subjName(1,:),S.stmType(1,:),[],[]);
 S.fname         = repmat(S.fname,[S.trlPerRun 1]);
-S.fdirLoc       = buildFolderNamePSY('LS3',expType,S.subjName(1,:),'local');
-S.fdirSrv       = buildFolderNamePSY('LS3',expType,S.subjName(1,:),'server');
+S.fdirLoc       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'local');
+S.fdirSrv       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'server');
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % PRINT DATA TO SCREEN %
@@ -494,12 +494,12 @@ end
 %%%%%%%%%%%%%
 % SAVE DATA %
 %%%%%%%%%%%%%
-% disp(['ExpLMSdetection: SAVING DATA...']);
-% if strcmp(D.cmpInfo.localHostName,'jburge-hubel')
-%     savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'both',0,S,'S');
-% else
-%     savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'local',0,S,'S');
-% end
+disp(['ExpLMSdetection: SAVING DATA...']);
+if strcmp(D.cmpInfo.localHostName,'jburge-hubel')
+    savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'both',0,S,'S');
+else
+    savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'local',0,S,'S');
+end
 
 %%%%%%%%%%%%%%%%%
 % CLOSE SCREENS %

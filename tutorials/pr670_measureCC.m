@@ -1,14 +1,14 @@
-% Klein10A check Demo.
+% PR670 check that we are getting the correct cone contrasts.
 % Use a cal file to set primaries to a corresponding XYZ/xyY and use the klien
 % to measure the CRT and see if we recover the XYZ/xyY.
 
 %% Clear
 clear; close all;
 
-% pr670obj = [];
-% devicePortString = '/dev/ttyACM0';
-% verb = 0;
-% pr670obj = PR670dev('verbosity', verb, 'devicePortString', devicePortString);
+pr670obj = [];
+devicePortString = '/dev/ttyACM0';
+verb = 0;
+pr670obj = PR670dev('verbosity', verb, 'devicePortString', devicePortString);
 
 %% Verbose?
 %
@@ -27,7 +27,7 @@ nDeviceBits = 8;
 nDeviceLevels = 2^nDeviceBits;
 CalibrateFitGamma(calObj, nDeviceLevels);
 nPrimaries = calObj.get('nDevices');
-
+nMeasurements = 15;
 
 %% Setting gammaMethod to do quantizes at the calibration file bit depth.
 %
@@ -51,6 +51,7 @@ psiParamsStruct.coneParams.ageYears = 30;
 T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,S);
 
 SetSensorColorSpace(calObj,T_cones,S);
+
 PsychDefaultSetup(2);
 screens = Screen('Screens');
 screenNumber = max(screens);
@@ -73,6 +74,8 @@ Screen('Flip', window);
 fprintf('Aim/focus the radiometer and hit enter:\n');
 pause;
 
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSettings);
+pause; %% ADD WAIT FOR 3600 here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  MEASUREMENT SET 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -83,68 +86,32 @@ contrastLMSNeg = LMSstimulusContrast('experiment','Experiment1-Neg');
 maxExp1Neg = contrastLMSNeg(1:6:end,:)';
 
 target_coneContrast = [maxExp1Pos,maxExp1Neg];
-
-
-for ii = 1:size(target_xy,2)
-    % Calc the settings from the modulation 
-    ccModulation = target_coneContrast(:,ii);
-    modExcitation = bgExcitations + (bgExcitations.*ccModulation);
-    [imSettings,badSetting] = SensorToSettings(calObj,modExcitation);
-    imPrimary = SettingsToPrimary(calObj,imSettings);
-    
-    % put up the sqaure
-    Screen('FillRect', window, imSettings, centeredRect);
-    Screen('Flip', window);
-    
-    % print stuff
-    [xyYDesired] = XYZToxyY(targetXYZ);
-    xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
-    fprintf('\n ** MEASUREMENT %2.0f **\n',ii)
-    if badSetting ~= 0
-        fprintf('WARNING: SETTING OUT OF GAMUT\n');
+for jj = 1:nMeasurements
+    for ii = 1:size(target_coneContrast,2)
+        % Calc the settings from the modulation
+        ccModulation = target_coneContrast(:,ii);
+        modExcitation = bgExcitations + (bgExcitations.*ccModulation);
+        [imSettings,badSetting] = SensorToSettings(calObj,modExcitation);
+        
+        % put up the sqaure
+        Screen('FillRect', window, imSettings, centeredRect);
+        Screen('Flip', window);
+        
+        % print stuff
+        fprintf('\n ** MEASUREMENT DIRECTION %2.2f° **\n',atand(ccModulation(3)./ccModulation(1)))
+        if badSetting ~= 0
+            fprintf('WARNING: SETTING OUT OF GAMUT\n');
+        end
+        fprintf('Cone Contrast Nominal (L,M,S): %4.2f, %4.2f,  %4.2f', ccModulation(1), ccModulation(2), ccModulation(3));
+        
+        % measure
+        rawMeasurement= pr670obj.measure;
+        % compute the xyY if the measured spectrum
+        A = SplineCmf(S,T_cones,pr670obj.userS);
+        measuredLMSexcitation = A * rawMeasurement';
+        measuredCC(:,ii,jj) = (measuredLMSexcitation-bgExcitations)./bgExcitations;
+        fprintf('CC Measurement %2.0f (L,M,S): %4.2f, %4.2f,  %4.2f',jj, measuredCC(1,ii,jj), measuredCC(2,ii,jj), measuredCC(3,ii,jj));
     end
-    fprintf('The Settings  (R,G,B): (%4.2f, %4.2f, %4.2f)\n', imSettings(1), imSettings(2), imSettings(3));
-    fprintf('CIE Desired   (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-    fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
-    
-    % measure
-    rawMeasurement= pr670obj.measure;
-    % compute the xyY if the measured spectrum
-    A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-    measuredXYZ = A * rawMeasurement';
-    measured_xyY = XYZToxyY(measuredXYZ);
-    fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  MEASUREMENT SET 2
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-theSettings  = [[1,0,0]',[0,1,0]',[0,0,1]'];
-
-for jj = 1:size(theSettings,2)
-    % Calc the settings from the xy
-    
-    imSettings = theSettings(:,jj);
-    imPrimary = SettingsToPrimary(calObj,imSettings);
-    
-    % put up the sqaure
-    Screen('FillRect', window, imSettings, centeredRect);
-    Screen('Flip', window);
-    
-    % print stuff
-    xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
-    fprintf('\n ** MEASUREMENT %2.0f **\n',ii+jj)
-    fprintf('The Settings  (R,G,B): (%4.2f, %4.2f, %4.2f)\n', imSettings(1), imSettings(2), imSettings(3));
-    fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
-    
-    % measure
-    rawMeasurement= pr670obj.measure;
-    % compute the xyY if the measured spectrum
-    A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
-    measuredXYZ = A * rawMeasurement';
-    measured_xyY = XYZToxyY(measuredXYZ);
-    fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
 end
 
 %% end of measurements

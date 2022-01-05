@@ -58,7 +58,9 @@ elseif strcmp(D.cmpInfo.localHostName,'ben-Precision-7520')
     cal = cals{1};
 else
     % Get Cal Data
-    cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
+    resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+    load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
+    cal = cals{3};
 end
 
 % Construct a calStructOBJ from the latest calibration

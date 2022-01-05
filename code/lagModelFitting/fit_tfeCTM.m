@@ -41,7 +41,7 @@ thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
 matrixContrasts = reshape(thePacket.metaData.stimContrasts,size(lagsMat));
 %% Make the fit object
 theDimension= size(thePacket.stimulus.values, 1);
-numMechanism = 2;
+numMechanism = 1;
 
 ctmOBJ = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', numMechanism ,'fminconAlgorithm','active-set');
 
@@ -74,10 +74,10 @@ tfeFValCheck = ctmOBJ.fitError(ctmOBJ.paramsToVec(oldWayParams),thePacket,'fitEr
 
 %% Compute the fit based on the timebase of the stimulus
 clear startParams
-startParams.weightL_1 = 50;
-startParams.weightS_1 = 2;
-startParams.weightL_2 = 0;
-startParams.weightS_2  = 0;
+startParams.weightL = 50;
+startParams.weightS = 2;
+%startParams.weightL_2 = 0;
+%startParams.weightS_2  = 0;
 startParams.minLag = 0.3;
 startParams.amplitude = 0.2;
 modelResponseStruct = ctmOBJ.computeResponse(oldWayParams,thePacket.stimulus,thePacket.kernel);
@@ -149,14 +149,42 @@ legend([p1,spt],{sprintf('%g',targetLags(1)),'null'})
 plotInfo.title  = 'Lag Vs. Contrast';
 plotInfo.xlabel  = 'Contrast (%)';
 plotInfo.ylabel = 'Lag (s)';
-plotInfo.figureSizeInches = [19 12];
+plotInfo.figureSizeInches = [20 11];
 plotInfo.subjCode    = subjCode;
 
-directionGroups = {[0,90],[75, -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-0.9,-22.5]};
+if strcmp(subjID,'MAB')
+    directionGroups = {[0,90],[75, -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.6,88.6, 87.6],[22.5,-1.4,-22.5]};
+    yLimVals = [0.2 0.9];
+elseif strcmp(subjID,'BMC')
+    directionGroups = {[0,90],[75, -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-0.9,-22.5]};
+    yLimVals = [0.2 0.6];
+elseif strcmp(subjID,'KAS')
+    directionGroups = {[0,90],[75, -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-1.9,-22.5]};
+    yLimVals = [0.2 0.8];
+end
 
 CIs.upper = abs(upperCI - meanLagBtstrpLagMat);
 CIs.lower = abs(meanLagBtstrpLagMat - lowerCI);
 
+plotColors = [230 172 178; ...
+    194  171  253; ...
+    36   210  201; ...
+    32   140  163; ...
+    253  182    44; ...
+    252  153  233;...
+    127  201  127;...
+    190  174  212;...
+    253  192  134;...
+    255  255  153;...
+    56   108  176;...
+    240    2  127;...
+    179  226  205;...
+    253  205  172;...
+    203  213  232;...
+    237  248  177;...
+    127  205  187;...
+    44   127  184;...
+    ]./255;
 
-plotDirectionPairs(matrixContrasts,lagsMat,lagsFromFitMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',[],'errorBarsCI',CIs,'yLimVals',[0.2 0.6])
+plotDirectionPairs(matrixContrasts,lagsMat,lagsFromFitMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors','errorBarsCI',CIs,'yLimVals',yLimVals)
 

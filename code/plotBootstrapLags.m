@@ -14,7 +14,7 @@ elseif strcmp(subjID,'KAS')
 end
 load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
 load(fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']));
-figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
+figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTrackingTask/Results/';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%       Contrast vs Lag

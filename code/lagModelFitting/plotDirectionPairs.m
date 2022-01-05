@@ -123,10 +123,8 @@ for ii = 1:(nColorDirPlots)
         set(gca,'Xscale','log');
     end
     
-    set(gca,'XTick',[0.03 0.1 0.3 1]);
-    
     ylim(yLimVals)
-    
+    xlim([0,1])
     autoTicksY = yLimVals(1):(yLimVals(2)-yLimVals(1))/4:yLimVals(2);
     
     set(gca, ...
@@ -140,6 +138,7 @@ for ii = 1:(nColorDirPlots)
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
         'YTick'       , autoTicksY, ...
+        'XTick'       ,[0.03 0.1 0.3 1],...
         'LineWidth'   , 2         , ...
         'ActivePositionProperty', 'OuterPosition');
     
@@ -169,14 +168,21 @@ for ii = 1:(nColorDirPlots)
     set( hTitle, 'FontSize', 18,'FontWeight' , 'bold');
     
     plotInfo = rmfield(plotInfo,'legend');
+
 end
+
 
 % Save it!
 figureSizeInches = plotInfo.figureSizeInches;
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
+% set(tcHndl, 'PaperUnits', 'inches');
+% set(tcHndl, 'PaperSize',figureSizeInches);
+tcHndl.Units  = 'inches';
+tcHndl.PaperUnits  = 'inches';
+tcHndl.PaperSize = figureSizeInches;
+tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+
 figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_model_fit_allData.pdf']);
 % Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
+%exportgraphics(tcHndl,figNameTc)

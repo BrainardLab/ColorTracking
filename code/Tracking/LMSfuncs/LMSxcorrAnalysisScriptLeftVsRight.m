@@ -24,7 +24,7 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
-Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'server');
+Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
 
 % ************ NEW CODE FOR SPLITTING LEFT AND RIGHT *******************
 % INDICES FOR SPLITTING

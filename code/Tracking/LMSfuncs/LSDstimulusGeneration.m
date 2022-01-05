@@ -1,13 +1,12 @@
-function [stm,S] = LSDstimulusGeneration(MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWoct,cmpIntrvl,indRnd)
+function [stm,S] = LSDstimulusGeneration(MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWoct,cmpIntrvl)
 
-% function [stm,S] = LSDstimulusGeneration(trlPerRun,MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWoct)
+% function [stm,S] = LSDstimulusGeneration(MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWoct,cmpIntrvl)
 %
 % example call: 
 %               expDirection = 'Experiment2-Pos'; 
 %               MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
 %               cmpIntrvl = [ones([floor(size(MaxContrastLMS,1)/2) 1]); zeros([ceil(size(MaxContrastLMS,1)/2) 1])];
-%               indRnd = randperm(size(MaxContrastLMS,1))';
-%               [stm,~] = LSDstimulusGeneration(MaxContrastLMS,1,0,0,0.932,cmpIntrvl,indRnd);
+%               [stm,~] = LSDstimulusGeneration(MaxContrastLMS,1,0,0,0.932,cmpIntrvl);
 %
 % generates chromatic gabor stimuli for LMS experiment
 %
@@ -26,7 +25,6 @@ function [stm,S] = LSDstimulusGeneration(MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWo
 %                                   [    scalar   ] -> same   bandwidth for all  components
 %                                   [  1   x nCmp ] -> unique bandwidth for each component
 %             cmpIntrvl     : comparison intervals
-%             indRnd        : indices for randomizing
 
 % DISPLAY PARAMETERS (BACKGROUND, CMPINFO)
 D.bgd        = [0.5, 0.5, 0.5];
@@ -53,16 +51,7 @@ S.frqCpdR = frqCpd;
 S.phsDegL = phsDeg;
 S.phsDegR = phsDeg;
 
-% RANDOMIZE
-S.frqCpdL = S.frqCpdL(indRnd,:);
-S.frqCpdR = S.frqCpdR(indRnd,:);
-S.phsDegL = S.phsDegL(indRnd,:);
-S.phsDegR = S.phsDegR(indRnd,:);
-S.ortDeg = S.ortDeg(indRnd,:);
-S.BWoct = S.BWoct(indRnd,:);
-S.MaxContrastLMS = S.MaxContrastLMS(indRnd,:);
-S.indRnd = indRnd; 
-S.cmpIntrvl = cmpIntrvl(indRnd);
+S.cmpIntrvl = cmpIntrvl;
 
 % LOAD CALIBRATION FILES
 if     strcmp(D.cmpInfo.localHostName,'jburge-marr')

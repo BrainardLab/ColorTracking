@@ -1,6 +1,6 @@
-function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
+function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, indRnd, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 
-% function [S D] = ExpLMSdetection(S,subjName,IPDmm, stmType, mtnType, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
+% function [S D] = ExpLMSdetection(S,subjName,IPDmm, stmType, mtnType, indRnd, bUseFeedback, bSKIPSYNCTEST, bDEBUG)
 %
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
@@ -9,8 +9,8 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, bUseFeedback
 %                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
 %                 cmpIntrvl = [ones([floor(size(MaxContrastLMS,1)/2) 1]); zeros([ceil(size(MaxContrastLMS,1)/2) 1])];
 %                 indRnd = randperm(size(MaxContrastLMS,1))';
-%                 [stm,S] = LSDstimulusGeneration(MaxContrastLMS,1,0,0,0.932,cmpIntrvl,indRnd);
-%                 ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', 1, 0, 1);
+%                 [stm,S] = LSDstimulusGeneration(MaxContrastLMS,1,0,0,0.932,cmpIntrvl);
+%                 ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', indRnd, 1, 0, 1);
 %
 % run target detection experiment to measure thresholds for different cone
 % contrast directions. 
@@ -32,8 +32,7 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, bUseFeedback
 %                 BRZ -> brownian   motion in X; RE only
 %                 SXZ -> sinusoidal motion onscreen (X only)
 %                        elliptical motion in depth (XZ    )
-% MaxContrastLMS: cone contrasts 
-%                   [nCnd x 3]
+% indRnd        : indices for randomizing
 % bUseFeedback:  boolean indicating whether to use feedback or not
 %                1 -> use feedback
 %                0 -> don't
@@ -92,6 +91,18 @@ S.smpPerDeg     = repmat(128,           [S.trlPerRun, 1]);    % FOR STIM TEXTURE
 
 % FIXATION CROSS HAIRS WIDTHS
 S.fixStmSzXYdeg = repmat([7.5 60]./60,  [S.trlPerRun, 1]);
+
+% RANDOMIZE
+S.frqCpdL = S.frqCpdL(indRnd,:);
+S.frqCpdR = S.frqCpdR(indRnd,:);
+S.phsDegL = S.phsDegL(indRnd,:);
+S.phsDegR = S.phsDegR(indRnd,:);
+S.ortDeg = S.ortDeg(indRnd,:);
+S.BWoct = S.BWoct(indRnd,:);
+S.MaxContrastLMS = S.MaxContrastLMS(indRnd,:);
+S.cmpIntrvl = S.cmpIntrvl(indRnd);
+S.stmLE = S.stmLE(:,:,:,indRnd);
+S.stmRE = S.stmRE(:,:,:,indRnd);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SINUSOIDAL MOTION PARAMETERS %

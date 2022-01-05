@@ -94,8 +94,8 @@ for ii = 1:size(target_xy,2)
         fprintf('WARNING: SETTING OUT OF GAMUT\n');
     end
     fprintf('The Settings  (R,G,B): (%4.2f, %4.2f, %4.2f)\n', imSettings(1), imSettings(2), imSettings(3));
-    fprintf('CIE Desired   (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
-    fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
+    fprintf('CIE Desired   (x,y): (%4.4f, %4.4f) Ylum: %4.4f Cd/m^2\n', xyYDesired(1), xyYDesired(2), xyYDesired(3));
+    fprintf('CIE Settings  (x,y): (%4.4f, %4.4f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
     
     % measure
     rawMeasurement= pr670obj.measure;
@@ -103,7 +103,7 @@ for ii = 1:size(target_xy,2)
     A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
     measuredXYZ = A * rawMeasurement';
     measured_xyY = XYZToxyY(measuredXYZ);
-    fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
+    fprintf('CIE MEasured  (x,y): (%4.4f, %4.4f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,7 +126,7 @@ for jj = 1:size(theSettings,2)
     xyYSettings  = XYZToxyY(SettingsToSensor(calObj,imSettings));
     fprintf('\n ** MEASUREMENT %2.0f **\n',ii+jj)
     fprintf('The Settings  (R,G,B): (%4.2f, %4.2f, %4.2f)\n', imSettings(1), imSettings(2), imSettings(3));
-    fprintf('CIE Settings  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
+    fprintf('CIE Settings  (x,y): (%4.4f, %4.4f) Ylum: %4.4f Cd/m^2\n', xyYSettings(1), xyYSettings(2), xyYSettings(3));
     
     % measure
     rawMeasurement= pr670obj.measure;
@@ -134,7 +134,7 @@ for jj = 1:size(theSettings,2)
     A = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,pr670obj.userS);
     measuredXYZ = A * rawMeasurement';
     measured_xyY = XYZToxyY(measuredXYZ);
-    fprintf('CIE MEasured  (x,y): (%4.2f, %4.2f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
+    fprintf('CIE MEasured  (x,y): (%4.4f, %4.4f) Ylum: %4.4f Cd/m^2\n', measured_xyY(1), measured_xyY(2), measured_xyY(3));
 end
 
 %% end of measurements

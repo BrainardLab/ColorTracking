@@ -7,7 +7,9 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, bUseFeedback
 %   example call: % TEST CODE
 %                 expDirection = 'directionCheck';
 %                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
-%                 [~,S] = LMSstimulusGeneration(MaxContrastLMS,1,0,0,0.932);
+%                 cmpIntrvl = [ones([floor(size(MaxContrastLMS,1)/2) 1]); zeros([ceil(size(MaxContrastLMS,1)/2) 1])];
+%                 indRnd = randperm(size(MaxContrastLMS,1))';
+%                 [stm,S] = LSDstimulusGeneration(MaxContrastLMS,1,0,0,0.932,cmpIntrvl,indRnd);
 %                 ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', 1, 0, 1);
 %
 % run target detection experiment to measure thresholds for different cone
@@ -61,7 +63,7 @@ if ~exist('bDEBUG','var')        || isempty(bDEBUG)         bDEBUG = 0;        e
 
 % *** FIX INPUT CHECKS BEFORE FORGET ***
 
-expType = 'DTC';
+expType = 'JND';
 
 %%%%%%%%%%%%%%%%%%%%%%
 % STIMULUS STRUCTURE %

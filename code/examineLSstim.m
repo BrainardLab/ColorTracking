@@ -143,9 +143,12 @@ while 1
            0.6.*[fPosX], 0.8.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
    Screen('Flip', D.wdwPtr);
    MaxContrastLMS = contrastLS.*[1/sqrt(tand(directionLS)^2+1) 0 tand(directionLS)/sqrt(tand(directionLS)^2+1)];
-   [stm,~] = LMSstimulusGeneration(1,MaxContrastLMS,1,0,0,0.932);
-   texCmpImg = Screen('MakeTexture', D.wdwPtr, stm, [], [], 2);
-   Screen('DrawTexture', D.wdwPtr, texCmpImg, [],D.plySqrPix);
+   [stmCmp,~] = LMSstimulusGeneration(MaxContrastLMS,1,0,0,0.932);
+   [stmStd,~] = LMSstimulusGeneration(MaxContrastLMS,1,0,90,0.932);
+   texCmpImg = Screen('MakeTexture', D.wdwPtr, stmCmp, [], [], 2);
+   texStdImg = Screen('MakeTexture', D.wdwPtr, stmStd, [], [], 2);
+   Screen('DrawTexture', D.wdwPtr, texCmpImg, [],D.plySqrPix+[-100 0 -100 0]);
+   Screen('DrawTexture', D.wdwPtr, texStdImg, [],D.plySqrPix-[-100 0 -100 0]);
    Screen('DrawingFinished', D.wdwPtr);
    Screen('Flip', D.wdwPtr);
 end

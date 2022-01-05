@@ -7,7 +7,7 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, bUseFeedback
 %   example call: % TEST CODE
 %                 expDirection = 'directionCheck';
 %                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
-%                 [~,S] = LMSstimulusGeneration(1*size(MaxContrastLMS,1),MaxContrastLMS,1,0,0,0.932);
+%                 [~,S] = LMSstimulusGeneration(MaxContrastLMS,1,0,0,0.932);
 %                 ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', 1, 0, 1);
 %
 % run target detection experiment to measure thresholds for different cone
@@ -121,8 +121,8 @@ D.wht        = 1.0; % 255; % 1.0000;
 
 S.fname         = buildFilenamePSYdataLMS(expType,S.subjName(1,:),S.stmType(1,:),[],[]);
 S.fname         = repmat(S.fname,[S.trlPerRun 1]);
-S.fdirLoc       = buildFolderNamePSY('LS3',expType,S.subjName(1,:),'local');
-S.fdirSrv       = buildFolderNamePSY('LS3',expType,S.subjName(1,:),'server');
+S.fdirLoc       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'local');
+S.fdirSrv       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'server');
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % PRINT DATA TO SCREEN %
@@ -162,7 +162,7 @@ psyPTBsetup(bSKIPSYNCTEST,bDEBUG); % call must come before psyPTBopenWindow
 
 % SETUP GAMMA CORRECTION OPTIONS
 D.gammaCorrectionType = 'LookupTable';      % move to top of experiment file
-psyPTBgammaCorrectSetup(D.gammaCorrectionType);
+% psyPTBgammaCorrectSetup(D.gammaCorrectionType);
 
 %%%%%%%%%%%%%%%%%%%
 % OPEN PTB WINDOW %
@@ -216,7 +216,7 @@ D         = psyPTBdisplayParameters(D);       % requires D.wdwPtr... PHASE OUT C
 % DON'T GAMMA CORRECT IN PSYCHTOOLBOX
 D.gamInv = linspace(0,1,1024)';
 % CORRECT GAMMA
-D         = psyPTBgammaCorrect(D);
+% D         = psyPTBgammaCorrect(D);
 
 % SET STIMULUS PARAMETERS
 D.plyXYpix = bsxfun(@times,S.imgSzXYdeg, D.pixPerDegXY);
@@ -494,12 +494,12 @@ end
 %%%%%%%%%%%%%
 % SAVE DATA %
 %%%%%%%%%%%%%
-% disp(['ExpLMSdetection: SAVING DATA...']);
-% if strcmp(D.cmpInfo.localHostName,'jburge-hubel')
-%     savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'both',0,S,'S');
-% else
-%     savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'local',0,S,'S');
-% end
+disp(['ExpLMSdetection: SAVING DATA...']);
+if strcmp(D.cmpInfo.localHostName,'jburge-hubel')
+    savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'both',0,S,'S');
+else
+    savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'local',0,S,'S');
+end
 
 %%%%%%%%%%%%%%%%%
 % CLOSE SCREENS %

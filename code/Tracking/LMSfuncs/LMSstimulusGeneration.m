@@ -1,11 +1,11 @@
-function [stm,S] = LMSstimulusGeneration(trlPerRun,MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWoct)
+function [stm,S] = LMSstimulusGeneration(MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWoct)
 
 % function [stm,S] = LMSstimulusGeneration(trlPerRun,MaxContrastLMS,frqCpd,phsDeg,ortDeg,BWoct)
 %
 % example call: 
 %               expDirection = 'Experiment2-Pos'; 
 %               MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
-%               [stm,~] = LMSstimulusGeneration(1*size(MaxContrastLMS,1),MaxContrastLMS,1,0,0,0.932);
+%               [stm,~] = LMSstimulusGeneration(MaxContrastLMS,1,0,0,0.932);
 %
 % generates chromatic gabor stimuli for LMS experiment
 %
@@ -30,6 +30,7 @@ D.cmpInfo = psyComputerInfo;
 
 S = struct;
 
+trlPerRun = size(MaxContrastLMS,1);
 % HARD-CODED STRUCT FIELDS
 S.trlPerRun    = trlPerRun;
 S.imgSzXYdeg    = repmat(2.*[2 2],[S.trlPerRun, 1]);

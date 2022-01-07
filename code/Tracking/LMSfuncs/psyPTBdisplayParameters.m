@@ -85,13 +85,20 @@ elseif strcmp(localHostName, 'BrainardLab-21-01')      % imac
 %%%%%%%%%%%%%%%%%%%%%
 
 elseif strcmp(localHostName, 'blobfish')      % imac
-    D.scrnZmm    = 500;       % VIEWING DISTANCE
-    D.scrnXYmm   = [355.6 203.2]; % DISPLAY SIZE IN MM AND PIXELS
-    D.bitsIn     = 12;
-    D.gamFncExponent = 2.2;
-    D.comp       = 'MACI64';
-    D.lumCdm2max = [];
+%     D.scrnZmm    = 500;       % VIEWING DISTANCE
+%     D.scrnXYmm   = [355.6 203.2]; % DISPLAY SIZE IN MM AND PIXELS
+%     D.bitsIn     = 12;
+%     D.gamFncExponent = 2.2;
+%     D.comp       = 'MACI64';
+%     D.lumCdm2max = [];
     
+D.scrnZmm    = 925;       % VIEWING DISTANCE
+D.scrnXYmm   = [405 303]; % DISPLAY SIZE IN MM
+%D.bitsIn     = 12;
+%D.gamFncExponent = 2.2;
+% disp(['psyPTBdisplayParameters: WARNING! bitsIn not set.']);
+D.comp       = 'MACI64';
+D.lumCdm2max = [];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BEN CHIN PERSONAL LAPTOP 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

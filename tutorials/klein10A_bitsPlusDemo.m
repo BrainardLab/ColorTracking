@@ -10,10 +10,15 @@ clear; close all;
 VERBOSE = false;
 
 %% Load cal file
-[rootDir,~] = fileparts(which(mfilename));
-resourcesDir = sprintf('%s/resources',rootDir);
-setpref('BrainardLabToolbox','CalDataFolder',resourcesDir);
-cal = LoadCalFile('ViewSonicG220fb');
+% [rootDir,~] = fileparts(which(mfilename));
+% resourcesDir = sprintf('%s/resources',rootDir);
+% setpref('BrainardLabToolbox','CalDataFolder',resourcesDir);
+% cal = LoadCalFile('ViewSonicG220fb');
+% calObj = ObjectToHandleCalOrCalStruct(cal);
+
+resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
+cal = cals{3};
 calObj = ObjectToHandleCalOrCalStruct(cal);
 
 %% Make this a 14-bit device as far as the calibration file goes (FOR NOW)
@@ -44,21 +49,16 @@ T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
 
 SetSensorColorSpace(calObj,T_xyz,S);
 
-target_xy = [0.326 0.372]';
-
-targetXYZRaw = xyYToXYZ([target_xy ; 1]);
-midpointXYZ = PrimaryToSensor(calObj,[.5 .5 .5]');
-rawScale = targetXYZRaw\midpointXYZ;
-targetXYZ = rawScale*targetXYZRaw;
-bgSettings = SensorToSettings(calObj,targetXYZ);
-bgPrimary = SettingsToPrimary(calObj,bgSettings);
+bgPrimary = [0.5 0.5 0.5]';
+bgSettings = PrimaryToSettings(calObj,bgPrimary);
+% bgPrimary = SettingsToPrimary(calObj,bgSettings);
 bgExcitations = SettingsToSensor(calObj,bgSettings);
 % imSettings = [88:10:148];
 imSettings = 124:132;
 
 %% MAKING LOOKUP TABLE
         
-targetContrastDir = [1 1 0]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
+targetContrastDir = [1 1 1]'; targetContrastDir = targetContrastDir/norm(targetContrastDir);
 targetContrast = 0.12;
 
 fprintf('Building lookup table ...');
@@ -83,18 +83,6 @@ screens = Screen('Screens');
 
 screenNumber = max(screens);
 
-% OPENING NEW WINDOW WITH BITS PLUS PLUS IN MIND
-[window,windowRect] = BitsPlusPlus('OpenWindowBits++',screenNumber,128.*[1 1 1]);
-
-% SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
-% [saveGamma,~]=Screen('ReadNormalizedGammaTable',window);
-saveGamma = repmat(linspace(0,1,256)',[1 3]);
-
-bPlusPlusMode = 2;
-% LOAD NEW GAMMA TABLE AND FLIP
-Screen('LoadNormalizedGammaTable', window, lookupTableSettings,bPlusPlusMode);
-Screen('Flip', window);
-pause;
 %% KLEIN STUFF
 
 % ------ OPEN THE DEVICE ----------------------------------------------
@@ -157,10 +145,32 @@ fprintf('>>> Firmware version: %s\n', response(20:20+7-1));
 % ------------ TURN AIMING LIGHTS ON ----------------------------------
 [status] = K10A_device('sendCommand', 'Lights ON');
 
+% OPENING NEW WINDOW WITH BITS PLUS PLUS IN MIND
+[window,windowRect] = BitsPlusPlus('OpenWindowBits++',screenNumber,[128 128 128]');
+
+[screenXpixels, screenYpixels] = Screen('WindowSize', window);
+[xCenter, yCenter] = RectCenter(windowRect);
+baseRect = [0 0 150 150];
+centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
+% put up the sqaure
+aimingSettings = [.3,.7,1].*256-1;
+Screen('FillRect', window, aimingSettings, centeredRect);
+Screen('Flip', window);
+fprintf('Aim/focus the radiometer and hit enter:\n');
+pause; 
+% SAVE CURRENT GAMMA TABLE SO CAN USE IT TO RESTORE LATER
+% [saveGamma,~]=Screen('ReadNormalizedGammaTable',window);
+saveGamma = repmat(linspace(0,1,256)',[1 3]);
+
 % ------------ TURN AIMING LIGHTS OFF ---------------------------------
 disp('Hit enter to turn lights off'); pause;
 [status] = K10A_device('sendCommand', 'Lights OFF');
 
+bPlusPlusMode = 2;
+% LOAD NEW GAMMA TABLE AND FLIP
+Screen('LoadNormalizedGammaTable', window, lookupTableSettings,bPlusPlusMode);
+Screen('Flip', window);
+pause(3600);
 
 % ------------- ENABLE AUTO-RANGE -------------------------------------
 [status, response] = K10A_device('sendCommand', 'EnableAutoRanging');
@@ -180,7 +190,7 @@ for m = 1:nMeasurements
 %    testPermInds = 1:length(imSettings);
     for k = 1:length(testPermInds)
         texTest = Screen('MakeTexture', window, imSettings(testPermInds(k)));
-        Screen('DrawTexture', window, texTest, [], [100 100 windowRect(3)-100 windowRect(4)-100]);
+        Screen('DrawTexture', window, texTest, [], centeredRect);
         Screen('Flip', window);
         pause(0.1);
        [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');

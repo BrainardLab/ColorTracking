@@ -177,7 +177,6 @@ bPlusPlusMode = 2;
 % LOAD NEW GAMMA TABLE AND FLIP
 Screen('LoadNormalizedGammaTable', window, lookupTableSettings,bPlusPlusMode);
 Screen('Flip', window);
-pause(10);
 
 if bUseKlein==1
     % ------------- ENABLE AUTO-RANGE -------------------------------------
@@ -213,7 +212,8 @@ if bUseKlein==1
             [status, response] = K10A_device('sendCommand', 'LockInRange2');
     end
 end
-
+disp('Hit enter for the last time');
+pause(60);
 %% ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
 
 nMeasurements = 100;
@@ -241,12 +241,12 @@ for m = 1:nMeasurements
 %             meanY = mean(correctedYdata8HzStream);
 %             meanZ = mean(correctedZdata8HzStream);
 %             meanCIExChroma = meanX / (meanX + meanY + meanZ);
-%             meanCIEyChroma = meanY / (meanX + meanY + meanZ);
+%             meanCIEyChroma = meanY / (meanX + meanY + meanZ);  
+           indLum = strfind(response,'Lum:');
+           lumMeas(end+1) = str2num(response(indLum+4:indLum+10));
+           imSettingsMeas(end+1) = imSettings(testPermInds(k));
+           display(['Measurement ' num2str(length(lumMeas))]);
        end
-       indLum = strfind(response,'Lum:');
-       lumMeas(end+1) = str2num(response(indLum+4:indLum+10));
-       imSettingsMeas(end+1) = imSettings(testPermInds(k));
-       display(['Measurement ' num2str(length(lumMeas))]);
     end
 end
 

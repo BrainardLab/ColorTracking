@@ -300,7 +300,7 @@ for m = 1:nMeasurements
     testPermInds = randperm(length(imSettings));
 %    testPermInds = 1:length(imSettings);
     for k = 1:length(testPermInds)
-        texTest = Screen('MakeTexture', window, [128 imSettings(testPermInds(k)) 128]);
+        texTest = Screen('MakeTexture', window, [imSettings(testPermInds(k)) 128 128]);
         Screen('DrawTexture', window, texTest, [], centeredRect);
         Screen('Flip', window);
         pause(0.1);
@@ -334,7 +334,7 @@ for m = 1:nMeasurements
     testPermInds = randperm(length(imSettings));
 %    testPermInds = 1:length(imSettings);
     for k = 1:length(testPermInds)
-        texTest = Screen('MakeTexture', window, [128 imSettings(testPermInds(k)) 128]);
+        texTest = Screen('MakeTexture', window, [128 128 imSettings(testPermInds(k))]);
         Screen('DrawTexture', window, texTest, [], centeredRect);
         Screen('Flip', window);
         pause(0.1);
@@ -454,3 +454,9 @@ figure;
 plot(imSettings,meanLum,'ko');
 formatFigure('Settings','Y',['Blue Gun']);
 
+%%
+
+figure; 
+plot(Yinit); 
+formatFigure('Sample','Y'); 
+axis square

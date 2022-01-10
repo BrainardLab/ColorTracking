@@ -212,8 +212,17 @@ if bUseKlein==1
     end
 end
 disp('Hit enter for the last time');
-pause(10);
+pause(180);
 %% ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
+
+streamDurationInSecondsInit = 15;
+display(['Streaming for ' num2str(streamDurationInSecondsInit) ' seconds']);
+[status, uncorrectedYdata256HzStream, ...
+correctedXdata8HzStream, ...
+correctedYdata8HzStream, ...
+correctedZdata8HzStream] = ...
+K10A_device('sendCommand', 'Standard Stream', streamDurationInSecondsInit);
+Yinit = correctedYdata8HzStream;
 
 nMeasurements = 100;
 lumMeas = [];
@@ -280,6 +289,9 @@ Screen('Flip', window);
 sca;
 
 %%
+
+lumMeas = lumMeas(2:end);
+imSettingsMeas = imSettingsMeas(2:end);
 
 meanLum = [];
 

@@ -86,6 +86,7 @@ screenNumber = max(screens);
 %% KLEIN STUFF
 
 bUseKlein = 1;
+bSingleShot = 1;
 
 if bUseKlein==1
     % ------ OPEN THE DEVICE ----------------------------------------------
@@ -183,8 +184,6 @@ if bUseKlein==1
     [status, response] = K10A_device('sendCommand', 'EnableAutoRanging');
 
     % ----------- LOCK THE RANGE FOR STREAMING -----------------------
-    [status, response] = K10A_device('sendCommand', 'DisableAutoRanging');
-    [status, response] = K10A_device('sendCommand', 'LockInRange2');
     disp('Select a luminance range');
     disp('Range 1: Can measure down to 0.001 cd/m^2, saturates at around  20 cd/m^2');
     disp('Range 2: Can measure down to 0.010 cd/m^2, saturates at around 240 cd/m^2');
@@ -213,7 +212,7 @@ if bUseKlein==1
     end
 end
 disp('Hit enter for the last time');
-pause(60);
+pause(10);
 %% ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
 
 nMeasurements = 100;
@@ -229,23 +228,24 @@ for m = 1:nMeasurements
         Screen('Flip', window);
         pause(0.1);
        if bUseKlein==1
-           [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-           fprintf('response[%d]:%s\n', k, response);         
-%            streamDurationInSeconds = 1.5;
-%            [status, uncorrectedYdata256HzStream, ...
-%             correctedXdata8HzStream, ...
-%             correctedYdata8HzStream, ...
-%             correctedZdata8HzStream] = ...
-%             K10A_device('sendCommand', 'Standard Stream', streamDurationInSeconds);
-%             meanX = mean(correctedXdata8HzStream);
-%             meanY = mean(correctedYdata8HzStream);
-%             meanZ = mean(correctedZdata8HzStream);
-%             meanCIExChroma = meanX / (meanX + meanY + meanZ);
-%             meanCIEyChroma = meanY / (meanX + meanY + meanZ);  
-           indLum = strfind(response,'Lum:');
-           lumMeas(end+1) = str2num(response(indLum+4:indLum+10));
-           imSettingsMeas(end+1) = imSettings(testPermInds(k));
-           display(['Measurement ' num2str(length(lumMeas))]);
+           if bSingleShot==1
+               [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+               fprintf('response[%d]:%s\n', k, response);         
+               indLum = strfind(response,'Lum:');
+               lumMeas(end+1) = str2num(response(indLum+4:indLum+10));
+               imSettingsMeas(end+1) = imSettings(testPermInds(k));
+               display(['Measurement ' num2str(length(lumMeas))]);
+           else
+               streamDurationInSeconds = 1.5;
+               [status, uncorrectedYdata256HzStream, ...
+                correctedXdata8HzStream, ...
+                correctedYdata8HzStream, ...
+                correctedZdata8HzStream] = ...
+                K10A_device('sendCommand', 'Standard Stream', streamDurationInSeconds);
+                lumMeas = [lumMeas; correctedYdata8HzStream'];
+                imSettingsMeas = [imSettingsMeas; imSettings(testPermInds(k)).*ones([length(correctedYdata8HzStream) 1])];
+                display([num2str(length(lumMeas)) ' Measurements']);
+           end
        end
     end
 end

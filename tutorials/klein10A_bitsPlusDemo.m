@@ -54,7 +54,7 @@ bgSettings = PrimaryToSettings(calObj,bgPrimary);
 % bgPrimary = SettingsToPrimary(calObj,bgSettings);
 bgExcitations = SettingsToSensor(calObj,bgSettings);
 % imSettings = [88:10:148];
-imSettings = 124:132;
+imSettings = 124:141;
 
 %% MAKING LOOKUP TABLE
         
@@ -215,14 +215,14 @@ disp('Hit enter for the last time');
 pause(360);
 %% ------------- GET SOME CORRECTED xyY MEASUREMENTS -------------------
 
-streamDurationInSecondsInit = 15;
-display(['Streaming for ' num2str(streamDurationInSecondsInit) ' seconds']);
-[status, uncorrectedYdata256HzStream, ...
-correctedXdata8HzStream, ...
-correctedYdata8HzStream, ...
-correctedZdata8HzStream] = ...
-K10A_device('sendCommand', 'Standard Stream', streamDurationInSecondsInit);
-Yinit = correctedYdata8HzStream;
+% streamDurationInSecondsInit = 10;
+% display(['Streaming for ' num2str(streamDurationInSecondsInit) ' seconds']);
+% [status, uncorrectedYdata256HzStream, ...
+% correctedXdata8HzStream, ...
+% correctedYdata8HzStream, ...
+% correctedZdata8HzStream] = ...
+% K10A_device('sendCommand', 'Standard Stream', streamDurationInSecondsInit);
+% Yinit = correctedYdata8HzStream;
 
 nMeasurements = 100;
 lumMeas = [];
@@ -293,73 +293,73 @@ for m = 1:nMeasurements
     end
 end
 
-lumMeasR = [];
-imSettingsMeasR = [];
+% lumMeasR = [];
+% imSettingsMeasR = [];
+% 
+% for m = 1:nMeasurements
+%     testPermInds = randperm(length(imSettings));
+% %    testPermInds = 1:length(imSettings);
+%     for k = 1:length(testPermInds)
+%         texTest = Screen('MakeTexture', window, [imSettings(testPermInds(k)) 128 128]);
+%         Screen('DrawTexture', window, texTest, [], centeredRect);
+%         Screen('Flip', window);
+%         pause(0.1);
+%        if bUseKlein==1
+%            if bSingleShot==1
+%                [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+%                fprintf('response[%d]:%s\n', k, response);         
+%                indLum = strfind(response,'Lum:');
+%                lumMeasR(end+1) = str2num(response(indLum+4:indLum+10));
+%                imSettingsMeasR(end+1) = imSettings(testPermInds(k));
+%                display(['Measurement ' num2str(length(lumMeasR))]);
+%            else
+%                streamDurationInSeconds = 1.5;
+%                [status, uncorrectedYdata256HzStream, ...
+%                 correctedXdata8HzStream, ...
+%                 correctedYdata8HzStream, ...
+%                 correctedZdata8HzStream] = ...
+%                 K10A_device('sendCommand', 'Standard Stream', streamDurationInSeconds);
+%                 lumMeasR = [lumMeasR; correctedYdata8HzStream'];
+%                 imSettingsMeasR = [imSettingsMeasR; imSettings(testPermInds(k)).*ones([length(correctedYdata8HzStream) 1])];
+%                 display([num2str(length(lumMeasR)) ' Measurements']);
+%            end
+%        end
+%     end
+% end
 
-for m = 1:nMeasurements
-    testPermInds = randperm(length(imSettings));
-%    testPermInds = 1:length(imSettings);
-    for k = 1:length(testPermInds)
-        texTest = Screen('MakeTexture', window, [imSettings(testPermInds(k)) 128 128]);
-        Screen('DrawTexture', window, texTest, [], centeredRect);
-        Screen('Flip', window);
-        pause(0.1);
-       if bUseKlein==1
-           if bSingleShot==1
-               [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-               fprintf('response[%d]:%s\n', k, response);         
-               indLum = strfind(response,'Lum:');
-               lumMeasR(end+1) = str2num(response(indLum+4:indLum+10));
-               imSettingsMeasR(end+1) = imSettings(testPermInds(k));
-               display(['Measurement ' num2str(length(lumMeasR))]);
-           else
-               streamDurationInSeconds = 1.5;
-               [status, uncorrectedYdata256HzStream, ...
-                correctedXdata8HzStream, ...
-                correctedYdata8HzStream, ...
-                correctedZdata8HzStream] = ...
-                K10A_device('sendCommand', 'Standard Stream', streamDurationInSeconds);
-                lumMeasR = [lumMeasR; correctedYdata8HzStream'];
-                imSettingsMeasR = [imSettingsMeasR; imSettings(testPermInds(k)).*ones([length(correctedYdata8HzStream) 1])];
-                display([num2str(length(lumMeasR)) ' Measurements']);
-           end
-       end
-    end
-end
-
-lumMeasB = [];
-imSettingsMeasB = [];
-
-for m = 1:nMeasurements
-    testPermInds = randperm(length(imSettings));
-%    testPermInds = 1:length(imSettings);
-    for k = 1:length(testPermInds)
-        texTest = Screen('MakeTexture', window, [128 128 imSettings(testPermInds(k))]);
-        Screen('DrawTexture', window, texTest, [], centeredRect);
-        Screen('Flip', window);
-        pause(0.1);
-       if bUseKlein==1
-           if bSingleShot==1
-               [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
-               fprintf('response[%d]:%s\n', k, response);         
-               indLum = strfind(response,'Lum:');
-               lumMeasB(end+1) = str2num(response(indLum+4:indLum+10));
-               imSettingsMeasB(end+1) = imSettings(testPermInds(k));
-               display(['Measurement ' num2str(length(lumMeasB))]);
-           else
-               streamDurationInSeconds = 1.5;
-               [status, uncorrectedYdata256HzStream, ...
-                correctedXdata8HzStream, ...
-                correctedYdata8HzStream, ...
-                correctedZdata8HzStream] = ...
-                K10A_device('sendCommand', 'Standard Stream', streamDurationInSeconds);
-                lumMeasB = [lumMeasB; correctedYdata8HzStream'];
-                imSettingsMeasB = [imSettingsMeasB; imSettings(testPermInds(k)).*ones([length(correctedYdata8HzStream) 1])];
-                display([num2str(length(lumMeasB)) ' Measurements']);
-           end
-       end
-    end
-end
+% lumMeasB = [];
+% imSettingsMeasB = [];
+% 
+% for m = 1:nMeasurements
+%     testPermInds = randperm(length(imSettings));
+% %    testPermInds = 1:length(imSettings);
+%     for k = 1:length(testPermInds)
+%         texTest = Screen('MakeTexture', window, [128 128 imSettings(testPermInds(k))]);
+%         Screen('DrawTexture', window, texTest, [], centeredRect);
+%         Screen('Flip', window);
+%         pause(0.1);
+%        if bUseKlein==1
+%            if bSingleShot==1
+%                [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+%                fprintf('response[%d]:%s\n', k, response);         
+%                indLum = strfind(response,'Lum:');
+%                lumMeasB(end+1) = str2num(response(indLum+4:indLum+10));
+%                imSettingsMeasB(end+1) = imSettings(testPermInds(k));
+%                display(['Measurement ' num2str(length(lumMeasB))]);
+%            else
+%                streamDurationInSeconds = 1.5;
+%                [status, uncorrectedYdata256HzStream, ...
+%                 correctedXdata8HzStream, ...
+%                 correctedYdata8HzStream, ...
+%                 correctedZdata8HzStream] = ...
+%                 K10A_device('sendCommand', 'Standard Stream', streamDurationInSeconds);
+%                 lumMeasB = [lumMeasB; correctedYdata8HzStream'];
+%                 imSettingsMeasB = [imSettingsMeasB; imSettings(testPermInds(k)).*ones([length(correctedYdata8HzStream) 1])];
+%                 display([num2str(length(lumMeasB)) ' Measurements']);
+%            end
+%        end
+%     end
+% end
 
 % for k = 1:length(imSettings)
 %     texTest = Screen('MakeTexture', window, imSettings(k));
@@ -422,41 +422,41 @@ figure;
 plot(imSettings,meanLum,'ko');
 formatFigure('Settings','Y',['Green Gun']);
 
-%% RED GUN
-
-lumMeasR = lumMeasR(2:end);
-imSettingsMeasR = imSettingsMeasR(2:end);
-
-meanLum = [];
-
-for i = 1:length(imSettings)
-    ind = imSettingsMeasR == imSettings(i);
-    meanLum(i) = mean(lumMeasR(ind));
-end
-
-figure; 
-plot(imSettings,meanLum,'ko');
-formatFigure('Settings','Y',['Red Gun']);
-
-%% BLUE GUN
-
-lumMeasB = lumMeasB(2:end);
-imSettingsMeasB = imSettingsMeasB(2:end);
-
-meanLum = [];
-
-for i = 1:length(imSettings)
-    ind = imSettingsMeasB == imSettings(i);
-    meanLum(i) = mean(lumMeasB(ind));
-end
-
-figure; 
-plot(imSettings,meanLum,'ko');
-formatFigure('Settings','Y',['Blue Gun']);
+% %% RED GUN
+% 
+% lumMeasR = lumMeasR(2:end);
+% imSettingsMeasR = imSettingsMeasR(2:end);
+% 
+% meanLum = [];
+% 
+% for i = 1:length(imSettings)
+%     ind = imSettingsMeasR == imSettings(i);
+%     meanLum(i) = mean(lumMeasR(ind));
+% end
+% 
+% figure; 
+% plot(imSettings,meanLum,'ko');
+% formatFigure('Settings','Y',['Red Gun']);
+% 
+% %% BLUE GUN
+% 
+% lumMeasB = lumMeasB(2:end);
+% imSettingsMeasB = imSettingsMeasB(2:end);
+% 
+% meanLum = [];
+% 
+% for i = 1:length(imSettings)
+%     ind = imSettingsMeasB == imSettings(i);
+%     meanLum(i) = mean(lumMeasB(ind));
+% end
+% 
+% figure; 
+% plot(imSettings,meanLum,'ko');
+% formatFigure('Settings','Y',['Blue Gun']);
 
 %%
 
-figure; 
-plot(Yinit); 
-formatFigure('Sample','Y'); 
-axis square
+% figure; 
+% plot(Yinit); 
+% formatFigure('Sample','Y'); 
+% axis square

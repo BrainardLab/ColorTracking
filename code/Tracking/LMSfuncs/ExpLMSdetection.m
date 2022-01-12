@@ -171,10 +171,10 @@ key_SPACE_BAR = KbName('space');
 psyPTBsetup(bSKIPSYNCTEST,bDEBUG); % call must come before psyPTBopenWindow
 
 % LOAD MONITOR CALIBRATION DATA (GAMMA DATA)
-[D.cal,D.gamPix,D.gamFnc,D.gamInv] = psyLoadCalibrationData(D.cmpInfo.localHostName);
+% [D.cal,D.gamPix,D.gamFnc,D.gamInv] = psyLoadCalibrationData(D.cmpInfo.localHostName);
 
 % SETUP GAMMA CORRECTION OPTIONS
-D.gammaCorrectionType = 'LookupTable';      % move to top of experiment file
+% D.gammaCorrectionType = 'LookupTable';      % move to top of experiment file
 % psyPTBgammaCorrectSetup(D.gammaCorrectionType);
 
 %%%%%%%%%%%%%%%%%%%
@@ -227,7 +227,7 @@ D         = psyPTBalphaBlending(D);           % requires D.wdwPtr
 % DISPLAY PARAMETERS (ifi,
 D         = psyPTBdisplayParameters(D);       % requires D.wdwPtr... PHASE OUT CALL: D.bitsOut = Screen('PixelSize',D.wdwPtr);
 % DON'T GAMMA CORRECT IN PSYCHTOOLBOX
-D.gamInv = linspace(0,1,1024)';
+% D.gamInv = linspace(0,1,1024)';
 % CORRECT GAMMA
 % D         = psyPTBgammaCorrect(D);
 

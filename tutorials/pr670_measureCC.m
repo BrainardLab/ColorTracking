@@ -53,16 +53,39 @@ T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,S);
 
 SetSensorColorSpace(calObj,T_cones,S);
 
-PsychDefaultSetup(2);
-screens = Screen('Screens');
-screenNumber = max(screens);
+% PsychDefaultSetup(2);
+% screens = Screen('Screens');
+% screenNumber = max(screens);
+
+% ------------- BURGE LAB CODE --------------
+% PTB-3 CORRECTLY INSTALLED AND FUNCTIONAL
+AssertOpenGL;
+% SETUP KEYBOARD
+KbName('UnifyKeyNames')
+bSKIPSYNCTEST = 0;
+% SETUP PSYCHTOOLBOX
+% PREPARE PSYCHIMAGING
+PsychImaging('PrepareConfiguration');
+% FLOATING POINT NUMBERS
+PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible');
+% USE NORMALIZED [0 1] RANGE FOR COLOR AND LUMINANCE LEVELS
+PsychImaging('AddTask', 'General', 'NormalizedHighresColorRange');
+% SKIP SYNCTESTS OR NOT
+Screen('Preference', 'SkipSyncTests', bSKIPSYNCTEST);
+% DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
+screenNumber = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
+% ------------ END BURGE LAB CODE ------------
 
 % get the background settings and exitations
 bgSettings = PrimaryToSettings(calObj,[0.5,0.5,0.5]');
 bgExcitations = SettingsToSensor(calObj,bgSettings);
 
 % ptb set up stuff
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSettings);
+% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSettings);
+% ------------- BURGE LAB CODE --------------
+% OPEN WINDOW
+[window, windowRect]  = PsychImaging('OpenWindow', D.sid, D.correctedBgd, [],[], [], 0);
+% ------------ END BURGE LAB CODE ------------
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 [xCenter, yCenter] = RectCenter(windowRect);
 baseRect = [0 0 150 150];

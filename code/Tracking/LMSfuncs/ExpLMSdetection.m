@@ -93,14 +93,13 @@ S.smpPerDeg     = repmat(128,           [S.trlPerRun, 1]);    % FOR STIM TEXTURE
 S.fixStmSzXYdeg = repmat([7.5 60]./60,  [S.trlPerRun, 1]);
 
 % RANDOMIZE
-S.frqCpdL = S.frqCpdL(indRnd,:);
-S.frqCpdR = S.frqCpdR(indRnd,:);
-S.phsDegL = S.phsDegL(indRnd,:);
-S.phsDegR = S.phsDegR(indRnd,:);
-S.ortDeg = S.ortDeg(indRnd,:);
-S.BWoct = S.BWoct(indRnd,:);
-S.MaxContrastLMS = S.MaxContrastLMS(indRnd,:);
-S.cmpIntrvl = S.cmpIntrvl(indRnd);
+frqCpdL = S.frqCpdL;
+frqCpdR = S.frqCpdR;
+phsDegL = S.phsDegL;
+phsDegR = S.phsDegR;
+ortDeg = S.ortDeg;
+BWoct = S.BWoct;
+MaxContrastLMS = S.MaxContrastLMS;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SINUSOIDAL MOTION PARAMETERS %
@@ -411,93 +410,108 @@ pause(1.0);
 % EXPERIMENT ITSELF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
-% CREATE & DISPLAY STIMULI
-for t = 1:S.trlPerRun
-    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t)),[]);
-    Screen('Flip', D.wdwPtr);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % INDIVIDUAL TRIAL CODE STARTS HERE %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
-    % PRESENT TRIAL
- %   psyPresentTrial2IFCmov(D,S,t,stdIphtXYTrgb(:,:,:,:,t),cmpIphtXYTrgb(:,:,:,:,t),msk1oF);
-     S = psyPresentTrialDetectionLMS(D,S,t,msk1oF);
-    if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
-    Screen('TextSize', D.wdwPtr, 14);
-    % MAKE & DRAW FIXATION CROSS
-    Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
-    Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], [D.wht],[D.wht D.wht D.wht]);
-    % FLIP
-    Screen('Flip', D.wdwPtr);
+% STORE cmpIntrvl OUTSIDE OF STRUCT
+cmpIntrvl = S.cmpIntrvl;
+for i = 1:size(indRnd,2) % FOR EACH RUN
+    % PULL OUT ONE COLUMN OF cmpIntrvl VALUES
+    S.cmpIntrvl = cmpIntrvl(:,i);
+    % RANDOMIZE A BUNCH OF THINGS
+    S.cmpIntrvl = S.cmpIntrvl(indRnd(:,i),:);
+    S.frqCpdL = frqCpdL(indRnd(:,i),:);
+    S.frqCpdR = frqCpdR(indRnd(:,i),:);
+    S.phsDegL = phsDegL(indRnd(:,i),:);
+    S.phsDegR = phsDegR(indRnd(:,i),:);
+    S.ortDeg = ortDeg(indRnd(:,i),:);
+    S.BWoct = BWoct(indRnd(:,i),:);
+    S.MaxContrastLMS = MaxContrastLMS(indRnd(:,i),:);
+    % CREATE & DISPLAY STIMULI
+    for t = 1:S.trlPerRun
+        Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),[]);
+        Screen('Flip', D.wdwPtr);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % INDIVIDUAL TRIAL CODE STARTS HERE %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+        % PRESENT TRIAL
+     %   psyPresentTrial2IFCmov(D,S,t,stdIphtXYTrgb(:,:,:,:,t),cmpIphtXYTrgb(:,:,:,:,t),msk1oF);
+         S = psyPresentTrialDetectionLMS(D,S,t,msk1oF);
+        if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+        Screen('TextSize', D.wdwPtr, 14);
+        % MAKE & DRAW FIXATION CROSS
+        Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+        Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], [D.wht],[D.wht D.wht D.wht]);
+        % FLIP
+        Screen('Flip', D.wdwPtr);
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % WAIT UNTIL ALL KEYS ARE RELEASED %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    while KbCheck(-1); end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % WAIT UNTIL ALL KEYS ARE RELEASED %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        while KbCheck(-1); end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % WAIT FOR SUBJECT RESPONSE %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    while 1
-        % WAIT FOR KEYPRESS
-        [ keyIsDown, ~, keyCode ] = KbCheck(-1);
-        if keyIsDown
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % WAIT FOR SUBJECT RESPONSE %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        while 1
+            % WAIT FOR KEYPRESS
+            [ keyIsDown, ~, keyCode ] = KbCheck(-1);
+            if keyIsDown
 
-            % DOWN ARROW RESPONSE
-            if find(keyCode) == key_D_ARROW
+                % DOWN ARROW RESPONSE
+                if find(keyCode) == key_D_ARROW
 
-                % 1ST INTERVAL SELECTED
-                chsIntrvl = 0;
-                S = psyCollectResponse(S,t,chsIntrvl,S.magORval);
+                    % 1ST INTERVAL SELECTED
+                    chsIntrvl = 0;
+                    S = psyCollectResponse(S,t,chsIntrvl,S.magORval);
 
-                % FEEDBACK
-                if S.bUseFeedback(t) == 1
-                    psyFeedbackSound(S.Rcorrect(t));
+                    % FEEDBACK
+                    if S.bUseFeedback(t) == 1
+                        psyFeedbackSound(S.Rcorrect(t));
+                    end
+                    % TIMING CHECKS
+                    S.clock(t,:) = fix(clock);
+                    break % breaks out of while loop and moves to next trial OR ends experiment
                 end
-                % TIMING CHECKS
-                S.clock(t,:) = fix(clock);
-                break % breaks out of while loop and moves to next trial OR ends experiment
-            end
 
-            % UP  ARROW RESPONSE
-            if find(keyCode) == key_U_ARROW
+                % UP  ARROW RESPONSE
+                if find(keyCode) == key_U_ARROW
 
-                % 2ND INTERVAL SELECTED
-                chsIntrvl = 1;
-                S = psyCollectResponse(S,t,chsIntrvl,S.magORval);
+                    % 2ND INTERVAL SELECTED
+                    chsIntrvl = 1;
+                    S = psyCollectResponse(S,t,chsIntrvl,S.magORval);
 
-                % FEEDBACK
-                if S.bUseFeedback(t) == 1
-                    psyFeedbackSound(S.Rcorrect(t));
+                    % FEEDBACK
+                    if S.bUseFeedback(t) == 1
+                        psyFeedbackSound(S.Rcorrect(t));
+                    end
+                    % TIMING CHECKS
+                    S.clock(t,:) = fix(clock);
+                    break % breaks out of while loop and moves to next trial OR ends experiment
                 end
-                % TIMING CHECKS
-                S.clock(t,:) = fix(clock);
-                break % breaks out of while loop and moves to next trial OR ends experiment
+
+                % % SPACE BAR RESPONSE (REPEAT TRIAL?)
+                % if find(keyCode) == key_SPACE_BAR
+                %
+                % % DO STUFF
+                %
+                %     break
+                % end
+
+                % EXIT EXPERIMENT
+                if keyCode(key_ESCAPE)
+                    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
+                    Screen('CloseAll');
+                    % CLOSE VIDEO SWITCHER
+                    % PsychVideoSwitcher('SwitchMode', D.sid, 0, 1); 
+                    disp(['ExpEqvInputNse: WARNING! Experiment quit b/c of ESCAPE key press']);
+                    return;
+                    break;
+                end
+
+                while KbCheck(-1); end
             end
-
-            % % SPACE BAR RESPONSE (REPEAT TRIAL?)
-            % if find(keyCode) == key_SPACE_BAR
-            %
-            % % DO STUFF
-            %
-            %     break
-            % end
-
-            % EXIT EXPERIMENT
-            if keyCode(key_ESCAPE)
-                Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
-                Screen('CloseAll');
-                % CLOSE VIDEO SWITCHER
-                % PsychVideoSwitcher('SwitchMode', D.sid, 0, 1); 
-                disp(['ExpEqvInputNse: WARNING! Experiment quit b/c of ESCAPE key press']);
-                return;
-                break;
-            end
-
-            while KbCheck(-1); end
         end
+        pause(.15);
     end
-    pause(.15);
 end
 
 %% ------------------END OF SESSION--------------------

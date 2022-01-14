@@ -68,6 +68,8 @@ bSKIPSYNCTEST = 0;
 PsychImaging('PrepareConfiguration');
 % FLOATING POINT NUMBERS
 PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible');
+% USE NORMALIZED [0 1] RANGE FOR COLOR AND LUMINANCE LEVELS
+PsychImaging('AddTask', 'General', 'NormalizedHighresColorRange');
 % SKIP SYNCTESTS OR NOT
 Screen('Preference', 'SkipSyncTests', bSKIPSYNCTEST);
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
@@ -116,6 +118,10 @@ for jj = 1:nMeasurements
         ccModulation = target_coneContrast(:,ii);
         modExcitation = bgExcitations + (bgExcitations.*ccModulation);
         [imSettings,badSetting] = SensorToSettings(calObj,modExcitation);
+        
+        
+        %%%%%% MAKE THIS WORK IN THIS SCRIPT!!!!
+        lookupTableSettings = makeLookUpTableForCC(calObj,targetContrast,targetContrastAngle,bgSettings, varargin)
         
         % put up the sqaure
         Screen('FillRect', window, imSettings, centeredRect);

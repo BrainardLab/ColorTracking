@@ -77,9 +77,17 @@ SetGammaMethod(calStructOBJ, gammaMethod, 256);
 % Gamma Correct
 D.correctedBgd = PrimaryToSettings(calStructOBJ,D.bgd')';
 
+S.lookupTableSettings = [];
+for i = 1:size(MaxContrastLMS,1)
+    S.lookupTableSettings(:,:,i) = rand([256 3]);
+end
+
+% *** REPLACE THIS WHEN THE PROPER STIMULUS IS READY ***
 t = 1;
 stm = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
-                                                                                                                                                                                                                                                                    
+stm = stm./2 + 0.5;
+% *******
+
 S.stmLE = stm;
 S.stmRE = stm;
 

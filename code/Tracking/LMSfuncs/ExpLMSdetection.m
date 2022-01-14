@@ -260,7 +260,7 @@ for t = 1:S.trlPerRun
     % NUM FRAMES COMPUTED VIA DESIRED DURATION
     if strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
         %% STIMULUS DURATION IN SECONDS
-        secPerTrl    = 1;
+        secPerTrl    = 0.5;
         % STIMULUS DURATION IN MILLISECONDS
         S.durationMs  = repmat(secPerTrl.*1000,[S.trlPerRun 1]);
         % ENSURE THAT INTERFRAME INTERVAL (IN SEC) IS A NICE ROUND NUMBER
@@ -410,9 +410,11 @@ pause(1.0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EXPERIMENT ITSELF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+[saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
 % CREATE & DISPLAY STIMULI
 for t = 1:S.trlPerRun
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t)),[]);
+    Screen('Flip', D.wdwPtr);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % INDIVIDUAL TRIAL CODE STARTS HERE %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -483,6 +485,7 @@ for t = 1:S.trlPerRun
 
             % EXIT EXPERIMENT
             if keyCode(key_ESCAPE)
+                Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
                 Screen('CloseAll');
                 % CLOSE VIDEO SWITCHER
                 % PsychVideoSwitcher('SwitchMode', D.sid, 0, 1); 
@@ -522,7 +525,7 @@ if bUseMsk == 1,
 end
 % SHOW CURSOR
 ShowCursor();
-
+Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
 % CLOSE PTB WINDOW
 Screen('CloseAll');
 sca

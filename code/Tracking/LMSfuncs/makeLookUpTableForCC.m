@@ -1,4 +1,4 @@
-function lookupTableSettings = makeLookUpTableForCC(calObj,targetContrast,targetContrastAngle,bgSettings, varargin)
+function [lookupTableSettings,badIndex] = makeLookUpTableForCC(calObj,targetContrast,targetContrastAngle,bgSettings, varargin)
 % Generates the look up table needed for set the chromaitc modulation usin gthe bits++
 %
 % Syntax:
@@ -43,4 +43,4 @@ lookupTableDesiredContrastCal = targetContrast*targetContrastDir*lookupTableDesi
 
 bgExcitations = SettingsToSensor(calObj,bgSettings);
 lookupTableDesiredExcitationsCal = ContrastToExcitation(lookupTableDesiredContrastCal,bgExcitations);
-lookupTableSettings = SensorToSettings(calObj,lookupTableDesiredExcitationsCal)';
+[lookupTableSettings, badIndex] = SensorToSettings(calObj,lookupTableDesiredExcitationsCal);

@@ -60,8 +60,6 @@ SetSensorColorSpace(calObj,T_cones,S);
 % ------------- BURGE LAB CODE --------------
 % PTB-3 CORRECTLY INSTALLED AND FUNCTIONAL
 AssertOpenGL;
-% SETUP KEYBOARD
-KbName('UnifyKeyNames')
 bSKIPSYNCTEST = 0;
 % SETUP PSYCHTOOLBOX
 % PREPARE PSYCHIMAGING
@@ -102,7 +100,7 @@ pause;
 
 Screen('FillRect', window, bgSettings, centeredRect);
 Screen('Flip', window);
-bgWaitTimeSecs = 3600;
+bgWaitTimeSecs = 1;
 pause(bgWaitTimeSecs);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  MEASUREMENT SET 1
@@ -125,17 +123,18 @@ for jj = 1:nMeasurements
         ccModulation = target_coneContrast(:,ii);
         
         [theta, targetContrast] = cart2pol(ccModulation(1),ccModulation(3));
-        targetContrastAngle = rad2deg(targetContrastAngle);
+        targetContrastAngle = rad2deg(theta);
         
-        lookupTableSettings = makeLookUpTableForCC(calObj,targetContrast,targetContrastAngle,bgSettings, varargin)
+        [lookupTableSettings, badSetting] = makeLookUpTableForCC(calObj,targetContrast,targetContrastAngle,bgSettings);
         
         % put up the sqaure
-        Screen('LoadNormalizedGammaTable', window, lookupTableSettings,bPlusPlusMode);
+        Screen('LoadNormalizedGammaTable', window, lookupTableSettings',bPlusPlusMode);
+        Screen('FillRect', window, imSettings, centeredRect);
         Screen('Flip', window);
         
         % print stuff
         fprintf('\n ** MEASUREMENT DIRECTION %2.2f° **\n',atand(ccModulation(3)./ccModulation(1)))
-        if badSetting ~= 0
+        if any(badSetting ~= 0)
             fprintf('WARNING: SETTING OUT OF GAMUT\n');
         end
         fprintf('Cone Contrast Nominal (L,M,S): %4.2f, %4.2f,  %4.2f\n', ccModulation(1), ccModulation(2), ccModulation(3));
@@ -145,7 +144,7 @@ for jj = 1:nMeasurements
         % compute the xyY if the measured spectrum
         A = SplineCmf(S,T_cones,pr670obj.userS);
         measuredLMSexcitation = A * rawMeasurement';
-        measuredCC(:,ii,jj) = (measuredLMSexcitation-bgExcitations)./bgExcitations;
+        measuredCC(:,ii,jj) = ExcitationsToContrast(measuredLMSexcitation,bgExcitations);
         fprintf('CC Measurement%2.0f (L,M,S): %4.2f, %4.2f,  %4.2f\n',jj, measuredCC(1,ii,jj), measuredCC(2,ii,jj), measuredCC(3,ii,jj));
     end
 end

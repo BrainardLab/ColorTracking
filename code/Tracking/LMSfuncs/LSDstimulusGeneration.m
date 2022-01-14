@@ -77,20 +77,9 @@ SetGammaMethod(calStructOBJ, gammaMethod, 256);
 % Gamma Correct
 D.correctedBgd = PrimaryToSettings(calStructOBJ,D.bgd')';
 
-for t = 1:S.trlPerRun
-    
-    contrastImage = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
+t = 1;
+stm = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
                                                                                                                                                                                                                                                                     
-    SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
-  
-    SetGammaMethod(calStructOBJ,2);
-    
-    backgroundExcitations = PrimaryToSensor(calStructOBJ,D.bgd');
-    
-    [stm(:,:,:,t),~,~] = generateChromaticGabor(calStructOBJ,contrastImage,backgroundExcitations,S.MaxContrastLMS(t,:)');
-    
-end
-
 S.stmLE = stm;
 S.stmRE = stm;
 

@@ -101,8 +101,6 @@ S.ortDeg = S.ortDeg(indRnd,:);
 S.BWoct = S.BWoct(indRnd,:);
 S.MaxContrastLMS = S.MaxContrastLMS(indRnd,:);
 S.cmpIntrvl = S.cmpIntrvl(indRnd);
-S.stmLE = S.stmLE(:,:,:,indRnd);
-S.stmRE = S.stmRE(:,:,:,indRnd);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SINUSOIDAL MOTION PARAMETERS %

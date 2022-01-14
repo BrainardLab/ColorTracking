@@ -2,265 +2,147 @@ close all
 clear all
 
 %% LOAD DATA
-subjID  = 'KAS';
-expName = 'LS3';
+subjIDcell  = {'MAB','BMC','KAS'};
+expCell = {'LS1','LS2','LS3'};
 theRuns = 1:20;
 
-figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTracking/Results/';
-
-if strcmp(expName,'LS1')
-    expCode = 'Experiment1-Pos';
-elseif strcmp(expName,'LS2')
-    expCode = 'Experiment2-Pos';
-elseif strcmp(expName,'LS3')
-    expCode = ['Experiment3-' subjID '-Pos'];
+figSavePath = '/Users/michael/labDropbox/CNST_analysis/ColorTrackingTask/Results/';
+for tt = 1:length(subjIDcell)
+    for pp = 1:length(expCell)
+        subjID  = subjIDcell{tt};
+        expName = expCell{pp};
+        
+        if strcmp(expName,'LS1')
+            expCode = 'Experiment1-Pos';
+        elseif strcmp(expName,'LS2')
+            expCode = 'Experiment2-Pos';
+        elseif strcmp(expName,'LS3')
+            expCode = ['Experiment3-' subjID '-Pos'];
+        end
+        
+        if strcmp(subjID,'MAB')
+            subjCode = 'Subject1';
+        elseif strcmp(subjID,'BMC')
+            subjCode = 'Subject2';
+        elseif strcmp(subjID,'KAS')
+            subjCode = 'Subject3';
+        end
+        
+        Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
+        
+        % ************ NEW CODE FOR SPLITTING LEFT AND RIGHT *******************
+        % INDICES FOR SPLITTING
+        indLeft = (Sall.MaxContrastLMS(:,1)>=0 & Sall.MaxContrastLMS(:,3)>=0) | (Sall.MaxContrastLMS(:,1)>0 & Sall.MaxContrastLMS(:,3)<0);
+        indRight = (Sall.MaxContrastLMS(:,1)<0 & Sall.MaxContrastLMS(:,3)<0) | (Sall.MaxContrastLMS(:,1)<=0 & Sall.MaxContrastLMS(:,3)>=0);
+        % NEW STRUCTS SPLIT BETWEEN LEFT AND RIGHT
+        SallLeft = structElementSelect(Sall,indLeft,size(Sall.MaxContrastLMS,1));
+        SallRight = structElementSelect(Sall,indRight,size(Sall.MaxContrastLMS,1));
+        % **********************************************************************
+        
+        %% SORT TRIALS BY COLOR ANGLE
+        plotRawData = false;
+        
+        % Get the cone contrasts MaxContrastLMS
+        MaxContrastLMS = LMSstimulusContrast('experiment',expCode);
+        uniqColorDirs = unique(round(atand(MaxContrastLMS(:,3)./MaxContrastLMS(:,1)),2),'stable');
+        
+        %% Get the left lags
+        for ii = 1:length(uniqColorDirs)
+            
+            % 0 DEG IN SL PLANE
+            ind = abs(atand(SallLeft.MaxContrastLMS(:,3)./SallLeft.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
+            
+            SLeft = structElementSelect(SallLeft,ind,size(SallLeft.tgtXmm,2));
+            % LMS ANALYSIS TO ESTIMATE LAGS
+            [~,~,rParamsLeft(:,:,ii)] = LMSxcorrAnalysis(SLeft,'LGS','bPLOTfitsAndRaw',plotRawData);
+            
+        end
+        
+        %% Get the right lags
+        for ii = 1:length(uniqColorDirs)
+            
+            % 0 DEG IN SL PLANE
+            ind = abs(atand(SallRight.MaxContrastLMS(:,3)./SallRight.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
+            
+            SRight = structElementSelect(SallRight,ind,size(SallRight.tgtXmm,2));
+            % LMS ANALYSIS TO ESTIMATE LAGS
+            [~,~,rParamsRight(:,:,ii)] = LMSxcorrAnalysis(SRight,'LGS','bPLOTfitsAndRaw',plotRawData);
+            
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%      Left vs Right
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % get the lags from rParams
+        lagsLeft = flipud(squeeze(rParamsLeft(2,:,:)));
+        lagsRight = flipud(squeeze(rParamsRight(2,:,:)));
+        
+        %lags = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
+        
+        % Set the colors
+        plotColors = [230 172 178; ...
+            194  171  253; ...
+            36   210  201; ...
+            32   140  163; ...
+            253  182    44; ...
+            252  153  233;...
+            ]./255;
+        
+        % Get the l2 norm of the cone contrasts
+        vecContrast = sqrt(MaxContrastLMS(:,1).^2+MaxContrastLMS(:,3).^2);
+        matrixContrasts = reshape(vecContrast,size(lagsLeft));
+        
+        % Names for plotting
+        
+        for jj = 1:length(uniqColorDirs)
+            plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
+        end
+        % Plot it!
+        tcHndl = figure; hold on;
+        sz = 64;
+        for ii = 1:size(lagsLeft,2)
+            s{ii} = scatter(lagsLeft(:,ii),lagsRight(:,ii),sz,'MarkerEdgeColor',plotColors(ii,:)*0.7,...
+                'MarkerFaceColor',plotColors(ii,:),...
+                'LineWidth',1.5);
+            
+            s{ii}.AlphaData = linspace(1,.4,6);
+            s{ii}.MarkerFaceAlpha = 'flat';
+        end
+        axis square
+        ylim([0.3,0.8]);
+        xlim([0.3,0.8]);
+        plot([0.3,0.8],[0.3,0.8],'k--','LineWidth',1.5);
+        hTitle  = title ('Lags Left Vs. Right Phase');
+        hXLabel = xlabel('Left Lags (s)');
+        hYLabel = ylabel('Right Lag (s)');
+        legend([s{:}],plotNames.legend,'Location','northeastoutside');
+        
+        
+        set(gca, ...
+            'Box'         , 'off'     , ...
+            'TickDir'     , 'out'     , ...
+            'FontSize'    , 16        , ...
+            'TickLength'  , [.02 .02] , ...
+            'XMinorTick'  , 'on'      , ...
+            'YMinorTick'  , 'on'      , ...
+            'YGrid'       , 'on'      , ...
+            'XColor'      , [.3 .3 .3], ...
+            'YColor'      , [.3 .3 .3], ...
+            'YTick'       , 0:.2:1, ...
+            'XTick'       , 0:.2:1,...
+            'LineWidth'   , 2         , ...
+            'ActivePositionProperty', 'OuterPosition');
+        
+        set(gcf, 'Color', 'white' );
+        
+        % Save it!
+        figureSizeInches = [11 8];
+        set(tcHndl, 'PaperUnits', 'inches');
+        set(tcHndl, 'PaperSize',figureSizeInches);
+        set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
+        % Full file name
+        figNameTc =  fullfile(figSavePath,[subjCode, '_LagsLeftVsRight_' expName '.pdf']);
+        % Save it
+        print(tcHndl, figNameTc, '-dpdf', '-r300');
+        
+    end
 end
-
-if strcmp(subjID,'MAB')
-    subjCode = 'Subject1';
-elseif strcmp(subjID,'BMC')
-    subjCode = 'Subject2';
-elseif strcmp(subjID,'KAS')
-    subjCode = 'Subject3';
-end
-
-Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
-
-% ************ NEW CODE FOR SPLITTING LEFT AND RIGHT *******************
-% INDICES FOR SPLITTING
-indLeft = (Sall.MaxContrastLMS(:,1)>=0 & Sall.MaxContrastLMS(:,3)>=0) | (Sall.MaxContrastLMS(:,1)>0 & Sall.MaxContrastLMS(:,3)<0);
-indRight = (Sall.MaxContrastLMS(:,1)<0 & Sall.MaxContrastLMS(:,3)<0) | (Sall.MaxContrastLMS(:,1)<=0 & Sall.MaxContrastLMS(:,3)>=0);
-% NEW STRUCTS SPLIT BETWEEN LEFT AND RIGHT
-SallLeft = structElementSelect(Sall,indLeft,size(Sall.MaxContrastLMS,1));
-SallRight = structElementSelect(Sall,indRight,size(Sall.MaxContrastLMS,1));
-% **********************************************************************
-
-%% SORT TRIALS BY COLOR ANGLE
-plotRawData = true;
-
-% Get the cone contrasts MaxContrastLMS
-MaxContrastLMS = LMSstimulusContrast('experiment',expCode);
-uniqColorDirs = unique(round(atand(MaxContrastLMS(:,3)./MaxContrastLMS(:,1)),2),'stable');
-
-for ii = 1:length(uniqColorDirs)
-    
-    % 0 DEG IN SL PLANE
-    ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqColorDirs(ii))<0.001;
-    
-    S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
-    % LMS ANALYSIS TO ESTIMATE LAGS
-    [~,~,rParams(:,:,ii)] = LMSxcorrAnalysis(S,'LGS','bPLOTfitsAndRaw',plotRawData);
-    
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%       Contrast vs Lag
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% get the lags from rParams
-lags = flipud(squeeze(rParams(2,:,:)));
-%lags = flipud((squeeze(rParams(3,:,:))-1).*squeeze(rParams(2,:,:))+ squeeze(rParams(4,:,:)));
-
-% Set the colors
-plotColors = [230 172 178; ...
-    194  171  253; ...
-    36   210  201; ...
-    32   140  163; ...
-    253  182    44; ...
-    252  153  233;...
-    ]./255;
-
-% Get the l2 norm of the cone contrasts
-vecContrast = sqrt(MaxContrastLMS(:,1).^2+MaxContrastLMS(:,3).^2);
-matrixContrasts = reshape(vecContrast,size(lags));
-
-% Names for plotting
-plotNames.title  = 'Lag Vs. Contrast';
-plotNames.xlabel  = 'Contrast (%)';
-plotNames.ylabel = 'Lag (s)';
-for jj = 1:length(uniqColorDirs)
-    plotNames.legend{jj} = sprintf('%s°',num2str(uniqColorDirs(jj)));
-end
-% Plot it!
-[tcHndl] =plotParams(matrixContrasts,lags,plotColors',plotNames,'yLimVals', [0.3 .9],'semiLog',false);
-
-% Save it!
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_LagVsContrast_' expName '.pdf']);
-% Save it
-% print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%       Contrast vs TIP
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculate the temporal integration period
-stds = flipud(squeeze(rParams(3,:,:)));
-tips = exp(log(lags)+stds.*sqrt(log(4))) - exp(log(lags)-stds.*sqrt(log(4)));
-
-
-plotNames.title  = 'TIP Vs. Contrast';
-plotNames.ylabel = 'Temporal Integration Period (s)';
-
-[tcHndl] = plotParams(matrixContrasts,tips,plotColors',plotNames,'yLimVals', [0 .8]);
-
-set(tcHndl, 'Renderer', 'Painters');
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_TipVsContrast_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%       Contrast vs Amp
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-amps = flipud(squeeze(rParams(1,:,:)));
-
-plotNames.title  = 'Amplitude Vs. Contrast';
-plotNames.ylabel = 'Amplitude (a.u.)';
-
-[tcHndl] = plotParams(matrixContrasts,amps,plotColors',plotNames,'yLimVals', [0 .4]);
-
-set(tcHndl, 'Renderer', 'Painters');
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_AmpVsContrast_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%          S/L+S
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-S_over_LS =  MaxContrastLMS(:,3) ./ (abs(MaxContrastLMS(:,1))+abs(MaxContrastLMS(:,3)));
-scaledContrasts = matrixContrasts./matrixContrasts(1,:);
-matSContrast = reshape(S_over_LS,size(lags));
-
-plotNames.title  = 'Lag Vs. Proportion S';
-plotNames.xlabel  = 'S / (S + L) (Proportion S)';
-plotNames.ylabel = 'Lag (s)';
-
-[tcHndl] = scatterParams(matSContrast,lags,plotColors',plotNames,'yLimVals', [.3 .9],'semiLog',false,'xTickVals',[],'sz',12.^2,'contrastAlpha',scaledContrasts);
-
-set(tcHndl, 'Renderer', 'Painters');
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_sOverLPlusS_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%          Lag vs TIP
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plotNames.title  = 'Lag Vs. TIP';
-plotNames.xlabel  = 'Lag (s)';
-plotNames.ylabel = 'Temporal Intergration Period (s)';
-
-[tcHndl] = scatterParams(lags,tips,plotColors',plotNames,'yLimVals', [0.1 .40],'sz',12.^2,'contrastAlpha',scaledContrasts);
-
-set(tcHndl, 'Renderer', 'Painters');
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_lagVsTips_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%          Amp vs TIP
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plotNames.title  = 'Amplitude Vs. TIP';
-plotNames.xlabel  = 'Amplitude (a.u.)';
-plotNames.ylabel = 'Temporal Intergration Period (s)';
-
-[tcHndl] = scatterParams(amps,tips,plotColors',plotNames,'yLimVals', [0.15 .35],'xTickVals',0:0.02:.2,'sz',12.^2,'contrastAlpha',scaledContrasts);
-
-set(tcHndl, 'Renderer', 'Painters');
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_ampsVsTips_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%          Lag vs Amp
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plotNames.title  = 'Lag Vs. Amplitude';
-plotNames.xlabel  = 'Lag (s)';
-plotNames.ylabel = 'Amplitude (a.u.)';
-
-[tcHndl] = scatterParams(lags,amps,plotColors',plotNames,'yLimVals', [0 .20],'sz',12.^2,'contrastAlpha',scaledContrasts);
-
-set(tcHndl, 'Renderer', 'Painters');
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_ampsVsLag_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%    Lag vs L-cone Contrast
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plotNames.title  = 'Lag Vs. L Cone Contrast';
-plotNames.xlabel =  'L Cone Contrast (%)';
-plotNames.ylabel = 'Lag (s)';
-
-coneContrastLvec = MaxContrastLMS(:,1);
-coneContrastSvec = MaxContrastLMS(:,3);
-
-coneContrastL = reshape(coneContrastLvec,size(lags));
-coneContrastS = reshape(coneContrastSvec,size(lags));
-
-aa = 0.4;
-bb = 1;
-alphaValsS = (bb-aa) .* ((coneContrastS - min(coneContrastS(:)))./ (max(coneContrastS(:)) -min(coneContrastS(:))) ) + aa;
-
-[tcHndl] = scatterParams(coneContrastL,lags,plotColors',plotNames,'yLimVals', [.3 .80],'sz',12.^2,'contrastAlpha',alphaValsS, 'semiLog', false);
-
-set(tcHndl, 'Renderer', 'Painters');
-figureSizeInches = [8 8];
-set(tcHndl, 'PaperUnits', 'inches');
-set(tcHndl, 'PaperSize',figureSizeInches);
-set(tcHndl, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-% Full file name
-figNameTc =  fullfile(figSavePath,[subjCode, '_L-Cone_contrastVsLag_' expName '.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-
-
-
-
-%
-% % MAKE 3D SCATTER PLOT
-%
-% figure;hold on;
-% scatter3(MaxContrastLMS(1:6,1),MaxContrastLMS(1:6,3),lags(:,1))
-%
-% scatter3(MaxContrastLMS(7:12,1),MaxContrastLMS(7:12,3),lags(:,2))
-%
-% scatter3(MaxContrastLMS(13:18,1),MaxContrastLMS(13:18,3),lags(:,6))
-%
-% scatter3(MaxContrastLMS(19:24,1),MaxContrastLMS(19:24,3),lags(:,5))
-%
-% scatter3(MaxContrastLMS(25:30,1),MaxContrastLMS(25:30,3),lags(:,4))
-%
-% scatter3(MaxContrastLMS(31:36,1),MaxContrastLMS(31:36,3),lags(:,3))
-% grid on
-% set(gca,'LineWidth',1.5)

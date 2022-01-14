@@ -68,6 +68,8 @@ bSKIPSYNCTEST = 0;
 PsychImaging('PrepareConfiguration');
 % FLOATING POINT NUMBERS
 PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible');
+% USE NORMALIZED [0 1] RANGE FOR COLOR AND LUMINANCE LEVELS
+PsychImaging('AddTask', 'General', 'NormalizedHighresColorRange');
 % SKIP SYNCTESTS OR NOT
 Screen('Preference', 'SkipSyncTests', bSKIPSYNCTEST);
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
@@ -82,7 +84,9 @@ bgExcitations = SettingsToSensor(calObj,bgSettings);
 % [window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSettings);
 % ------------- BURGE LAB CODE --------------
 % OPEN WINDOW
-[window, windowRect]  = PsychImaging('OpenWindow', D.sid, D.correctedBgd, [],[], [], 0);
+
+[window,windowRect] = BitsPlusPlus('OpenWindowBits++',screenNumber,[128 128 128]');
+
 % ------------ END BURGE LAB CODE ------------
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 [xCenter, yCenter] = RectCenter(windowRect);
@@ -108,17 +112,25 @@ contrastLMSPos = LMSstimulusContrast('experiment','Experiment1-Pos');
 maxExp1Pos = contrastLMSPos(3:6:end,:)';
 contrastLMSNeg = LMSstimulusContrast('experiment','Experiment1-Neg');
 maxExp1Neg = contrastLMSNeg(3:6:end,:)';
-
 target_coneContrast = [maxExp1Pos,maxExp1Neg];
+
+%% Make the square
+imSettings = [255 255 255];
+Screen('FillRect', window, imSettings, centeredRect);
+bPlusPlusMode = 2;
+
 for jj = 1:nMeasurements
     for ii = 1:size(target_coneContrast,2)
         % Calc the settings from the modulation
         ccModulation = target_coneContrast(:,ii);
-        modExcitation = bgExcitations + (bgExcitations.*ccModulation);
-        [imSettings,badSetting] = SensorToSettings(calObj,modExcitation);
+        
+        [theta, targetContrast] = cart2pol(ccModulation(1),ccModulation(3));
+        targetContrastAngle = rad2deg(targetContrastAngle);
+        
+        lookupTableSettings = makeLookUpTableForCC(calObj,targetContrast,targetContrastAngle,bgSettings, varargin)
         
         % put up the sqaure
-        Screen('FillRect', window, imSettings, centeredRect);
+        Screen('LoadNormalizedGammaTable', window, lookupTableSettings,bPlusPlusMode);
         Screen('Flip', window);
         
         % print stuff
@@ -143,7 +155,7 @@ measurementInfo.calFile = 'ViewSonicG220fb_670.mat';
 measurementInfo.calCell = calCell;
 measurementInfo.radiometer = 'PR670';
 measurementInfo.bgWaitTimeSecs = bgWaitTimeSecs;
-% Save measurements 
+% Save measurements
 savePath = '/home/brainardlab/labDropbox/CNST_materials/ColorTrackingTask/monitorValiadtions/';
 saveName = fullfile(savePath,'pr670_CC_measurements.mat');
 save(saveName,'measuredCC','measurementInfo')
@@ -157,11 +169,11 @@ angles = atand(target_coneContrast(3,:)./target_coneContrast(1,:));
 contrasts = vecnorm(target_coneContrast) .* [1 1 1 1 1 1 -1 -1 -1 -1 -1 -1];
 fprintf('\n**  MEASUREMENT SUMMARY  **\n');
 for ii= 1:size(meanMeasuredCC,2)
-            fprintf('\nDirection = %2.2fdeg -- Contrast = %1.4f\n', angles(ii), contrasts(ii));
-            fprintf('Cone Contrast Nominal (L,M,S): %4.4f, %4.4f,  %4.4f\n', target_coneContrast(1,ii), target_coneContrast(2,ii), target_coneContrast(3,ii));
-            fprintf('Cone Contrast Measure (L,M,S): %4.4f ±%4.4f, %4.4f ±%4.4f,  %4.4f ±%4.4f\n', meanMeasuredCC(1,ii), semMeasured(1,ii),meanMeasuredCC(2,ii), semMeasured(2,ii),meanMeasuredCC(3,ii),semMeasured(3,ii));
-            fprintf('Nominal - Measured (L,M,S): %4.4f, %3.4f,  %3.4f\n', diffContrast(1,ii), diffContrast(2,ii), diffContrast(3,ii));
-            fprintf('Percent Difference (L,S): %3.2f, %3.2f\n', percentDiff(1,ii), percentDiff(3,ii));
+    fprintf('\nDirection = %2.2fdeg -- Contrast = %1.4f\n', angles(ii), contrasts(ii));
+    fprintf('Cone Contrast Nominal (L,M,S): %4.4f, %4.4f,  %4.4f\n', target_coneContrast(1,ii), target_coneContrast(2,ii), target_coneContrast(3,ii));
+    fprintf('Cone Contrast Measure (L,M,S): %4.4f ±%4.4f, %4.4f ±%4.4f,  %4.4f ±%4.4f\n', meanMeasuredCC(1,ii), semMeasured(1,ii),meanMeasuredCC(2,ii), semMeasured(2,ii),meanMeasuredCC(3,ii),semMeasured(3,ii));
+    fprintf('Nominal - Measured (L,M,S): %4.4f, %3.4f,  %3.4f\n', diffContrast(1,ii), diffContrast(2,ii), diffContrast(3,ii));
+    fprintf('Percent Difference (L,S): %3.2f, %3.2f\n', percentDiff(1,ii), percentDiff(3,ii));
 end
 
 %% end of measurements

@@ -5,11 +5,13 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, indRnd, bUse
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
 %   example call: % TEST CODE
-%                 expDirection = 'directionCheck';
-%                 MaxContrastLMS = LMSstimulusContrast('experiment',expDirection);
-%                 cmpIntrvl = [ones([floor(size(MaxContrastLMS,1)/2) 1]); zeros([ceil(size(MaxContrastLMS,1)/2) 1])];
-%                 indRnd = randperm(size(MaxContrastLMS,1))';
-%                 [stm,S] = LSDstimulusGeneration(MaxContrastLMS,1,0,0,0.932,cmpIntrvl);
+%                 targetContrast = [0.5 0.5 0.5 0.5]';
+%                 targetContrastAngle = [45 75 -45 -75]';
+%                 cmpIntrvl = [ones([floor(length(targetContrast)/2) 1]); zeros([ceil(length(targetContrast)/2) 1])];
+%                 cmpIntrvl = repmat(cmpIntrvl,[1 2]);
+%                 indRnd = randperm(length(targetContrast))';
+%                 indRnd = [indRnd randperm(length(targetContrast))'];
+%                 [stm,S] = LSDstimulusGeneration(targetContrast,targetContrastAngle,1,0,0,0.932,cmpIntrvl);
 %                 ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', indRnd, 1, 0, 1);
 %
 % run target detection experiment to measure thresholds for different cone
@@ -98,7 +100,8 @@ phsDegL = S.phsDegL;
 phsDegR = S.phsDegR;
 ortDeg = S.ortDeg;
 BWoct = S.BWoct;
-MaxContrastLMS = S.MaxContrastLMS;
+targetContrast = S.targetContrast;
+targetContrastAngle = S.targetContrastAngle;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SINUSOIDAL MOTION PARAMETERS %
@@ -201,7 +204,7 @@ D.stereoMode = stereoMode;
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
 % OPEN WINDOW
-[D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.correctedBgd, [],[], [], D.stereoMode);
+[D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd', [],[], [], D.stereoMode);
 % SET DEFAULT TEXT
 Screen('TextSize',D.wdwPtr,24);
 % FLIP SCREEN
@@ -386,7 +389,8 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.phsDegR = phsDegR(indRnd(:,i),:);
     S.ortDeg = ortDeg(indRnd(:,i),:);
     S.BWoct = BWoct(indRnd(:,i),:);
-    S.MaxContrastLMS = MaxContrastLMS(indRnd(:,i),:);
+    S.targetContrast = targetContrast(indRnd(:,i),:);
+    S.targetContrastAngle = targetContrastAngle(indRnd(:,i),:);
     %%%%%%%%%%%%%%%
     % FILE NAMING %
     %%%%%%%%%%%%%%%
@@ -400,7 +404,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     % PRE-EXPERIMENT SCREEN
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % BRING SCREEN UP TO DESIRED GRAY LEVEL
-    Screen('FillRect', D.wdwPtr, D.correctedBgd);
+    Screen('FillRect', D.wdwPtr, D.bgd);
 
     % WAIT UNTIL ALL KEYS ARE RELEASED
     while KbCheck(-1); end

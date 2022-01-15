@@ -249,7 +249,7 @@ for t = 1:S.trlPerRun
     % NUM FRAMES COMPUTED VIA DESIRED DURATION
     if strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
         %% STIMULUS DURATION IN SECONDS
-        secPerTrl    = 0.5;
+        secPerTrl    = 0.4;
         % STIMULUS DURATION IN MILLISECONDS
         S.durationMs  = repmat(secPerTrl.*1000,[S.trlPerRun 1]);
         % ENSURE THAT INTERFRAME INTERVAL (IN SEC) IS A NICE ROUND NUMBER
@@ -370,33 +370,6 @@ end
 S.mskScale = repmat(mskScale,[S.trlPerRun, 1]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PRE-EXPERIMENT SCREEN
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% BRING SCREEN UP TO DESIRED GRAY LEVEL
-Screen('FillRect', D.wdwPtr, D.correctedBgd);
-
-% WAIT UNTIL ALL KEYS ARE RELEASED
-while KbCheck(-1); end
-Screen('TextSize', D.wdwPtr, 20);
-if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
-Screen('DrawText',D.wdwPtr, ['First trial starts exactly one second after you hit the down arrow.'], ...
-       0.6.*[fPosX], 0.8.*[fPosY], [D.wht],[D.wht D.wht D.wht]);
-Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
-Screen('Flip',D.wdwPtr);
-% WAIT FOR KEYPRESS
-while 1
-    [ keyIsDown, ~, keyCode ] = KbCheck(-1);
-    if keyIsDown & find(keyCode) == key_D_ARROW
-        break;
-    end
-end
-% DRAW FIXATION STIM
-if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
-Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
-Screen('Flip',D.wdwPtr);
-pause(1.0);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EXPERIMENT ITSELF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
@@ -422,6 +395,35 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.fname         = repmat(S.fname,[S.trlPerRun 1]);
     S.fdirLoc       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'local');
     S.fdirSrv       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'server');
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % PRE-EXPERIMENT SCREEN
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % BRING SCREEN UP TO DESIRED GRAY LEVEL
+    Screen('FillRect', D.wdwPtr, D.correctedBgd);
+
+    % WAIT UNTIL ALL KEYS ARE RELEASED
+    while KbCheck(-1); end
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
+    Screen('TextSize', D.wdwPtr, 20);
+    if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the down arrow.'], ...
+           0.6.*[fPosX], 0.8.*[fPosY], [D.wht]);
+    Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+    Screen('Flip',D.wdwPtr);
+    % WAIT FOR KEYPRESS
+    while 1
+        [ keyIsDown, ~, keyCode ] = KbCheck(-1);
+        if keyIsDown & find(keyCode) == key_D_ARROW
+            break;
+        end
+    end
+    % DRAW FIXATION STIM
+    if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+    Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+    Screen('Flip',D.wdwPtr);
+    pause(1.0);
+    
     % CREATE & DISPLAY STIMULI
     for t = 1:S.trlPerRun
         Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),[]);
@@ -437,7 +439,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
         Screen('TextSize', D.wdwPtr, 14);
         % MAKE & DRAW FIXATION CROSS
         Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
-        Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], [D.wht],[D.wht D.wht D.wht]);
+        Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], [D.wht]);
         % FLIP
         Screen('Flip', D.wdwPtr);
 

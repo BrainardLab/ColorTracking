@@ -204,7 +204,7 @@ D.stereoMode = stereoMode;
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
 % OPEN WINDOW
-[D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd', [],[], [], D.stereoMode);
+[D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
 % SET DEFAULT TEXT
 Screen('TextSize',D.wdwPtr,24);
 % FLIP SCREEN

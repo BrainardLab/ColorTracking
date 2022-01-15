@@ -96,7 +96,7 @@ HideCursor();
 %%%%%%%%%%%%%%%%%%%%
 numFrm = size(S.tgtXpixL(:,t),1);
 texCmpImg = Screen('MakeTexture', D.wdwPtr, S.stmLE, [], [], 2);
-texStdImg = Screen('MakeTexture', D.wdwPtr, reshape(D.bgd',[1 1 3]), [], [], 2);
+texStdImg = Screen('MakeTexture', D.wdwPtr, reshape(D.bgd,[1 1 3]), [], [], 2);
 
 %%%%%%%%%%%%%%%%%%%
 % %%%%%%%%%%%%%%% %
@@ -114,7 +114,7 @@ for j = 0:[S.numIntrvl-1]
         %% DRAW LEFT EYE BUFFER %
         %%%%%%%%%%%%%%%%%%%%%%%%
         % DRAW LEFT EYE BACKGROUND
-        Screen('FillRect', D.wdwPtr, D.bgd'.*S.trm(t), D.wdwXYpix);
+        Screen('FillRect', D.wdwPtr, D.bgd.*S.trm(t), D.wdwXYpix);
         % DRAWING LEFT EYE FIXATION STIMULUS
         Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], [D.fixStm]); 
         % DRAW LEFT EYE STIMULUS

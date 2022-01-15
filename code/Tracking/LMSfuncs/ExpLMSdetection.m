@@ -79,7 +79,6 @@ S.mtnType      = repmat(mtnType,     [S.trlPerRun, 1]);      % MOTION   TYPE
 
 S.magORval     = 'mag';       % SUBJ RESPONDS ACCORDING TO MAGNITUDE OF VARIABLE VS. SIGN OF VARIABLE?
 S.numIntrvl = repmat(2,[S.trlPerRun 1]);
-S.cmpIntrvl = round(rand([S.trlPerRun 1]));
 % CMP IS ALWAYS 'GREATER' THAN STD
 S.stdX = zeros([S.trlPerRun 1]);
 S.cmpX = ones([S.trlPerRun 1]);
@@ -125,15 +124,6 @@ D.blk        = 0.0;
 D.bgd        = [0.5, 0.5, 0.5]; % 128; % 0.5000;
 D.wht        = 1.0; % 255; % 1.0000;
 
-%%%%%%%%%%%%%%%
-% FILE NAMING %
-%%%%%%%%%%%%%%%
-
-S.fname         = buildFilenamePSYdataLMS(expType,S.subjName(1,:),S.stmType(1,:),[],[]);
-S.fname         = repmat(S.fname,[S.trlPerRun 1]);
-S.fdirLoc       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'local');
-S.fdirSrv       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'server');
-
 %%%%%%%%%%%%%%%%%%%%%%%%
 % PRINT DATA TO SCREEN %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -143,11 +133,11 @@ disp(['                            Stimulus type  = '         stmType      ]);
 disp(['                              Motion type  = '         mtnType      ]);
 disp(['                        Total trls in Exp  = ' num2str(S.trlPerRun) ]);
 disp(['                              Trls in Run  = ' num2str(S.trlPerRun) ]);
-for i=1,
-    disp(['                 Saving PSYdata to fdirLoc = ' num2str(S.fdirLoc(1,:)) ]);
-    disp(['                 Saving PSYdata to fdirSrv = ' num2str(S.fdirSrv(1,:)) ]);
-    disp(['                 Saving PSYdata to fname   = ../' num2str(S.fname(  1,:)) ]);
-end
+% for i=1,
+%     disp(['                 Saving PSYdata to fdirLoc = ' num2str(S.fdirLoc(1,:)) ]);
+%     disp(['                 Saving PSYdata to fdirSrv = ' num2str(S.fdirSrv(1,:)) ]);
+%     disp(['                 Saving PSYdata to fname   = ../' num2str(S.fname(  1,:)) ]);
+% end
 pause(2);
 
 %% -------------- SET UP PSYCHTOOLBOX --------------
@@ -424,6 +414,14 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.ortDeg = ortDeg(indRnd(:,i),:);
     S.BWoct = BWoct(indRnd(:,i),:);
     S.MaxContrastLMS = MaxContrastLMS(indRnd(:,i),:);
+    %%%%%%%%%%%%%%%
+    % FILE NAMING %
+    %%%%%%%%%%%%%%%
+
+    S.fname         = buildFilenamePSYdataLMS(expType,S.subjName(1,:),S.stmType(1,:),[],[]);
+    S.fname         = repmat(S.fname,[S.trlPerRun 1]);
+    S.fdirLoc       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'local');
+    S.fdirSrv       = buildFolderNamePSY('LSD',expType,S.subjName(1,:),'server');
     % CREATE & DISPLAY STIMULI
     for t = 1:S.trlPerRun
         Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),[]);
@@ -512,22 +510,25 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
         end
         pause(.15);
     end
+    %%%%%%%%%%%%%
+    % SAVE DATA %
+    %%%%%%%%%%%%%
+    disp(['ExpLMSdetection: SAVING DATA...']);
+    try
+        if strcmp(D.cmpInfo.localHostName,'jburge-hubel')
+            savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'both',0,S,'S');
+        else
+            savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'local',0,S,'S');
+        end
+    catch
+        display('ExpLMSdetection: WARNING! Having trouble saving data...');
+    end
 end
 
 %% ------------------END OF SESSION--------------------
 %%%%%%%%%%%%%
 % PLOT DATA %
 %%%%%%%%%%%%%
-
-%%%%%%%%%%%%%
-% SAVE DATA %
-%%%%%%%%%%%%%
-disp(['ExpLMSdetection: SAVING DATA...']);
-if strcmp(D.cmpInfo.localHostName,'jburge-hubel')
-    savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'both',0,S,'S');
-else
-    savePSYdataLMS(S.fname(1,:),expType,S.subjName(1,:),'local',0,S,'S');
-end
 
 %%%%%%%%%%%%%%%%%
 % CLOSE SCREENS %

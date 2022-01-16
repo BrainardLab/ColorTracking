@@ -5,10 +5,10 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, indRnd, bUse
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
 %   example call: % TEST CODE
-%                 targetContrast = [0.5 0.5 0.5 0.5]';
-%                 targetContrastAngle = [45 75 -45 -75]';
+%                 targetContrast = [0.5 0.25 0.5 0.25 0.5 0.25 0.5 0.25]';
+%                 targetContrastAngle = [45 45 75 75 -45 -45 -75 -75]';
 %                 cmpIntrvl = [ones([floor(length(targetContrast)/2) 1]); zeros([ceil(length(targetContrast)/2) 1])];
-%                 cmpIntrvl = repmat(cmpIntrvl,[1 2]);
+%                 cmpIntrvl = [cmpIntrvl flipud(cmpIntrvl)];
 %                 indRnd = randperm(length(targetContrast))';
 %                 indRnd = [indRnd randperm(length(targetContrast))'];
 %                 [stm,S] = LSDstimulusGeneration(targetContrast,targetContrastAngle,1,0,0,0.932,cmpIntrvl);
@@ -207,6 +207,8 @@ D.stereoMode = stereoMode;
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
 % OPEN WINDOW
 [D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
+[saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
+Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,[]);
 % SET DEFAULT TEXT
 Screen('TextSize',D.wdwPtr,24);
 % FLIP SCREEN
@@ -356,6 +358,7 @@ end
 D.fixStm=psyFixStm_CrossHairs([D.wdwXYpix(3)/2 D.wdwXYpix(4)/2],2.*[S.Apix(1) S.fixStmSzXYpix(1, 2)], [S.fixStmSzXYpix(1, 1) S.fixStmSzXYpix(1, 2)], '|||||||||||||',[],0,0.50);
 [fPosX,fPosY] = RectCenter(D.wdwXYpix);
 D.fixStm(:,end+1) = [fPosX-3 fPosY-3 fPosX+3 fPosY+3]';
+D.fixStm = D.fixStm(:,end);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % MAKE 1/F TEXTURE MASK % (OR NOT)
@@ -379,7 +382,6 @@ S.mskScale = repmat(mskScale,[S.trlPerRun, 1]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EXPERIMENT ITSELF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
 % STORE cmpIntrvl OUTSIDE OF STRUCT
 cmpIntrvl = S.cmpIntrvl;
 for i = 1:size(indRnd,2) % FOR EACH RUN
@@ -422,7 +424,8 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
 
     % WAIT UNTIL ALL KEYS ARE RELEASED
     while KbCheck(-1); end
-    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
+%    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,[]);
     Screen('TextSize', D.wdwPtr, 20);
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the down arrow.'], ...

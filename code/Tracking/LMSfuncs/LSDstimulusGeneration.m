@@ -106,6 +106,8 @@ for i = 1:length(targetContrastAngle)
     S.lookupTableSettings(:,:,i) = lookupTableSettings';
 end
 
+S.lookupTableSettingsInit = makeLookUpTableForCC(calObj,0.5,0,D.correctedBgd')';
+
 % *** REPLACE THIS WHEN THE PROPER STIMULUS IS READY ***
 t = 1;
 stm = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));

@@ -26,8 +26,7 @@ function [stm,S] = LSDstimulusGeneration(targetContrast,targetContrastAngle,frqC
 %                                   [  1   x nCmp ] -> unique bandwidth for each component
 %             cmpIntrvl     : comparison intervals
 
-% DISPLAY PARAMETERS (BACKGROUND, CMPINFO)
-D.bgd        = [0.5, 0.5, 0.5];
+% DISPLAY PARAMETERS (CMPINFO)
 D.cmpInfo = psyComputerInfo;
 
 S = struct;
@@ -90,15 +89,14 @@ psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
 psiParamsStruct.coneParams.fieldSizeDegrees = 2;
 psiParamsStruct.coneParams.ageYears = 30;
 T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,Scolor);
-load T_xyzJuddVos % Judd-Vos XYZ Color matching function
-T_xyz = SplineCmf(S_xyzJuddVos,683*T_xyzJuddVos,Scolor);
-SetSensorColorSpace(calObj,T_xyz,Scolor);
+
+SetSensorColorSpace(calObj,T_cones,Scolor);
 bgPrimary = [0.5 0.5 0.5]';
 bgSettings = PrimaryToSettings(calObj,bgPrimary);
-targetBgXYZ = SettingsToSensor(calObj,bgSettings);
+D.bgd        = bgPrimary';
 
 % Gamma Correct
-D.correctedBgd = PrimaryToSettings(calObj,D.bgd')';
+D.correctedBgd = bgSettings';
 
 S.lookupTableSettings = [];
 for i = 1:length(targetContrastAngle)
@@ -106,7 +104,13 @@ for i = 1:length(targetContrastAngle)
     S.lookupTableSettings(:,:,i) = lookupTableSettings';
 end
 
-S.lookupTableSettingsInit = makeLookUpTableForCC(calObj,0.5,0,D.correctedBgd')';
+% MAKE INITIAL GAMMA TABLE
+lookupTableDesiredMonochromeContrastsCal = [linspace(-1,-2/256,256/2-1) 0 linspace(2/256,1,256/2)];
+lookupTableDesiredContrastCal = 1*[1;1;1]*lookupTableDesiredMonochromeContrastsCal;
+bgExcitations = SettingsToSensor(calObj,bgSettings);
+lookupTableDesiredExcitationsCal = ContrastToExcitation(lookupTableDesiredContrastCal,bgExcitations);
+[lookupTableSettingsInit, ~] = SensorToSettings(calObj,lookupTableDesiredExcitationsCal);
+S.lookupTableSettingsInit = lookupTableSettingsInit';
 
 % *** REPLACE THIS WHEN THE PROPER STIMULUS IS READY ***
 t = 1;

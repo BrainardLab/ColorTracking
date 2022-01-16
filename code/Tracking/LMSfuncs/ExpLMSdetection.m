@@ -5,8 +5,8 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, indRnd, bUse
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
 %   example call: % TEST CODE
-%                 targetContrast = [0.5 0.25 0.5 0.25 0.5 0.25 0.5 0.25]';
-%                 targetContrastAngle = [45 45 75 75 -45 -45 -75 -75]';
+%                 targetContrast = [0.1 0.05 0.5 0.25 0.1 0.05 0.5 0.25 0.5 0.25]';
+%                 targetContrastAngle = [45 45 75 75 -45 -45 -75 -75 90 90]';
 %                 cmpIntrvl = [ones([floor(length(targetContrast)/2) 1]); zeros([ceil(length(targetContrast)/2) 1])];
 %                 cmpIntrvl = [cmpIntrvl flipud(cmpIntrvl)];
 %                 indRnd = randperm(length(targetContrast))';
@@ -457,10 +457,12 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
      %   psyPresentTrial2IFCmov(D,S,t,stdIphtXYTrgb(:,:,:,:,t),cmpIphtXYTrgb(:,:,:,:,t),msk1oF);
          S = psyPresentTrialDetectionLMS(D,S,t,msk1oF);
         if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
+        
         Screen('TextSize', D.wdwPtr, 14);
         % MAKE & DRAW FIXATION CROSS
         Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
         Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], [D.wht]);
+        Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,1);
         % FLIP
         Screen('Flip', D.wdwPtr);
 

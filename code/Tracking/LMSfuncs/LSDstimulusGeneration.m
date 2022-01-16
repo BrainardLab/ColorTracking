@@ -102,7 +102,7 @@ D.correctedBgd = PrimaryToSettings(calObj,D.bgd')';
 
 S.lookupTableSettings = [];
 for i = 1:length(targetContrastAngle)
-    [lookupTableSettings,badIndex] = makeLookUpTableForCC(calObj,targetContrast(i),targetContrastAngle(i),D.correctedBgd);
+    [lookupTableSettings,badIndex] = makeLookUpTableForCC(calObj,targetContrast(i),targetContrastAngle(i),D.correctedBgd');
     S.lookupTableSettings(:,:,i) = lookupTableSettings';
 end
 

@@ -185,8 +185,10 @@ elseif strcmp(D.cmpInfo.localHostName,'ben-Precision-7520')
     load('/home/ben/Documents/VisionScience/Data/BurgeLabCalibrationData/ViewSonicG220fb.mat');
     cal = cals{1};
 else
-    % Get Cal Data
-    cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
+    resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+    load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
+    calCell = 3;
+    cal = cals{calCell};
 end
 
 % Construct a calStructOBJ from the latest calibration
@@ -248,98 +250,100 @@ load T_cones_ss2
 % CREATE THE STIMULI FOR ALL THE SESSION
 S.Limg=[];
 S.Rimg=[];
-for t = 1:S.trlPerRun
-    % NUM FRAMES COMPUTED VIA DESIRED DURATION
-    if strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
-        %% STIMULUS DURATION IN SECONDS
-        secPerTrl    = 0.4;
-        % STIMULUS DURATION IN MILLISECONDS
-        S.durationMs  = repmat(secPerTrl.*1000,[S.trlPerRun 1]);
-        % ENSURE THAT INTERFRAME INTERVAL (IN SEC) IS A NICE ROUND NUMBER
-        D.fps          = round(1./D.ifi);
-        D.ifi          = 1./D.fps;
-        % FRAME SAMPLES IN SECS
-        S.tSec        = [0:D.ifi:secPerTrl]';
-        % STIMULUS DURATION IN FRAMES
-        numFrm         = length(S.tSec);
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % WORLD & SCREEN TARGET POSITION %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % WORLD STANDARD DEVIATION IN MM PER FRAME
-        sigmaQmm      = 0.8;
-        S.sigmaQmm    = repmat(sigmaQmm,[S.trlPerRun, 1]);
-        % WORLD TARGET POSITION IN MM W.R.T. MONITOR CENTER
-        if      strcmp(mtnType,'BXZ') || strcmp(mtnType,'OXZ') % BROWNIAN MOTION IN XZ
-            % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            S.tgtYmm(:,t) =  zeros(numFrm,1);
-            S.tgtZmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            [S.tgtXmmL(:,t),  S.tgtXmmR(:,t)]=screenXfromRangeXZ([S.tgtXmm(:,t) S.tgtZmm(:,t)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
-            S.tgtYmmL(:,t) = S.tgtYmm(:,t); S.tgtYmmR(:,t) = S.tgtYmm(:,t);
-        elseif  strcmp(mtnType,'B0Z') || strcmp(mtnType,'O0Z') % BROWNIAN MOTION IN Z ONLY
-            % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmm(:,t) =  zeros(numFrm,1);
-            S.tgtYmm(:,t) =  zeros(numFrm,1);
-            S.tgtZmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            [S.tgtXmmL(:,t),  S.tgtXmmR(:,t)]=screenXfromRangeXZ([S.tgtXmm(:,t) S.tgtZmm(:,t)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
-            S.tgtYmmL(:,t) = S.tgtYmm(:,t); S.tgtYmmR(:,t) = S.tgtYmm(:,t);
-        elseif      strcmp(mtnType,'BXY') || strcmp(mtnType,'OXY') % BROWNIAN MOTION IN XY
-            % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            S.tgtYmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            S.tgtZmm(:,t) =  zeros(numFrm,1);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmmL(:,t) = S.tgtXmm(:,t); S.tgtXmmR(:,t) = S.tgtXmm(:,t);
-            S.tgtYmmL(:,t) = S.tgtXmm(:,t); S.tgtYmmR(:,t) = S.tgtXmm(:,t);
-            % [S.tgtXmmL(:,t), S.tgtXmmR(:,t)]=screenXfromRangeXZ([S.tgtXmm(:,t) S.tgtZmm(:,t)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
-            S.tgtYmmL(:,t) = S.tgtYmm(:,t); S.tgtYmmR(:,t) = S.tgtYmm(:,t);
-        elseif  strcmp(mtnType,'BPX') || strcmp(mtnType,'OPX') % BROWNIAN MOTION IN X ONLY W. PULFRICH RESPONSE
-            S.tgtXmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            S.tgtYmm(:,t) =  zeros(numFrm,1);
-            S.tgtZmm(:,t) =  zeros(numFrm,1);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmmL(:,t) = S.tgtXmm(:,t); S.tgtXmmR(:,t) = S.tgtXmm(:,t);
-            S.tgtYmmL(:,t) = S.tgtYmm(:,t); S.tgtYmmR(:,t) = S.tgtYmm(:,t);
-        elseif  strcmp(mtnType,'B0X') || strcmp(mtnType,'O0X') % BROWNIAN MOTION IN X ONLY
-            S.tgtXmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            S.tgtYmm(:,t) =  zeros(numFrm,1);
-            S.tgtZmm(:,t) =  zeros(numFrm,1);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmmL(:,t) = S.tgtXmm(:,t); S.tgtXmmR(:,t) = S.tgtXmm(:,t);
-            S.tgtYmmL(:,t) = S.tgtYmm(:,t); S.tgtYmmR(:,t) = S.tgtYmm(:,t);
-        elseif  strcmp(mtnType,'BLX') || strcmp(mtnType,'OLX') % BROWNIAN X MOTION IN LE ONLY
-            S.tgtXmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            S.tgtYmm(:,t) =  zeros(numFrm,1);
-            S.tgtZmm(:,t) =  nan(numFrm,1);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmmL(:,t) = S.tgtXmm(:,t); S.tgtXmmR(:,t) = nan(numFrm,1);
-            S.tgtYmmL(:,t) = S.tgtYmm(:,t); S.tgtYmmR(:,t) = nan(numFrm,1);
-        elseif  strcmp(mtnType,'BRX') || strcmp(mtnType,'ORX') % BROWNIAN X MOTION IN RE ONLY
-            S.tgtXmm(:,t) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            S.tgtYmm(:,t) =  zeros(numFrm,1);
-            S.tgtZmm(:,t) =  nan(numFrm,1);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            S.tgtXmmL(:,t) = nan(numFrm,1); S.tgtXmmR(:,t) = S.tgtXmm(:,t);
-            S.tgtYmmL(:,t) = nan(numFrm,1); S.tgtYmmR(:,t) = S.tgtYmm(:,t);
+for i = 1:size(indRnd,2)
+    for t = 1:S.trlPerRun
+        % NUM FRAMES COMPUTED VIA DESIRED DURATION
+        if strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
+            %% STIMULUS DURATION IN SECONDS
+            secPerTrl    = 0.4;
+            % STIMULUS DURATION IN MILLISECONDS
+            S.durationMs  = repmat(secPerTrl.*1000,[S.trlPerRun 1]);
+            % ENSURE THAT INTERFRAME INTERVAL (IN SEC) IS A NICE ROUND NUMBER
+            D.fps          = round(1./D.ifi);
+            D.ifi          = 1./D.fps;
+            % FRAME SAMPLES IN SECS
+            S.tSec        = [0:D.ifi:secPerTrl]';
+            % STIMULUS DURATION IN FRAMES
+            numFrm         = length(S.tSec);
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % WORLD & SCREEN TARGET POSITION %
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % WORLD STANDARD DEVIATION IN MM PER FRAME
+            sigmaQmm      = 0.8;
+            S.sigmaQmm    = repmat(sigmaQmm,[S.trlPerRun, 1]);
+            % WORLD TARGET POSITION IN MM W.R.T. MONITOR CENTER
+            if      strcmp(mtnType,'BXZ') || strcmp(mtnType,'OXZ') % BROWNIAN MOTION IN XZ
+                % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                tgtYmm(:,t,i) =  zeros(numFrm,1);
+                tgtZmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+                [tgtXmmL(:,t,i),  tgtXmmR(:,t,i)]=screenXfromRangeXZ([tgtXmm(:,t,i) tgtZmm(:,t,i)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
+                tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
+            elseif  strcmp(mtnType,'B0Z') || strcmp(mtnType,'O0Z') % BROWNIAN MOTION IN Z ONLY
+                % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmm(:,t,i) =  zeros(numFrm,1);
+                tgtYmm(:,t,i) =  zeros(numFrm,1);
+                tgtZmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+                [tgtXmmL(:,t,i),  tgtXmmR(:,t,i)]=screenXfromRangeXZ([tgtXmm(:,t,i) tgtZmm(:,t,i)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
+                tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
+            elseif      strcmp(mtnType,'BXY') || strcmp(mtnType,'OXY') % BROWNIAN MOTION IN XY
+                % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                tgtYmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                tgtZmm(:,t,i) =  zeros(numFrm,1);
+                % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmmL(:,t,i) = tgtXmm(:,t,i); tgtXmmR(:,t,i) = tgtXmm(:,t,i);
+                tgtYmmL(:,t,i) = tgtXmm(:,t,i); tgtYmmR(:,t,i) = tgtXmm(:,t,i);
+                % [tgtXmmL(:,t,i), tgtXmmR(:,t,i)]=screenXfromRangeXZ([tgtXmm(:,t,i) tgtZmm(:,t,i)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
+                tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
+            elseif  strcmp(mtnType,'BPX') || strcmp(mtnType,'OPX') % BROWNIAN MOTION IN X ONLY W. PULFRICH RESPONSE
+                tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                tgtYmm(:,t,i) =  zeros(numFrm,1);
+                tgtZmm(:,t,i) =  zeros(numFrm,1);
+                % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmmL(:,t,i) = tgtXmm(:,t,i); tgtXmmR(:,t,i) = tgtXmm(:,t,i);
+                tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
+            elseif  strcmp(mtnType,'B0X') || strcmp(mtnType,'O0X') % BROWNIAN MOTION IN X ONLY
+                tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                tgtYmm(:,t,i) =  zeros(numFrm,1);
+                tgtZmm(:,t,i) =  zeros(numFrm,1);
+                % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmmL(:,t,i) = tgtXmm(:,t,i); tgtXmmR(:,t,i) = tgtXmm(:,t,i);
+                tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
+            elseif  strcmp(mtnType,'BLX') || strcmp(mtnType,'OLX') % BROWNIAN X MOTION IN LE ONLY
+                tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                tgtYmm(:,t,i) =  zeros(numFrm,1);
+                tgtZmm(:,t,i) =  nan(numFrm,1);
+                % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmmL(:,t,i) = tgtXmm(:,t,i); tgtXmmR(:,t,i) = nan(numFrm,1);
+                tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = nan(numFrm,1);
+            elseif  strcmp(mtnType,'BRX') || strcmp(mtnType,'ORX') % BROWNIAN X MOTION IN RE ONLY
+                tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+                tgtYmm(:,t,i) =  zeros(numFrm,1);
+                tgtZmm(:,t,i) =  nan(numFrm,1);
+                % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+                tgtXmmL(:,t,i) = nan(numFrm,1); tgtXmmR(:,t,i) = tgtXmm(:,t,i);
+                tgtYmmL(:,t,i) = nan(numFrm,1); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
+            else
+                error(['ExpLMSdetection: WARNING! unhandled mtnType=' mtnType]);
+            end
+
+            % SCREEN TARGET POSITION IN PIXELS
+            tgtXpixL(:,t,i) = tgtXmmL(:,t,i).*D.pixPerMmXY(1);
+            tgtXpixR(:,t,i) = tgtXmmR(:,t,i).*D.pixPerMmXY(1);
+            tgtYpixL(:,t,i) = tgtYmmL(:,t,i).*D.pixPerMmXY(2);
+            tgtYpixR(:,t,i) = tgtYmmR(:,t,i).*D.pixPerMmXY(2);
+
+            %         % SCREEN TARGET POSITION IN DEGREES
+            %         tgtXdegL(:,t,i) = atand(tgtXmmL(:,t,i)./D.scrnZmm);
+            %         tgtXdegR(:,t,i) = atand(tgtXmmR(:,t,i)./D.scrnZmm);
+            %         tgtYdegL(:,t,i) = atand(tgtYmmL(:,t,i)./D.scrnZmm);
+            %         tgtYdegR(:,t,i) = atand(tgtYmmR(:,t,i)./D.scrnZmm);
         else
-            error(['ExpLMSdetection: WARNING! unhandled mtnType=' mtnType]);
+            disp(['ExpLMSdetection: WARNING! unhandled stmType= ' S.stmType(1,:)]);
         end
-        
-        % SCREEN TARGET POSITION IN PIXELS
-        S.tgtXpixL(:,t) = S.tgtXmmL(:,t).*D.pixPerMmXY(1);
-        S.tgtXpixR(:,t) = S.tgtXmmR(:,t).*D.pixPerMmXY(1);
-        S.tgtYpixL(:,t) = S.tgtYmmL(:,t).*D.pixPerMmXY(2);
-        S.tgtYpixR(:,t) = S.tgtYmmR(:,t).*D.pixPerMmXY(2);
-        
-        %         % SCREEN TARGET POSITION IN DEGREES
-        %         S.tgtXdegL(:,t) = atand(S.tgtXmmL(:,t)./D.scrnZmm);
-        %         S.tgtXdegR(:,t) = atand(S.tgtXmmR(:,t)./D.scrnZmm);
-        %         S.tgtYdegL(:,t) = atand(S.tgtYmmL(:,t)./D.scrnZmm);
-        %         S.tgtYdegR(:,t) = atand(S.tgtYmmR(:,t)./D.scrnZmm);
-    else
-        disp(['ExpLMSdetection: WARNING! unhandled stmType= ' S.stmType(1,:)]);
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -391,6 +395,16 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.BWoct = BWoct(indRnd(:,i),:);
     S.targetContrast = targetContrast(indRnd(:,i),:);
     S.targetContrastAngle = targetContrastAngle(indRnd(:,i),:);
+    S.tgtXpixL = squeeze(tgtXpixL(:,:,i));
+    S.tgtXpixR = squeeze(tgtXpixR(:,:,i));
+    S.tgtYpixL = squeeze(tgtYpixL(:,:,i));
+    S.tgtYpixR = squeeze(tgtYpixR(:,:,i));
+    S.tgtXmm = squeeze(tgtXmm(:,:,i));
+    S.tgtYmm = squeeze(tgtYmm(:,:,i));
+    S.tgtZmm = squeeze(tgtZmm(:,:,i));
+    S.tgtXmmL = squeeze(tgtXmmL(:,:,i));
+    S.tgtXmmR = squeeze(tgtXmmR(:,:,i));
+    S.tgtYmmL = squeeze(tgtYmmL(:,:,i));
     %%%%%%%%%%%%%%%
     % FILE NAMING %
     %%%%%%%%%%%%%%%

@@ -5,7 +5,7 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, indRnd, bUse
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
 %   example call: % TEST CODE
-%                 targetContrast = [0.1 0.05 0.5 0.25 0.1 0.05 0.5 0.25 0.5 0.25]';
+%                 targetContrast = [0.1 0.05 0.4 0.2 0.1 0.05 0.4 0.2 0.5 0.25]';
 %                 targetContrastAngle = [45 45 75 75 -45 -45 -75 -75 90 90]';
 %                 cmpIntrvl = [ones([floor(length(targetContrast)/2) 1]); zeros([ceil(length(targetContrast)/2) 1])];
 %                 cmpIntrvl = [cmpIntrvl flipud(cmpIntrvl)];
@@ -158,7 +158,23 @@ key_RETURN    = KbName('return');
 key_SPACE_BAR = KbName('space');
 
 % SETUP PSYCHTOOLBOX
-psyPTBsetup(bSKIPSYNCTEST,bDEBUG); % call must come before psyPTBopenWindow
+% psyPTBsetup(bSKIPSYNCTEST,bDEBUG); % call must come before psyPTBopenWindow
+
+% PREPARE PSYCHIMAGING
+PsychImaging('PrepareConfiguration');
+% FLOATING POINT NUMBERS
+PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible');
+% SKIP SYNCTESTS OR NOT
+Screen('Preference', 'SkipSyncTests', bSKIPSYNCTEST);
+% DEBUGGING WINDOW
+if bDEBUG == 1
+    % OPACITY
+    opacityAlpha = 0.5;
+    % ENABLE ALPHA WINDOW FOR DEBUGGING
+    PsychDebugWindowConfiguration([],opacityAlpha); % NOTE! must call before opening ptb window
+elseif bDEBUG == 0
+    gribble = 1;
+end
 
 % LOAD MONITOR CALIBRATION DATA (GAMMA DATA)
 % [D.cal,D.gamPix,D.gamFnc,D.gamInv] = psyLoadCalibrationData(D.cmpInfo.localHostName);
@@ -206,9 +222,10 @@ D.stereoMode = stereoMode;
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
 % OPEN WINDOW
-[D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
+% [D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
+[D.wdwPtr, D.wdwXYpix]  = BitsPlusPlus('OpenWindowBits++',D.sid,[128 128 128]');
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
-Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,[]);
+Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
 % SET DEFAULT TEXT
 Screen('TextSize',D.wdwPtr,24);
 % FLIP SCREEN
@@ -420,17 +437,17 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     % PRE-EXPERIMENT SCREEN
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % BRING SCREEN UP TO DESIRED GRAY LEVEL
-    Screen('FillRect', D.wdwPtr, D.bgd);
+    Screen('FillRect', D.wdwPtr, round(D.bgd.*255));
 
     % WAIT UNTIL ALL KEYS ARE RELEASED
     while KbCheck(-1); end
 %    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
-    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,[]);
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
     Screen('TextSize', D.wdwPtr, 20);
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the down arrow.'], ...
-           0.6.*[fPosX], 0.8.*[fPosY], [D.wht]);
-    Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+           0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
+    Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
     Screen('Flip',D.wdwPtr);
     % WAIT FOR KEYPRESS
     while 1
@@ -441,13 +458,13 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     end
     % DRAW FIXATION STIM
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
-    Screen('FillRect', D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
+    Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
     Screen('Flip',D.wdwPtr);
     pause(1.0);
     
     % CREATE & DISPLAY STIMULI
     for t = 1:S.trlPerRun
-        Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),[]);
+        Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),2);
         Screen('Flip', D.wdwPtr);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % INDIVIDUAL TRIAL CODE STARTS HERE %
@@ -460,9 +477,9 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
         
         Screen('TextSize', D.wdwPtr, 14);
         % MAKE & DRAW FIXATION CROSS
-        Screen('FillRect',D.wdwPtr, [D.wht,D.wht,D.wht], D.fixStm);
-        Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], [D.wht]);
-        Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,1);
+        Screen('FillRect',D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
+        Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], round([D.wht.*255]));
+        Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
         % FLIP
         Screen('Flip', D.wdwPtr);
 
@@ -521,7 +538,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
 
                 % EXIT EXPERIMENT
                 if keyCode(key_ESCAPE)
-                    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
+                    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,2);
                     Screen('CloseAll');
                     % CLOSE VIDEO SWITCHER
                     % PsychVideoSwitcher('SwitchMode', D.sid, 0, 1); 
@@ -565,7 +582,7 @@ if bUseMsk == 1,
 end
 % SHOW CURSOR
 ShowCursor();
-Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
+Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,2);
 % CLOSE PTB WINDOW
 Screen('CloseAll');
 sca

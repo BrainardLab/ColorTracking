@@ -116,6 +116,7 @@ S.lookupTableSettingsInit = lookupTableSettingsInit';
 t = 1;
 stm = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
 stm = stm./2 + 0.5;
+stm = round(stm.*255);
 % *******
 
 S.stmLE = stm;

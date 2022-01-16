@@ -66,8 +66,6 @@ bSKIPSYNCTEST = 0;
 PsychImaging('PrepareConfiguration');
 % FLOATING POINT NUMBERS
 PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible');
-% USE NORMALIZED [0 1] RANGE FOR COLOR AND LUMINANCE LEVELS
-PsychImaging('AddTask', 'General', 'NormalizedHighresColorRange');
 % SKIP SYNCTESTS OR NOT
 Screen('Preference', 'SkipSyncTests', bSKIPSYNCTEST);
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
@@ -92,15 +90,19 @@ baseRect = [0 0 150 150];
 centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
 
 % put up the aiming sqaure
-imSettings = [.3,.7,1];
+imSettings = [63,122,20];
 Screen('FillRect', window, imSettings, centeredRect);
 Screen('Flip', window);
 fprintf('Aim/focus the radiometer and hit enter:\n');
 pause;
 
-Screen('FillRect', window, bgSettings, centeredRect);
+bPlusPlusMode = 2;
+imSettings =[128, 128, 128];
+[lookupTableSettings, badSetting] = makeLookUpTableForCC(calObj,.11,45,bgSettings);
+Screen('LoadNormalizedGammaTable', window, lookupTableSettings',bPlusPlusMode);
+Screen('FillRect', window, imSettings, centeredRect);
 Screen('Flip', window);
-bgWaitTimeSecs = 1;
+bgWaitTimeSecs = 3600;
 pause(bgWaitTimeSecs);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  MEASUREMENT SET 1
@@ -114,8 +116,7 @@ target_coneContrast = [maxExp1Pos,maxExp1Neg];
 
 %% Make the square
 imSettings = [255 255 255];
-Screen('FillRect', window, imSettings, centeredRect);
-bPlusPlusMode = 2;
+
 
 for jj = 1:nMeasurements
     for ii = 1:size(target_coneContrast,2)
@@ -156,7 +157,7 @@ measurementInfo.radiometer = 'PR670';
 measurementInfo.bgWaitTimeSecs = bgWaitTimeSecs;
 % Save measurements
 savePath = '/home/brainardlab/labDropbox/CNST_materials/ColorTrackingTask/monitorValiadtions/';
-saveName = fullfile(savePath,'pr670_CC_measurements.mat');
+saveName = fullfile(savePath,'pr670_CC_measurements_3.mat');
 save(saveName,'measuredCC','measurementInfo')
 
 %% Print our summary

@@ -365,6 +365,16 @@ for i = 1:size(indRnd,2)
         end
     end
 end
+
+% % MAKE TEMPORAL WINDOW
+% S.timeWindow = cosWindowFlattop([1 numFrm],floor(numFrm/2),ceil(numFrm/2),0,0);
+% % WINDOW STIMULUS
+% stmLE = S.stmLE;
+% for i = 1:length(S.timeWindow)
+%     stmTmp = ((stmLE-mean(stmLE(:)))./mean(stmLE(:))).*S.timeWindow(i);
+%     S.stmLE(:,:,i) = round(stmTmp.*mean(stmLE(:))+mean(stmLE(:)));
+% end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FIXATION/REFERENCE CROSS HAIRS %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -555,6 +565,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     %%%%%%%%%%%%%
     % SAVE DATA %
     %%%%%%%%%%%%%
+%    S.stmLE = stmLE;
     disp(['ExpLMSdetection: SAVING DATA...']);
     try
         if strcmp(D.cmpInfo.localHostName,'jburge-hubel')

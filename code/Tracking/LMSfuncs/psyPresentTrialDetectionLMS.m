@@ -95,7 +95,9 @@ HideCursor();
 % STIMULUS TEXTURE %
 %%%%%%%%%%%%%%%%%%%%
 numFrm = size(S.tgtXpixL(:,t),1);
-texCmpImg = Screen('MakeTexture', D.wdwPtr, S.stmLE);
+for i = 1:size(S.stmLE,3)
+   texCmpImg(i) = Screen('MakeTexture', D.wdwPtr, S.stmLE(:,:,i));
+end
 texStdImg = Screen('MakeTexture', D.wdwPtr, round(reshape(D.bgd,[1 1 3]).*255));
 
 %%%%%%%%%%%%%%%%%%%
@@ -123,7 +125,7 @@ for j = 0:[S.numIntrvl-1]
         %%%%%%%%%%%%%%
         if j == 0
             if     S.cmpIntrvl(t) == 0
-                Screen('DrawTexture', D.wdwPtr, texCmpImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                Screen('DrawTexture', D.wdwPtr, texCmpImg(f), [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
             elseif S.cmpIntrvl(t) == 1
                 Screen('DrawTexture', D.wdwPtr, texStdImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
             end
@@ -138,7 +140,7 @@ for j = 0:[S.numIntrvl-1]
                 % Secs_DrawTexture(t) = GetSecs-t0;
             elseif S.cmpIntrvl(t) == 1
                 % t0 = GetSecs;
-                Screen('DrawTexture', D.wdwPtr, texCmpImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+                Screen('DrawTexture', D.wdwPtr, texCmpImg(f), [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
                 % Secs_DrawTexture(t) = GetSecs-t0;
             end
         end

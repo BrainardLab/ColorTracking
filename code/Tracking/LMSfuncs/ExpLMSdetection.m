@@ -287,6 +287,7 @@ for i = 1:size(indRnd,2)
             S.tSec        = [0:D.ifi:secPerTrl]';
             % STIMULUS DURATION IN FRAMES
             numFrm         = length(S.tSec);
+            numFrm = numFrm+1;
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % WORLD & SCREEN TARGET POSITION %
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -369,16 +370,6 @@ for i = 1:size(indRnd,2)
     end
 end
 
-% MAKE TEMPORAL WINDOW
-S.timeWindow = cosWindowFlattop([1 numFrm],floor(numFrm/2),ceil(numFrm/2),0,0);
-% S.timeWindow = cosWindowFlattop([1 numFrm],0,numFrm,0,0);
-% WINDOW STIMULUS
-stmLE = S.stmLE;
-for i = 1:length(S.timeWindow)
-    stmTmp = ((stmLE-mean(stmLE(:)))./mean(stmLE(:))).*S.timeWindow(i);
-    S.stmLE(:,:,i) = round(stmTmp.*mean(stmLE(:))+mean(stmLE(:)));
-end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FIXATION/REFERENCE CROSS HAIRS %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -438,6 +429,16 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.tgtXmmL = squeeze(tgtXmmL(:,:,i));
     S.tgtXmmR = squeeze(tgtXmmR(:,:,i));
     S.tgtYmmL = squeeze(tgtYmmL(:,:,i));
+    
+    % MAKE TEMPORAL WINDOW
+    S.timeWindow = cosWindowFlattop([1 numFrm],floor(numFrm/2),ceil(numFrm/2),0,0);
+    % S.timeWindow = cosWindowFlattop([1 numFrm],0,numFrm,0,0);
+    % WINDOW STIMULUS
+    stmLE = S.stmLE;
+    for j = 1:length(S.timeWindow)
+        stmTmp = ((stmLE-mean(stmLE(:)))./mean(stmLE(:))).*S.timeWindow(j);
+        S.stmLE(:,:,j) = round(stmTmp.*mean(stmLE(:))+mean(stmLE(:)));
+    end
     %%%%%%%%%%%%%%%
     % FILE NAMING %
     %%%%%%%%%%%%%%%

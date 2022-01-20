@@ -156,6 +156,9 @@ key_R_ARROW   = KbName('rightArrow');
 key_ESCAPE    = KbName('escape');
 key_RETURN    = KbName('return');
 key_SPACE_BAR = KbName('space');
+gamepadIndex = Gamepad('GetNumGamepads');
+bttnOneNum = 1;
+bttnTwoNum = 4;
 
 % SETUP PSYCHTOOLBOX
 % psyPTBsetup(bSKIPSYNCTEST,bDEBUG); % call must come before psyPTBopenWindow
@@ -450,7 +453,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     Screen('FillRect', D.wdwPtr, round(D.bgd.*255));
 
     % WAIT UNTIL ALL KEYS ARE RELEASED
-    while KbCheck(-1); end
+    while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
 %    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
     Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
     Screen('TextSize', D.wdwPtr, 20);
@@ -460,12 +463,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
     Screen('Flip',D.wdwPtr);
     % WAIT FOR KEYPRESS
-    while 1
-        [ keyIsDown, ~, keyCode ] = KbCheck(-1);
-        if keyIsDown & find(keyCode) == key_D_ARROW
-            break;
-        end
-    end
+    while ~Gamepad('GetButton', gamepadIndex, bttnOneNum); end
     % DRAW FIXATION STIM
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
@@ -496,18 +494,24 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % WAIT UNTIL ALL KEYS ARE RELEASED %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        while KbCheck(-1); end
+        while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % WAIT FOR SUBJECT RESPONSE %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         while 1
+            isResponse = 0;
             % WAIT FOR KEYPRESS
+            key_D_ARROW = Gamepad('GetButton', gamepadIndex, bttnOneNum);
+            if key_D_ARROW; isResponse = 1; end
+            key_U_ARROW = Gamepad('GetButton', gamepadIndex, bttnTwoNum);
+            if key_U_ARROW; isResponse = 1; end
             [ keyIsDown, ~, keyCode ] = KbCheck(-1);
-            if keyIsDown
+            if keyIsDown; isResponse = 1; end
+            if isResponse
 
                 % DOWN ARROW RESPONSE
-                if find(keyCode) == key_D_ARROW
+                if key_D_ARROW
 
                     % 1ST INTERVAL SELECTED
                     chsIntrvl = 0;
@@ -523,7 +527,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
                 end
 
                 % UP  ARROW RESPONSE
-                if find(keyCode) == key_U_ARROW
+                if key_U_ARROW
 
                     % 2ND INTERVAL SELECTED
                     chsIntrvl = 1;
@@ -557,7 +561,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
                     break;
                 end
 
-                while KbCheck(-1); end
+                while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
             end
         end
         pause(.15);

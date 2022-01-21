@@ -92,7 +92,7 @@ elseif strcmp(localHostName, 'blobfish')      % imac
 %     D.comp       = 'MACI64';
 %     D.lumCdm2max = [];
     
-D.scrnZmm    = 925;       % VIEWING DISTANCE
+D.scrnZmm    = 1050;       % VIEWING DISTANCE
 D.scrnXYmm   = [405 303]; % DISPLAY SIZE IN MM
 %D.bitsIn     = 12;
 %D.gamFncExponent = 2.2;

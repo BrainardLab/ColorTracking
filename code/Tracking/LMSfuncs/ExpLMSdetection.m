@@ -287,7 +287,6 @@ for i = 1:size(indRnd,2)
             S.tSec        = [0:D.ifi:secPerTrl]';
             % STIMULUS DURATION IN FRAMES
             numFrm         = length(S.tSec);
-            numFrm = numFrm+1;
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % WORLD & SCREEN TARGET POSITION %
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -431,7 +430,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.tgtYmmL = squeeze(tgtYmmL(:,:,i));
     
     % MAKE TEMPORAL WINDOW
-    S.timeWindow = cosWindowFlattop([1 numFrm],floor(numFrm/2),ceil(numFrm/2),0,0);
+    S.timeWindow = cosWindowFlattop([1 numFrm+1],floor((numFrm+1)/2),ceil((numFrm+1)/2),0,0);
     % S.timeWindow = cosWindowFlattop([1 numFrm],0,numFrm,0,0);
     % WINDOW STIMULUS
     stmLE = S.stmLE;
@@ -458,9 +457,11 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
 %    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
     Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
+    Screen('Flip',D.wdwPtr);
+    if i==1; pause(360); end
     Screen('TextSize', D.wdwPtr, 20);
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
-    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the down arrow.'], ...
+    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the down button.'], ...
            0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
     Screen('Flip',D.wdwPtr);

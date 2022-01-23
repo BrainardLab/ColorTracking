@@ -25,4 +25,23 @@ for i = 1:length(targetContrastAngleUnq)
    PCdta(:,i) = PCdtaTmp(:,indBest);
 end
 
+if p.Results.bPLOTpsfs
+    figure;
+    set(gcf,'Position',[315 73 1240 863]);
+    for i = 1:length(targetContrastAngleUnq)
+        ind = abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01;
+        contrastMinMax = [min(S.targetContrast(ind)) max(S.targetContrast(ind))];
+        contrastUnq = unique(S.targetContrast(ind));
+        contrasts4plot = (contrastMinMax(1)-diff(contrastMinMax)*0.1):0.0001:(contrastMinMax(2)+diff(contrastMinMax)*0.1);
+        PCfit = psyfitgengaussfunc(zeros(size(contrasts4plot)),contrasts4plot,mFit(i),sFit(i),bFit(i),DPcrt,2,0);
+        subplot(2,3,i);
+        hold on;
+        plot(contrasts4plot.*100,PCfit,'k-');
+        plot(contrastUnq.*100,PCdta(:,i),'ko','MarkerSize',10,'MarkerFaceColor','w');
+        ylim([0.4 1]);
+        axis square; 
+        formatFigure('Michelson Contrast (%)','Proportion Correct',['Angle = ' num2str(targetContrastAngleUnq(i))]);
+    end
+end
+
 end

@@ -1,5 +1,17 @@
 function [tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,DPcrt,varargin)
 
+% function [tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,DPcrt,varargin)
+%
+% example call: 
+%
+% analyzes LSD detection experiment data and plots psychometric functions
+%
+% inputs:
+%         S: data struct from experiment
+%         DPcrt: d-prime at which threshold is defined. 
+%                DPcrt=1.00 -> 76% correct
+%                DPcrt=1.41 -> 84% correct
+
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('S',@isstruct);
 p.addParameter('bPLOTpsfs',0,@isnumeric);

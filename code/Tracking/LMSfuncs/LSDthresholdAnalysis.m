@@ -27,7 +27,7 @@ nRepeats = 10;
 for i = 1:length(targetContrastAngleUnq)
    ind = abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01;
    for j = 1:nRepeats
-       [mFitTmp(:,j),sFitTmp(:,j),bFitTmp(:,j),tFitTmp(:,j),PCdtaTmp(:,j),~,negLLtmp(:,j)] = psyfitgengauss(abs(S.stdX(ind)),abs(S.targetContrast(ind)),S.R(ind) == S.cmpIntrvl(ind),0,[],[],DPcrt,nIntrvl,0);
+       [mFitTmp(:,j),sFitTmp(:,j),bFitTmp(:,j),tFitTmp(:,j),PCdtaTmp(:,j),~,negLLtmp(:,j)] = psyfitgengauss(zeros(size(S.targetContrast(ind))),abs(S.targetContrast(ind)),S.R(ind) == S.cmpIntrvl(ind),0,[],[],DPcrt,nIntrvl,0);
        display(['Iteration ' num2str(j)]);
    end
    indBestAll = find(abs(negLLtmp-min(negLLtmp))<0.001);
@@ -44,8 +44,8 @@ if p.Results.bPLOTpsfs
     set(gcf,'Position',[315 73 1240 863]);
     for i = 1:length(targetContrastAngleUnq)
         ind = abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01;
-        contrastMinMax = [min(S.targetContrast(ind)) max(S.targetContrast(ind))];
-        contrastUnq = unique(S.targetContrast(ind));
+        contrastMinMax = [min(abs(S.targetContrast(ind))) max(abs(S.targetContrast(ind)))];
+        contrastUnq = unique(abs(S.targetContrast(ind)));
         contrasts4plot = (contrastMinMax(1)-diff(contrastMinMax)*0.1):0.0001:(contrastMinMax(2)+diff(contrastMinMax)*0.1);
         PCfit = psyfitgengaussfunc(zeros(size(contrasts4plot)),contrasts4plot,mFit(i),sFit(i),bFit(i),DPcrt,nIntrvl,0);
         subplot(2,3,i);

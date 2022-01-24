@@ -224,6 +224,7 @@ D.correctedBgd = PrimaryToSettings(calStructOBJ,D.bgd')';
 D.stereoMode = stereoMode;
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
+oldResolution=Screen('Resolution', D.sid,[],[],60);
 % OPEN WINDOW
 % [D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
 [D.wdwPtr, D.wdwXYpix]  = BitsPlusPlus('OpenWindowBits++',D.sid,[128 128 128]');
@@ -406,10 +407,12 @@ S.mskScale = repmat(mskScale,[S.trlPerRun, 1]);
 % STORE cmpIntrvl OUTSIDE OF STRUCT
 cmpIntrvl = S.cmpIntrvl;
 for i = 1:size(indRnd,2) % FOR EACH RUN
+    indRndSpecial = mod(indRnd(:,i),size(indRnd,1));
+    indRndSpecial(indRndSpecial==0) = size(indRnd,1);
     % PULL OUT ONE COLUMN OF cmpIntrvl VALUES
     S.cmpIntrvl = cmpIntrvl(:,i);
     % RANDOMIZE A BUNCH OF THINGS
-    S.cmpIntrvl = S.cmpIntrvl(indRnd(:,i),:);
+    S.cmpIntrvl = S.cmpIntrvl(indRndSpecial,:);
     S.frqCpdL = frqCpdL(indRnd(:,i),:);
     S.frqCpdR = frqCpdR(indRnd(:,i),:);
     S.phsDegL = phsDegL(indRnd(:,i),:);
@@ -474,7 +477,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     pause(1.0);
     
     % CREATE & DISPLAY STIMULI
-    for t = 1:S.trlPerRun
+    for t = 1:size(indRnd,1)
         Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),2);
         Screen('Flip', D.wdwPtr);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -555,7 +558,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
 
                 % EXIT EXPERIMENT
                 if keyCode(key_ESCAPE)
-                    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,2);
+                    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
                     Screen('CloseAll');
                     % CLOSE VIDEO SWITCHER
                     % PsychVideoSwitcher('SwitchMode', D.sid, 0, 1); 
@@ -600,7 +603,7 @@ if bUseMsk == 1,
 end
 % SHOW CURSOR
 ShowCursor();
-Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,2);
+Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
 % CLOSE PTB WINDOW
 Screen('CloseAll');
 sca

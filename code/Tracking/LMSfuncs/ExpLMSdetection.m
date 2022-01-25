@@ -407,12 +407,12 @@ S.mskScale = repmat(mskScale,[S.trlPerRun, 1]);
 % STORE cmpIntrvl OUTSIDE OF STRUCT
 cmpIntrvl = S.cmpIntrvl;
 for i = 1:size(indRnd,2) % FOR EACH RUN
-    indRndSpecial = mod(indRnd(:,i),size(indRnd,1));
-    indRndSpecial(indRndSpecial==0) = size(indRnd,1);
+%     indRndSpecial = mod(indRnd(:,i),size(indRnd,1));
+%     indRndSpecial(indRndSpecial==0) = size(indRnd,1);
     % PULL OUT ONE COLUMN OF cmpIntrvl VALUES
     S.cmpIntrvl = cmpIntrvl(:,i);
     % RANDOMIZE A BUNCH OF THINGS
-    S.cmpIntrvl = S.cmpIntrvl(indRndSpecial,:);
+%    S.cmpIntrvl = S.cmpIntrvl(indRndSpecial,:);
     S.frqCpdL = frqCpdL(indRnd(:,i),:);
     S.frqCpdR = frqCpdR(indRnd(:,i),:);
     S.phsDegL = phsDegL(indRnd(:,i),:);

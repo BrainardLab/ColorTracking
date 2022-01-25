@@ -18,28 +18,47 @@ targetContrast = [targetContrast1; targetContrast2];
 targetContrastAngle = [targetContrastAngle1; targetContrastAngle2];
 
 % SPECIFY NUMBER OF REPEATS 
-nRepeats = 20;
+nRepeats = 10;
 
-% SPECIFY COMPARISON INTERVALS
-cmpIntrvlAll = repmat([ones([1 nRepeats/2]) zeros([1 nRepeats/2])],[size(targetContrastAngle,1) 1]);
-for i = 1:size(targetContrastAngle,1); cmpIntrvlperm(i,:) = randperm(nRepeats); end
-for i = 1:size(targetContrastAngle,1); cmpIntrvlAll(i,:) = cmpIntrvlAll(i,cmpIntrvlperm(i,:)); end
+% %% COMPLETELY INTERMIXED CONDITIONS
+% 
+% % SPECIFY COMPARISON INTERVALS
+% cmpIntrvlAll = repmat([ones([1 nRepeats/2]) zeros([1 nRepeats/2])],[size(targetContrastAngle,1) 1]);
+% for i = 1:size(targetContrastAngle,1); cmpIntrvlperm(i,:) = randperm(nRepeats); end
+% for i = 1:size(targetContrastAngle,1); cmpIntrvlAll(i,:) = cmpIntrvlAll(i,cmpIntrvlperm(i,:)); end
+% 
+% % SPECIFY RANDOM INDICES
+% for i = 1:nRepeats
+%    indRnd1(:,i) = randperm(size(targetContrastAngle,1)/2)'; 
+% end
+% 
+% % SPECIFY RANDOM INDICES
+% for i = 1:nRepeats
+%    indRnd2(:,i) = randperm(size(targetContrastAngle,1)/2)'+size(targetContrastAngle,1)/2; 
+% end
+% 
+% indRnd = [];
+% cmpIntrvl = [];
+% for i = 1:size(indRnd1,2)
+%     indRnd(:,i*2-1) = indRnd1(:,i);
+%     indRnd(:,i*2) = indRnd2(:,i);
+%     cmpIntrvl(1:size(indRnd1,1),i*2-1) = cmpIntrvlAll(1:size(indRnd1),i);
+%     cmpIntrvl(1:size(indRnd1,1),i*2) = cmpIntrvlAll((size(indRnd1,1)+1):(2*size(indRnd1)),i);
+% end
 
-% SPECIFY RANDOM INDICES
-for i = 1:nRepeats
-   indRnd1(:,i) = randperm(size(targetContrastAngle,1)/2)'; 
-end
-
-% SPECIFY RANDOM INDICES
-for i = 1:nRepeats
-   indRnd2(:,i) = randperm(size(targetContrastAngle,1)/2)'+size(targetContrastAngle,1)/2; 
-end
+%% FOR BLOCKED CONDITIONS
 
 indRnd = [];
-cmpIntrvl = [];
-for i = 1:size(indRnd1,2)
-    indRnd(:,i*2-1) = indRnd1(:,i);
-    indRnd(:,i*2) = indRnd2(:,i);
-    cmpIntrvl(1:size(indRnd1,1),i*2-1) = cmpIntrvlAll(1:size(indRnd1),i);
-    cmpIntrvl(1:size(indRnd1,1),i*2) = cmpIntrvlAll((size(indRnd1,1)+1):(2*size(indRnd1)),i);
+targetContrastAngleUnq = unique(targetContrastAngle);
+for i = 1:length(targetContrastAngleUnq)
+    indStim = find(abs(targetContrastAngle-targetContrastAngleUnq(i))<0.001);
+    indStimNeg = indStim(targetContrast(indStim)<0);
+    indStimPos = indStim(targetContrast(indStim)>0);
+    indRndTmpNeg = repmat(indStimNeg,[nRepeats 1]);
+    indRndTmpNeg = indRndTmpNeg(randperm(length(indRndTmpNeg)));
+    indRndTmpPos = repmat(indStimPos,[nRepeats 1]);
+    indRndTmpPos = indRndTmpPos(randperm(length(indRndTmpPos)));    
+    indRnd = [indRnd indRndTmpNeg indRndTmpPos];
 end
+
+cmpIntrvl = round(rand(size(indRnd)));

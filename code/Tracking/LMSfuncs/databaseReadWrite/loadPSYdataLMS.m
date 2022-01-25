@@ -39,11 +39,19 @@ for i = 1:length(dataFileNums)
     load([fdir filesep fname]);
     disp(['loadPSYdataLMS: BRAVO! successfully loaded: ' fname ' ...'])
     % COMBINE STRUCTS
-    if strcmp(expType,'TRK') || strcmp(expType,'JND')
+    if ~strcmp(expName,'LSD') && (strcmp(expType,'TRK') || strcmp(expType,'JND'))
        S = rmfield(S,'fname');
        S = rmfield(S,'stmRE');
        S = rmfield(S,'stmLE');
        Sall = structmerge(Sall,S,S.trlPerRun);
+    elseif strcmp(expName,'LSD')
+        Stmp.stdX = S.stdX;
+        Stmp.cmpX = S.cmpX;
+        Stmp.R = S.R;
+        Stmp.cmpIntrvl = S.cmpIntrvl;
+        Stmp.targetContrast = S.targetContrast;
+        Stmp.targetContrastAngle = S.targetContrastAngle;
+        Sall = structmerge(Sall,Stmp,length(Stmp.R));
     else
         disp(['loadPSYdataLMS: INVALID ARGUMENT TO expType = ' num2str(expType) '. WRITE CODE!?']);
     end

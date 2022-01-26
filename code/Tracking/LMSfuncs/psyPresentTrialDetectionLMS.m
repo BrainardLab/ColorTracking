@@ -1,4 +1,4 @@
-function S = psyPresentTrialDetectionLMS(D,S,t,msk1oF)
+function S = psyPresentTrialDetectionLMS(D,S,t,msk1oF,indRnd)
 
 % function S = psyPresentTrialDetectionLMS(D,S,t,msk1oF)
 %
@@ -109,6 +109,10 @@ texStdImg = Screen('MakeTexture', D.wdwPtr, round(reshape(D.bgd,[1 1 3]).*255));
 trlBgnSec = GetSecs();
 
 for j = 0:[S.numIntrvl-1]
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd),2);
+    Screen('FillRect', D.wdwPtr, round(D.bgd.*S.trm(t).*255), D.wdwXYpix);
+    Screen('Flip', D.wdwPtr);
+    pause(0.2);
     sound(sin(0.54.*[0:1439]).*cosWindowFlattop([1 1440],720,720,0));
     % START FRAME LOOP
     for f = 1:numFrm
@@ -118,7 +122,7 @@ for j = 0:[S.numIntrvl-1]
         % DRAW LEFT EYE BACKGROUND
         Screen('FillRect', D.wdwPtr, round(D.bgd.*S.trm(t).*255), D.wdwXYpix);
         % DRAWING LEFT EYE FIXATION STIMULUS
-        Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), [D.fixStm]); 
+%        Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), [D.fixStm]); 
         % DRAW LEFT EYE STIMULUS
         %%%%%%%%%%%%%%
         % INTERVAL 1 % PRESENT STD or CMP STIMULUS (AS APPROPRIATE)
@@ -156,6 +160,12 @@ for j = 0:[S.numIntrvl-1]
         Screen('DrawingFinished', D.wdwPtr);
         Screen('Flip', D.wdwPtr);
 
+    end
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
+    Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), [D.fixStm]); 
+    Screen('Flip', D.wdwPtr);
+    if j==0
+       pause(0.2);
     end
 end
 

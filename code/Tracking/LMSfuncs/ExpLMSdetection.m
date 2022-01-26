@@ -461,7 +461,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
 %    Screen('LoadNormalizedGammaTable', D.wdwPtr, saveGamma,[]);
     Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
     Screen('Flip',D.wdwPtr);
-    if i==1; pause(360); end
+    if i==1; pause(3.6); end
     Screen('TextSize', D.wdwPtr, 20);
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the down button.'], ...
@@ -478,15 +478,15 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     
     % CREATE & DISPLAY STIMULI
     for t = 1:size(indRnd,1)
-        Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),2);
-        Screen('Flip', D.wdwPtr);
+%         Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indRnd(t,i)),2);
+%         Screen('Flip', D.wdwPtr);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % INDIVIDUAL TRIAL CODE STARTS HERE %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
         % PRESENT TRIAL
      %   psyPresentTrial2IFCmov(D,S,t,stdIphtXYTrgb(:,:,:,:,t),cmpIphtXYTrgb(:,:,:,:,t),msk1oF);
-         S = psyPresentTrialDetectionLMS(D,S,t,msk1oF);
+         S = psyPresentTrialDetectionLMS(D,S,t,msk1oF,indRnd(t,i));
         if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
         
         Screen('TextSize', D.wdwPtr, 14);

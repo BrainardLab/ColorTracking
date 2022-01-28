@@ -18,7 +18,7 @@ targetContrast = [targetContrast1; targetContrast2];
 targetContrastAngle = [targetContrastAngle1; targetContrastAngle2];
 
 % SPECIFY NUMBER OF REPEATS 
-nRepeats = 10;
+nRepeats = 20;
 
 % %% COMPLETELY INTERMIXED CONDITIONS
 % 
@@ -49,16 +49,32 @@ nRepeats = 10;
 %% FOR BLOCKED CONDITIONS
 
 indRnd = [];
+cmpIntrvl = [];
 targetContrastAngleUnq = unique(targetContrastAngle);
 for i = 1:length(targetContrastAngleUnq)
     indStim = find(abs(targetContrastAngle-targetContrastAngleUnq(i))<0.001);
     indStimNeg = indStim(targetContrast(indStim)<0);
     indStimPos = indStim(targetContrast(indStim)>0);
+    cmpIntrvlNeg = generateCmpIntrvlLSD(length(indStimNeg),nRepeats);
+    cmpIntrvlPos = generateCmpIntrvlLSD(length(indStimPos),nRepeats);
+    
     indRndTmpNeg = repmat(indStimNeg,[nRepeats 1]);
-    indRndTmpNeg = indRndTmpNeg(randperm(length(indRndTmpNeg)));
     indRndTmpPos = repmat(indStimPos,[nRepeats 1]);
-    indRndTmpPos = indRndTmpPos(randperm(length(indRndTmpPos)));    
+    cmpIntrvlNeg = cmpIntrvlNeg(:);
+    cmpIntrvlPos = cmpIntrvlPos(:);
+    
+    % INDICES FOR RANDOMIZING 
+    indRndPreNeg = randperm(length(indRndTmpNeg));
+    indRndPrePos = randperm(length(indRndTmpPos));
+    % RANDOMIZE INDICES
+    indRndTmpNeg = indRndTmpNeg(indRndPreNeg);     
+    indRndTmpPos = indRndTmpPos(indRndPrePos);   
+    % RANDOMIZE CMP INTERVALS
+    cmpIntrvlNeg = cmpIntrvlNeg(indRndPreNeg);
+    cmpIntrvlPos = cmpIntrvlPos(indRndPrePos);
+    
     indRnd = [indRnd indRndTmpNeg indRndTmpPos];
+    cmpIntrvl = [cmpIntrvl cmpIntrvlNeg cmpIntrvlPos];
 end
 
-cmpIntrvl = round(rand(size(indRnd)));
+

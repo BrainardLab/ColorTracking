@@ -48,8 +48,8 @@ nRepeats = 20;
 
 %% FOR BLOCKED CONDITIONS
 
-indRnd = [];
-cmpIntrvl = [];
+indRndPenultimate = [];
+cmpIntrvlPenultimate = [];
 targetContrastAngleUnq = unique(targetContrastAngle);
 for i = 1:length(targetContrastAngleUnq)
     indStim = find(abs(targetContrastAngle-targetContrastAngleUnq(i))<0.001);
@@ -73,19 +73,34 @@ for i = 1:length(targetContrastAngleUnq)
     cmpIntrvlNeg = cmpIntrvlNeg(indRndPreNeg);
     cmpIntrvlPos = cmpIntrvlPos(indRndPrePos);
     
-    indRnd = [indRnd indRndTmpNeg indRndTmpPos];
-    cmpIntrvl = [cmpIntrvl cmpIntrvlNeg cmpIntrvlPos];
+    indRndPenultimate = [indRndPenultimate indRndTmpNeg indRndTmpPos];
+    cmpIntrvlPenultimate = [cmpIntrvlPenultimate cmpIntrvlNeg cmpIntrvlPos];
+end
+
+nTrialPerRun = 10;
+nPartitions = size(indRndPenultimate,1)./nTrialPerRun;
+indRnd = [];
+cmpIntrvl = [];
+for i = 1:nPartitions
+    indSelection = ((i-1)*nTrialPerRun+1):((i-1)*nTrialPerRun+nTrialPerRun);
+    
+    indRndTmp = indRndPenultimate(indSelection,:);
+    cmpIntrvlTmp = cmpIntrvlPenultimate(indSelection,:);
+    
+    indPermBlock = randperm(size(indRndTmp,2));
+    
+    indRnd = [indRnd; indRndTmp(:,indPermBlock)];    
+    cmpIntrvl = [cmpIntrvl; cmpIntrvlTmp(:,indPermBlock)];
 end
 
 %% SANITY CHECKS
 
 sanityCheckInd = 1;
-sanityCheckContrasts = targetContrast(indRnd(:,sanityCheckInd));
+sanityCheckContrasts = targetContrast(indRndPenultimate(:,sanityCheckInd));
 sanityCheckContrastsUnq = unique(sanityCheckContrasts);
 for i = 1:length(sanityCheckContrastsUnq)
     indTestForCmpBalance = abs(sanityCheckContrasts-sanityCheckContrastsUnq(i))<0.001;
 %    sum(indTestForCmpBalance)
-    cmpBalanced = cmpIntrvl(indTestForCmpBalance,sanityCheckInd);
+    cmpBalanced = cmpIntrvlPenultimate(indTestForCmpBalance,sanityCheckInd);
     sum(cmpBalanced)
 end
-

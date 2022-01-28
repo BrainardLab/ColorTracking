@@ -77,4 +77,15 @@ for i = 1:length(targetContrastAngleUnq)
     cmpIntrvl = [cmpIntrvl cmpIntrvlNeg cmpIntrvlPos];
 end
 
+%% SANITY CHECKS
+
+sanityCheckInd = 1;
+sanityCheckContrasts = targetContrast(indRnd(:,sanityCheckInd));
+sanityCheckContrastsUnq = unique(sanityCheckContrasts);
+for i = 1:length(sanityCheckContrastsUnq)
+    indTestForCmpBalance = abs(sanityCheckContrasts-sanityCheckContrastsUnq(i))<0.001;
+%    sum(indTestForCmpBalance)
+    cmpBalanced = cmpIntrvl(indTestForCmpBalance,sanityCheckInd);
+    sum(cmpBalanced)
+end
 

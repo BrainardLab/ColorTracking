@@ -89,18 +89,22 @@ for i = 1:nPartitions
     
     indPermBlock = randperm(size(indRndTmp,2));
     
-    indRnd = [indRnd; indRndTmp(:,indPermBlock)];    
-    cmpIntrvl = [cmpIntrvl; cmpIntrvlTmp(:,indPermBlock)];
+    indRnd = [indRnd indRndTmp(:,indPermBlock)];    
+    cmpIntrvl = [cmpIntrvl cmpIntrvlTmp(:,indPermBlock)];
 end
 
 %% SANITY CHECKS
 
-sanityCheckInd = 1;
-sanityCheckContrasts = targetContrast(indRndPenultimate(:,sanityCheckInd));
-sanityCheckContrastsUnq = unique(sanityCheckContrasts);
-for i = 1:length(sanityCheckContrastsUnq)
-    indTestForCmpBalance = abs(sanityCheckContrasts-sanityCheckContrastsUnq(i))<0.001;
-%    sum(indTestForCmpBalance)
-    cmpBalanced = cmpIntrvlPenultimate(indTestForCmpBalance,sanityCheckInd);
-    sum(cmpBalanced)
+for i = 1:length(targetContrastAngleUnq)
+    targetContrastSanityCheck = targetContrast(indRnd);
+    targetContrastAngleSanityCheck = targetContrastAngle(indRnd);
+    indPosSanityCheck = targetContrastAngle(indRnd)==targetContrastAngleUnq(i) & targetContrast(indRnd)>0;
+    indNegSanityCheck = targetContrastAngle(indRnd)==targetContrastAngleUnq(i) & targetContrast(indRnd)<0;
+    targetContrastUnqSanityCheck = unique(targetContrastSanityCheck(indNegSanityCheck));
+    for j = 1:length(targetContrastUnqSanityCheck)
+        indFinalSanityCheck = targetContrastAngleSanityCheck==targetContrastAngleUnq(i) & abs(targetContrastSanityCheck-targetContrastUnqSanityCheck(j))<0.0001;
+        sum(cmpIntrvl(indFinalSanityCheck))
+%        unique(targetContrastAngleSanityCheck(indFinalSanityCheck))
+%        unique(targetContrastSanityCheck(indFinalSanityCheck))
+    end
 end

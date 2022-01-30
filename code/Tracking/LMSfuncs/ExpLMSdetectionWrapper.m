@@ -87,6 +87,23 @@ for i = 1:nPartitions
     indRndTmp = indRndPenultimate(indSelection,:);
     cmpIntrvlTmp = cmpIntrvlPenultimate(indSelection,:);
     
+    indRndPractice = [];
+    for j = 1:size(indRndTmp,2)
+        practiceAngle = unique(targetContrastAngle(indRndTmp(:,j)));
+        potentialPracticeContrasts = targetContrast(targetContrastAngle==practiceAngle);
+        if sum(targetContrast(indRndTmp(:,j)))<0
+            maxPracticeContrast=min(potentialPracticeContrasts);
+        else
+            maxPracticeContrast=max(potentialPracticeContrasts);
+        end
+        
+        indRndPractice(j) = find(targetContrastAngle==practiceAngle & abs(targetContrast-maxPracticeContrast)<0.001);
+    end
+    indRndPractice = [indRndPractice; indRndPractice];
+    cmpIntrvlPractice = round(rand(size(indRndPractice)));
+    indRndTmp = [indRndPractice; indRndTmp];
+    cmpIntrvlTmp = [cmpIntrvlPractice; cmpIntrvlTmp];
+    
     indPermBlock = randperm(size(indRndTmp,2));
     
     indRnd = [indRnd indRndTmp(:,indPermBlock)];    
@@ -95,16 +112,16 @@ end
 
 %% SANITY CHECKS
 
-for i = 1:length(targetContrastAngleUnq)
-    targetContrastSanityCheck = targetContrast(indRnd);
-    targetContrastAngleSanityCheck = targetContrastAngle(indRnd);
-    indPosSanityCheck = targetContrastAngle(indRnd)==targetContrastAngleUnq(i) & targetContrast(indRnd)>0;
-    indNegSanityCheck = targetContrastAngle(indRnd)==targetContrastAngleUnq(i) & targetContrast(indRnd)<0;
-    targetContrastUnqSanityCheck = unique(targetContrastSanityCheck(indNegSanityCheck));
-    for j = 1:length(targetContrastUnqSanityCheck)
-        indFinalSanityCheck = targetContrastAngleSanityCheck==targetContrastAngleUnq(i) & abs(targetContrastSanityCheck-targetContrastUnqSanityCheck(j))<0.0001;
-        sum(cmpIntrvl(indFinalSanityCheck))
-%        unique(targetContrastAngleSanityCheck(indFinalSanityCheck))
-%        unique(targetContrastSanityCheck(indFinalSanityCheck))
-    end
-end
+% for i = 1:length(targetContrastAngleUnq)
+%     targetContrastSanityCheck = targetContrast(indRnd);
+%     targetContrastAngleSanityCheck = targetContrastAngle(indRnd);
+%     indPosSanityCheck = targetContrastAngle(indRnd)==targetContrastAngleUnq(i) & targetContrast(indRnd)>0;
+%     indNegSanityCheck = targetContrastAngle(indRnd)==targetContrastAngleUnq(i) & targetContrast(indRnd)<0;
+%     targetContrastUnqSanityCheck = unique(targetContrastSanityCheck(indNegSanityCheck));
+%     for j = 1:length(targetContrastUnqSanityCheck)
+%         indFinalSanityCheck = targetContrastAngleSanityCheck==targetContrastAngleUnq(i) & abs(targetContrastSanityCheck-targetContrastUnqSanityCheck(j))<0.0001;
+%         sum(cmpIntrvl(indFinalSanityCheck))
+% %        unique(targetContrastAngleSanityCheck(indFinalSanityCheck))
+% %        unique(targetContrastSanityCheck(indFinalSanityCheck))
+%     end
+% end

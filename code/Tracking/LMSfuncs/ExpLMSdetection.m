@@ -492,7 +492,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
         Screen('TextSize', D.wdwPtr, 14);
         % MAKE & DRAW FIXATION CROSS
         Screen('FillRect',D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
-        Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( S.trlPerRun ) ' trials'], [20], [20], round([D.wht.*255]));
+        Screen('DrawText',D.wdwPtr, [num2str(t) '  of ' num2str( size(indRnd,1) ) ' trials'], [20], [20], round([D.wht.*255]));
         Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
         % FLIP
         Screen('Flip', D.wdwPtr);

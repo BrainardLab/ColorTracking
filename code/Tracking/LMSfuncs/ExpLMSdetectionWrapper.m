@@ -6,7 +6,7 @@
 % preserve the practice of running positive and negative angles of cone
 % contrast modulations in separate blocks. 
 
-subjName = 'KAS';
+subjName = 'JNK';
 
 % SET RANDOM SEED
 randSeed = 2;
@@ -25,6 +25,8 @@ elseif strcmp(subjName,'MAB')
     targetContrast1 = [linspace(0.07/6,0.07,6) linspace(0.02/6,0.02,6) linspace(0.025/6,0.025,6) linspace(0.025/6,0.025,6) linspace(0.095/6,0.095,6) linspace(0.18/6,0.18,6)]';
 elseif strcmp(subjName,'KAS')
     targetContrast1 = [linspace(0.06/6,0.06,6) linspace(0.0175/6,0.0175,6) linspace(0.01/6,0.01,6) linspace(0.0175/6,0.0175,6) linspace(0.06/6,0.06,6) linspace(0.14/6,0.14,6)]';
+else
+    targetContrast1 = [linspace(0.04/6,0.04,6) linspace(0.0125/6,0.0125,6) linspace(0.01/6,0.01,6) linspace(0.0125/6,0.0125,6) linspace(0.04/6,0.04,6) linspace(0.09/6,0.09,6)]';
 end
 targetContrast2 = -targetContrast1;
 targetContrast = [targetContrast1; targetContrast2];
@@ -111,7 +113,7 @@ for i = 1:nPartitions
         
         indRndPractice(j) = find(targetContrastAngle==practiceAngle & abs(targetContrast-maxPracticeContrast)<0.001);
     end
-    indRndPractice = [indRndPractice; indRndPractice];
+    indRndPractice = [indRndPractice; indRndPractice; indRndPractice];
     cmpIntrvlPractice = round(rand(size(indRndPractice)));
     indRndTmp = [indRndPractice; indRndTmp];
     cmpIntrvlTmp = [cmpIntrvlPractice; cmpIntrvlTmp];

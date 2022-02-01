@@ -101,22 +101,22 @@ for i = 1:nPartitions
     indRndTmp = indRndPenultimate(indSelection,:);
     cmpIntrvlTmp = cmpIntrvlPenultimate(indSelection,:);
     
-    indRndPractice = [];
-    for j = 1:size(indRndTmp,2)
-        practiceAngle = unique(targetContrastAngle(indRndTmp(:,j)));
-        potentialPracticeContrasts = targetContrast(targetContrastAngle==practiceAngle);
-        if sum(targetContrast(indRndTmp(:,j)))<0
-            maxPracticeContrast=min(potentialPracticeContrasts);
-        else
-            maxPracticeContrast=max(potentialPracticeContrasts);
-        end
-        
-        indRndPractice(j) = find(targetContrastAngle==practiceAngle & abs(targetContrast-maxPracticeContrast)<0.001);
-    end
-    indRndPractice = [indRndPractice; indRndPractice; indRndPractice];
-    cmpIntrvlPractice = round(rand(size(indRndPractice)));
-    indRndTmp = [indRndPractice; indRndTmp];
-    cmpIntrvlTmp = [cmpIntrvlPractice; cmpIntrvlTmp];
+%     indRndPractice = [];
+%     for j = 1:size(indRndTmp,2)
+%         practiceAngle = unique(targetContrastAngle(indRndTmp(:,j)));
+%         potentialPracticeContrasts = targetContrast(targetContrastAngle==practiceAngle);
+%         if sum(targetContrast(indRndTmp(:,j)))<0
+%             maxPracticeContrast=min(potentialPracticeContrasts);
+%         else
+%             maxPracticeContrast=max(potentialPracticeContrasts);
+%         end
+%         
+%         indRndPractice(j) = find(targetContrastAngle==practiceAngle & abs(targetContrast-maxPracticeContrast)<0.001);
+%     end
+%     indRndPractice = [indRndPractice; indRndPractice; indRndPractice];
+%     cmpIntrvlPractice = round(rand(size(indRndPractice)));
+%     indRndTmp = [indRndPractice; indRndTmp];
+%     cmpIntrvlTmp = [cmpIntrvlPractice; cmpIntrvlTmp];
     
     indPermBlock = randperm(size(indRndTmp,2));
     

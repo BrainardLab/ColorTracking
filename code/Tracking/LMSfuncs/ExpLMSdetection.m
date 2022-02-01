@@ -431,7 +431,8 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.tgtXmmL = squeeze(tgtXmmL(:,:,i));
     S.tgtXmmR = squeeze(tgtXmmR(:,:,i));
     S.tgtYmmL = squeeze(tgtYmmL(:,:,i));
-    
+    maxContrastForThisAngle = max(targetContrast(abs(targetContrastAngle-unique(S.targetContrastAngle))<0.001));
+    indPrimer = find(abs(targetContrastAngle-unique(S.targetContrastAngle))<0.001 & abs(targetContrast-maxContrastForThisAngle)<0.001);
     % MAKE TEMPORAL WINDOW
     S.timeWindow = cosWindowFlattop([1 numFrm+1],floor((numFrm+1)/2),ceil((numFrm+1)/2),0,0);
     % S.timeWindow = cosWindowFlattop([1 numFrm],0,numFrm,0,0);
@@ -464,12 +465,29 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     if i==1; pause(3.6); end
     Screen('TextSize', D.wdwPtr, 20);
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
-    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the down button.'], ...
+    
+    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. Hit green down button to see primer stimulus.'], ...
+       0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
+    Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
+    Screen('Flip',D.wdwPtr);    
+    while ~Gamepad('GetButton', gamepadIndex, bttnOneNum); end
+    while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
+    
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indPrimer),2);
+    texPrimer = Screen('MakeTexture', D.wdwPtr, stmLE);
+    Screen('DrawTexture', D.wdwPtr, texPrimer, [], D.plySqrPix);
+    Screen('Flip',D.wdwPtr);
+    pause(3);
+    
+    Screen('Close', texPrimer);
+    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
+    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the green down button.'], ...
            0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
     Screen('Flip',D.wdwPtr);
     % WAIT FOR KEYPRESS
     while ~Gamepad('GetButton', gamepadIndex, bttnOneNum); end
+    
     % DRAW FIXATION STIM
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);

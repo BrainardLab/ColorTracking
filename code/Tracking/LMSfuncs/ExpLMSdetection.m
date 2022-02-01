@@ -487,6 +487,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     Screen('Flip',D.wdwPtr);
     % WAIT FOR KEYPRESS
     while ~Gamepad('GetButton', gamepadIndex, bttnOneNum); end
+    while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
     
     % DRAW FIXATION STIM
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end

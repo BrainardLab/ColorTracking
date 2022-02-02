@@ -101,31 +101,29 @@ for i = 1:nPartitions
     indRndTmp = indRndPenultimate(indSelection,:);
     cmpIntrvlTmp = cmpIntrvlPenultimate(indSelection,:);
     
-%     indRndPractice = [];
-%     for j = 1:size(indRndTmp,2)
-%         practiceAngle = unique(targetContrastAngle(indRndTmp(:,j)));
-%         potentialPracticeContrasts = targetContrast(targetContrastAngle==practiceAngle);
-%         if sum(targetContrast(indRndTmp(:,j)))<0
-%             maxPracticeContrast=min(potentialPracticeContrasts);
-%         else
-%             maxPracticeContrast=max(potentialPracticeContrasts);
-%         end
-%         
-%         indRndPractice(j) = find(targetContrastAngle==practiceAngle & abs(targetContrast-maxPracticeContrast)<0.001);
-%     end
-%     indRndPractice = [indRndPractice; indRndPractice; indRndPractice];
-%     cmpIntrvlPractice = round(rand(size(indRndPractice)));
-%     indRndTmp = [indRndPractice; indRndTmp];
-%     cmpIntrvlTmp = [cmpIntrvlPractice; cmpIntrvlTmp];
-    
     indRndTmp = reshape(indRndTmp,[size(indRndTmp,1)*2 size(indRndTmp,2)/2]);
     cmpIntrvlTmp = reshape(cmpIntrvlTmp,[size(cmpIntrvlTmp,1)*2 size(cmpIntrvlTmp,2)/2]);
 
+    indRndPractice = [];
+    for j = 1:size(indRndTmp,2)
+        practiceAngle = unique(targetContrastAngle(indRndTmp(:,j)));
+        potentialPracticeContrasts = targetContrast(targetContrastAngle==practiceAngle);
+        if sum(targetContrast(indRndTmp(:,j)))<0
+            maxPracticeContrast=min(potentialPracticeContrasts);
+        else
+            maxPracticeContrast=max(potentialPracticeContrasts);
+        end
+        
+        indRndPractice(j) = find(targetContrastAngle==practiceAngle & abs(targetContrast-maxPracticeContrast)<0.001);
+    end
+    indRndPractice = [indRndPractice; indRndPractice; indRndPractice];
+    cmpIntrvlPractice = round(rand(size(indRndPractice))); 
+    
     indPermBlock = randperm(size(indRndTmp,2));
     indPermRun = randperm(size(indRndTmp,1));
     
-    indRnd = [indRnd indRndTmp(indPermRun,indPermBlock)];    
-    cmpIntrvl = [cmpIntrvl cmpIntrvlTmp(indPermRun,indPermBlock)];
+    indRnd = [indRnd [indRndPractice(:,indPermBlock); indRndTmp(indPermRun,indPermBlock)]];    
+    cmpIntrvl = [cmpIntrvl [cmpIntrvlPractice(:,indPermBlock); cmpIntrvlTmp(indPermRun,indPermBlock)]];
 end
 
 %% SANITY CHECKS
@@ -138,9 +136,9 @@ for i = 1:length(targetContrastAngleUnq)
     targetContrastUnqSanityCheck = unique(targetContrastSanityCheck(indPosSanityCheck));
     for j = 1:length(targetContrastUnqSanityCheck)
         indFinalSanityCheck = targetContrastAngleSanityCheck==targetContrastAngleUnq(i) & abs(targetContrastSanityCheck-targetContrastUnqSanityCheck(j))<0.0001;
-        sum(cmpIntrvl(indFinalSanityCheck))
+%        sum(cmpIntrvl(indFinalSanityCheck))
 %        unique(targetContrastAngleSanityCheck(indFinalSanityCheck))
 %        unique(targetContrastSanityCheck(indFinalSanityCheck))
-%        length(cmpIntrvl(indFinalSanityCheck))
+        length(cmpIntrvl(indFinalSanityCheck))
     end
 end

@@ -91,7 +91,7 @@ for i = 1:length(targetContrastAngleUnq)
     cmpIntrvlPenultimate = [cmpIntrvlPenultimate cmpIntrvlNeg cmpIntrvlPos];
 end
 
-nTrialPerRun = 30;
+nTrialPerRun = 60;
 nPartitions = size(indRndPenultimate,1)./nTrialPerRun;
 indRnd = [];
 cmpIntrvl = [];
@@ -100,9 +100,6 @@ for i = 1:nPartitions
     
     indRndTmp = indRndPenultimate(indSelection,:);
     cmpIntrvlTmp = cmpIntrvlPenultimate(indSelection,:);
-    
-    indRndTmp = reshape(indRndTmp,[size(indRndTmp,1)*2 size(indRndTmp,2)/2]);
-    cmpIntrvlTmp = reshape(cmpIntrvlTmp,[size(cmpIntrvlTmp,1)*2 size(cmpIntrvlTmp,2)/2]);
 
     indRndPractice = [];
     for j = 1:size(indRndTmp,2)
@@ -128,6 +125,7 @@ end
 
 %% SANITY CHECKS
 
+testA = [];
 for i = 1:length(targetContrastAngleUnq)
     targetContrastSanityCheck = targetContrast(indRnd);
     targetContrastAngleSanityCheck = targetContrastAngle(indRnd);
@@ -136,9 +134,9 @@ for i = 1:length(targetContrastAngleUnq)
     targetContrastUnqSanityCheck = unique(targetContrastSanityCheck(indPosSanityCheck));
     for j = 1:length(targetContrastUnqSanityCheck)
         indFinalSanityCheck = targetContrastAngleSanityCheck==targetContrastAngleUnq(i) & abs(targetContrastSanityCheck-targetContrastUnqSanityCheck(j))<0.0001;
-%        sum(cmpIntrvl(indFinalSanityCheck))
-%        unique(targetContrastAngleSanityCheck(indFinalSanityCheck))
-%        unique(targetContrastSanityCheck(indFinalSanityCheck))
-        length(cmpIntrvl(indFinalSanityCheck))
+        testA(i,j,1) = sum(cmpIntrvl(indFinalSanityCheck));
+        testA(i,j,2) = unique(targetContrastAngleSanityCheck(indFinalSanityCheck));
+        testA(i,j,3) = unique(targetContrastSanityCheck(indFinalSanityCheck));
+        testA(i,j,4) = length(cmpIntrvl(indFinalSanityCheck));
     end
 end

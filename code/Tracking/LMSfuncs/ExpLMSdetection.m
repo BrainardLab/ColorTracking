@@ -466,21 +466,21 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     Screen('TextSize', D.wdwPtr, 20);
     if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
     
-    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. Hit green down button to see primer stimulus.'], ...
-       0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
-    Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
-    Screen('Flip',D.wdwPtr);    
-    while ~Gamepad('GetButton', gamepadIndex, bttnOneNum); end
-    while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
+%     Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. Hit green down button to see primer stimulus.'], ...
+%        0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
+%     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
+%     Screen('Flip',D.wdwPtr);    
+%     while ~Gamepad('GetButton', gamepadIndex, bttnOneNum); end
+%     while KbCheck(-1) || Gamepad('GetButton', gamepadIndex, bttnOneNum) || Gamepad('GetButton', gamepadIndex, bttnTwoNum); end
+%     
+%     Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indPrimer),2);
+%     texPrimer = Screen('MakeTexture', D.wdwPtr, stmLE);
+%     Screen('DrawTexture', D.wdwPtr, texPrimer, [], D.plySqrPix);
+%     Screen('Flip',D.wdwPtr);
+%     pause(3);
     
-    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettings(:,:,indPrimer),2);
-    texPrimer = Screen('MakeTexture', D.wdwPtr, stmLE);
-    Screen('DrawTexture', D.wdwPtr, texPrimer, [], D.plySqrPix);
-    Screen('Flip',D.wdwPtr);
-    pause(3);
-    
-    Screen('Close', texPrimer);
-    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
+%    Screen('Close', texPrimer);
+%    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
     Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the green down button.'], ...
            0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);

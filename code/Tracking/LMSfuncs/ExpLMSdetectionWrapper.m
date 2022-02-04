@@ -26,7 +26,7 @@ elseif strcmp(subjName,'MAB')
 elseif strcmp(subjName,'KAS')
     targetContrast1 = [linspace(0.06/6,0.06,6) linspace(0.0175/6,0.0175,6) linspace(0.01/6,0.01,6) linspace(0.0175/6,0.0175,6) linspace(0.06/6,0.06,6) linspace(0.14/6,0.14,6)]';
 else
-    targetContrast1 = [linspace(0.04/6,0.04,6) linspace(0.0125/6,0.0125,6) linspace(0.01/6,0.01,6) linspace(0.0125/6,0.0125,6) linspace(0.04/6,0.04,6) linspace(0.09/6,0.09,6)]';
+    targetContrast1 = [linspace(0.07/6,0.07,6) linspace(0.02/6,0.02,6) linspace(0.025/6,0.025,6) linspace(0.025/6,0.025,6) linspace(0.095/6,0.095,6) linspace(0.18/6,0.18,6)]';
 end
 targetContrast2 = -targetContrast1;
 targetContrast = [targetContrast1; targetContrast2];

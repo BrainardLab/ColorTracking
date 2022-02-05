@@ -65,6 +65,8 @@ nRepeats = 20;
 indRndPenultimate = [];
 cmpIntrvlPenultimate = [];
 targetContrastAngleUnq = unique(targetContrastAngle);
+indStimCounter = [];
+
 for i = 1:length(targetContrastAngleUnq)
     indStim = find(abs(targetContrastAngle-targetContrastAngleUnq(i))<0.001);
     indStimNeg = indStim(targetContrast(indStim)<0);
@@ -89,6 +91,12 @@ for i = 1:length(targetContrastAngleUnq)
     
     indRndPenultimate = [indRndPenultimate indRndTmpNeg indRndTmpPos];
     cmpIntrvlPenultimate = [cmpIntrvlPenultimate cmpIntrvlNeg cmpIntrvlPos];
+    indStimCounter(end+1) = length(indStimNeg);
+    indStimCounter(end+1) = length(indStimPos);
+end
+
+if length(unique(indStimCounter))>1
+   error('ExpLMSdetectionWrapper: uneven number of contrasts per direction!'); 
 end
 
 nTrialPerRun = 60;
@@ -117,10 +125,22 @@ for i = 1:nPartitions
     cmpIntrvlPractice = round(rand(size(indRndPractice))); 
     
     indPermBlock = randperm(size(indRndTmp,2));
-    indPermRun = randperm(size(indRndTmp,1));
+%    indPermRun = randperm(size(indRndTmp,1));
+    indPermRun = [];
+    for k1 = 1:size(indRndTmp,2)
+        indPermRunTmp = [];
+        for k2 = 1:size(indRndTmp,1)/indStimCounter(1)
+            indPermRunTmp = [indPermRunTmp; (k2-1)*indStimCounter(1)+randperm(indStimCounter(1))'];
+        end
+        indPermRun(:,k1) = indPermRunTmp;
+    end
+    for k1 = 1:size(indRndTmp,2)
+       indRndTmp(:,k1) = indRndTmp(indPermRun(:,k1),k1);
+       cmpIntrvlTmp(:,k1) = cmpIntrvlTmp(indPermRun(:,k1),k1);
+    end
     
-    indRnd = [indRnd [indRndPractice(:,indPermBlock); indRndTmp(indPermRun,indPermBlock)]];    
-    cmpIntrvl = [cmpIntrvl [cmpIntrvlPractice(:,indPermBlock); cmpIntrvlTmp(indPermRun,indPermBlock)]];
+    indRnd = [indRnd [indRndPractice(:,indPermBlock); indRndTmp(:,indPermBlock)]];    
+    cmpIntrvl = [cmpIntrvl [cmpIntrvlPractice(:,indPermBlock); cmpIntrvlTmp(:,indPermBlock)]];
 end
 
 %% SANITY CHECKS

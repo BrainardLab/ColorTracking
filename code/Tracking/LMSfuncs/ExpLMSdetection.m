@@ -206,7 +206,7 @@ elseif strcmp(D.cmpInfo.localHostName,'ben-Precision-7520')
 else
     resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
     load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
-    calCell = 3;
+    calCell = 4;
     cal = cals{calCell};
 end
 

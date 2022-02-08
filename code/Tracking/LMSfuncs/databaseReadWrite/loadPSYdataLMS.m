@@ -45,13 +45,21 @@ for i = 1:length(dataFileNums)
        S = rmfield(S,'stmLE');
        Sall = structmerge(Sall,S,S.trlPerRun);
     elseif strcmp(expName,'LSD')
-        Stmp.stdX = S.stdX;
-        Stmp.cmpX = S.cmpX;
-        Stmp.R = S.R;
-        Stmp.cmpIntrvl = S.cmpIntrvl;
-        Stmp.targetContrast = S.targetContrast;
-        Stmp.targetContrastAngle = S.targetContrastAngle;
-        Sall = structmerge(Sall,Stmp,length(Stmp.R));
+        Stmp.stdX = S.stdX(4:end);
+        Stmp.cmpX = S.cmpX(4:end);
+        Stmp.R = S.R(4:end);
+        Stmp.cmpIntrvl = S.cmpIntrvl(4:end);
+        Stmp.targetContrast = S.targetContrast(4:end);
+        Stmp.targetContrastAngle = S.targetContrastAngle(4:end);
+        
+%         Stmp.stdX = S.stdX;
+%         Stmp.cmpX = S.cmpX;
+%         Stmp.R = S.R;
+%         Stmp.cmpIntrvl = S.cmpIntrvl;
+%         Stmp.targetContrast = S.targetContrast;
+%         Stmp.targetContrastAngle = S.targetContrastAngle;      
+
+         Sall = structmerge(Sall,Stmp,length(Stmp.R));
     else
         disp(['loadPSYdataLMS: INVALID ARGUMENT TO expType = ' num2str(expType) '. WRITE CODE!?']);
     end

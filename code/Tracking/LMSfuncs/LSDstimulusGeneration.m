@@ -101,6 +101,9 @@ D.correctedBgd = bgSettings';
 S.lookupTableSettings = [];
 for i = 1:length(targetContrastAngle)
     [lookupTableSettings,badIndex] = makeLookUpTableForCC(calObj,targetContrast(i),targetContrastAngle(i),D.correctedBgd');
+    if any(badIndex ~= 0)
+        warning('WARNING: %2.2f is out of gamut\n',targetContrast(i));
+    end
     S.lookupTableSettings(:,:,i) = lookupTableSettings';
 end
 

@@ -1,7 +1,7 @@
 % TRACKING STIM TO MAC_BOYN
 
 %% Load cal file
-resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
 calCell = 3;
 cal = cals{calCell};

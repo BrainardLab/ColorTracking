@@ -1,7 +1,7 @@
 savePath = '/Users/michael/labDropbox/CNST_materials/ColorTrackingTask/monitorValiadtions/';
 
 
-resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
 calCell = 3;
 cal = cals{calCell};

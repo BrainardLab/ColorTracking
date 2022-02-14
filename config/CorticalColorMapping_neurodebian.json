@@ -3,14 +3,14 @@
 		"flavor": "",
 		"hook": "",
 		"importance": "",
-		"localHookTemplate": "config/CorticalColorMappingLocalHookTemplate.m",
-		"name": "CorticalColorMapping",
+		"localHookTemplate": "config/ColorTrackingLocalHookTemplate.m",
+		"name": "ColorTracking",
 		"pathPlacement": "append",
 		"subfolder": "",
 		"toolboxRoot": "",
 		"type": "git",
 		"update": "",
-		"url": "https://github.com/BrainardLab/CorticalColorMapping.git"
+		"url": "https://github.com/BrainardLab/ColorTracking.git"
 	},	
     {
         "flavor": "",

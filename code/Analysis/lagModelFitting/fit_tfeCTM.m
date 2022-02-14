@@ -2,7 +2,7 @@
 %
 %% Load the data  
 subjID = 'KAS';
-projectName = 'CorticalColorMapping';
+projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
 plotInfo.figSavePath = getpref(projectName,'figureSavePath');

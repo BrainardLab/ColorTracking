@@ -61,7 +61,7 @@ elseif strcmp(D.cmpInfo.localHostName,'ben-Precision-7520')
     load('/home/ben/Documents/VisionScience/Data/BurgeLabCalibrationData/ViewSonicG220fb.mat');
     cal = cals{1};
 else
-    resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+    resourcesDir =  getpref('ColorTracking','CalDataFolder');
     load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
     cal = cals{4};
 end

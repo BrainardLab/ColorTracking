@@ -65,17 +65,17 @@ end
 
 % SPECIAL CASE FOR BEN LAPTOP
 cmpInfo = psyComputerInfo;
-if (ispref('CorticalColorMapping','dropboxPath'))
-    fdirRoot = fullfile(getpref('CorticalColorMapping','dropboxPath'),'CNSC_data','ColorTrackingTask',prjCode);
+if (ispref('ColorTracking','dropboxPath'))
+    fdirRoot = fullfile(getpref('ColorTracking','dropboxPath'),'CNSC_data','ColorTrackingTask',prjCode);
     fdir  = fullfile(fdirRoot,subjName); 
 elseif strcmp(cmpInfo.localHostName,'ben-Precision-7520')
     fdirRoot = ['/home/ben/Dropbox (Aguirre-Brainard Lab)/CNSC_data/ColorTrackingTask/' prjCode];
     fdir  = [fdirRoot filesep subjName   ];
 % elseif ( strcmp(cmpInfo.localHostName,'blobfish') | strcmp(cmpInfo.localHostName,'eagleray') )
-%     fdirRoot = fullfile(getpref('CorticalColorMapping','dropboxPath'),'ColorTrackingTask','Data');
+%     fdirRoot = fullfile(getpref('ColorTracking','dropboxPath'),'ColorTrackingTask','Data');
 %     fdir  = fullfile(fdirRoot,subjName);
 % elseif strcmp(cmpInfo.localHostName,'BrainardLab-21-01')
-%     fdirRoot  = fullfile(getpref('CorticalColorMapping','dropboxPath'), 'ColorTrackingTask','Data');
+%     fdirRoot  = fullfile(getpref('ColorTracking','dropboxPath'), 'ColorTrackingTask','Data');
 %     fdir  = fullfile(fdirRoot,subjName);
 end
 

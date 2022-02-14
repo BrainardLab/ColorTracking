@@ -20,7 +20,7 @@ elseif strcmp(subjID,'KAS')
 end
 
 % get prefs
-projectName = 'CorticalColorMapping';
+projectName = 'ColorTracking';
 crossValCacheFolder = getpref(projectName,'crossValCacheFolder');
 
 % Load the cross val data cache
@@ -201,7 +201,7 @@ if p.Results.makeAndSavePlot
     set(meanRMSEbar, 'PaperUnits', 'inches');
     set(meanRMSEbar, 'PaperSize',figureSizeInches);
     set(meanRMSEbar, 'PaperPosition', [0 0 figureSizeInches(1) figureSizeInches(2)]);
-    figNameRMSEmeanRMSEbar = fullfile(getpref('CorticalColorMapping','figureSavePath'), ...
+    figNameRMSEmeanRMSEbar = fullfile(getpref('ColorTracking','figureSavePath'), ...
         [subjID,'_Cross_Val_RMSE_OneVsTwoMech.pdf']);
     print(meanRMSEbar, figNameRMSEmeanRMSEbar, '-dpdf', '-r300');
     

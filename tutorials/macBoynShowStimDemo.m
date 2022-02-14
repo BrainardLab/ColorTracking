@@ -2,7 +2,7 @@ close all
 clear all
 
 %% Load cal files and set the gamma method
-resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
 calCell = 4;
 cal = cals{calCell};

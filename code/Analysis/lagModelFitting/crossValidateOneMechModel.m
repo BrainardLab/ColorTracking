@@ -19,7 +19,7 @@ elseif strcmp(subjID,'KAS')
 end
 
 % get prefs
-projectName = 'CorticalColorMapping';
+projectName = 'ColorTracking';
 crossValCacheFolder = getpref(projectName,'crossValCacheFolder');
 
 % Load the cross val data cache

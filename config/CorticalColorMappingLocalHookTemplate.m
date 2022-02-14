@@ -1,23 +1,23 @@
-function CorticalColorMappingLocalHook
-%  CorticalColorMappingLocalHook
+function ColorTrackingLocalHook
+%  ColorTrackingLocalHook
 %
-% Configure things for working on the  CorticalColorMapping project.
+% Configure things for working on the  ColorTracking project.
 %
 % For use with the ToolboxToolbox.
 %
-% If you 'git clone' CorticalColorMapping into your ToolboxToolbox "projectRoot"
+% If you 'git clone' ColorTracking into your ToolboxToolbox "projectRoot"
 % folder, then run in MATLAB
-%   tbUseProject('CorticalColorMapping')
-% ToolboxToolbox will set up CorticalColorMapping and its dependencies on
+%   tbUseProject('ColorTracking')
+% ToolboxToolbox will set up ColorTracking and its dependencies on
 % your machine.
 %crossValCacheFolder
 % As part of the setup process, ToolboxToolbox will copy this file to your
 % ToolboxToolbox localToolboxHooks directory (minus the "Template" suffix).
 % The defalt location for this would be
-%   ~/localToolboxHooks/CorticalColorMappingLocalHook.m
+%   ~/localToolboxHooks/ColorTrackingLocalHook.m
 %
-% Each time you run tbUseProject('CorticalColorMapping'), ToolboxToolbox will
-% execute your local copy of this file to do setup for CorticalColorMapping.
+% Each time you run tbUseProject('ColorTracking'), ToolboxToolbox will
+% execute your local copy of this file to do setup for ColorTracking.
 %
 % You should edit your local copy with values that are correct for your
 % local machine, for example the output directory location.
@@ -25,8 +25,8 @@ function CorticalColorMappingLocalHook
 
 
 %% Say hello.
-fprintf('CorticalColorMapping local hook.\n');
-projectName = 'CorticalColorMapping';
+fprintf('ColorTracking local hook.\n');
+projectName = 'ColorTracking';
 
 %% Delete any old prefs
 if (ispref(projectName))

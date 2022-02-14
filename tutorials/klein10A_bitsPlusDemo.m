@@ -16,7 +16,7 @@ VERBOSE = false;
 % cal = LoadCalFile('ViewSonicG220fb');
 % calObj = ObjectToHandleCalOrCalStruct(cal);
 
-resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
 cal = cals{3};
 calObj = ObjectToHandleCalOrCalStruct(cal);

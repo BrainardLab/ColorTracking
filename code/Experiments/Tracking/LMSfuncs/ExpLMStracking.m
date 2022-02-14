@@ -384,7 +384,7 @@ if     strcmp(D.cmpInfo.localHostName,'jburge-marr')
     cal = cals{1};
 else
     % Get Cal Data
-    cal = LoadCalFile('ViewSonicG220fb',[],getpref('CorticalColorMapping','CalFolder'));
+    cal = LoadCalFile('ViewSonicG220fb',[],getpref('ColorTracking','CalFolder'));
 end
 
 % Construct a calStructOBJ from the latest calibration

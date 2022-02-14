@@ -1,7 +1,7 @@
 % test the tfeCTM
 subjID = 'KAS';
 %% Load the data
-projectName = 'CorticalColorMapping';
+projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
 plotInfo.figSavePath = getpref(projectName,'figureSavePath');

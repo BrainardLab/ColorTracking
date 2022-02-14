@@ -16,7 +16,7 @@ elseif strcmp(subjID,'KAS')
 end
 
 % get prefs
-projectName = 'CorticalColorMapping';
+projectName = 'ColorTracking';
 crossValCacheFolder = getpref(projectName,'crossValCacheFolder');
 
 %% Loop over the experiments

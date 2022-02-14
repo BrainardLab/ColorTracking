@@ -1,6 +1,6 @@
 % Batch rename folder name for the hard drive to handle mismatch with the
 % dropbox account
-projectName = 'CorticalColorMapping';
+projectName = 'ColorTracking';
 basePath = getpref(projectName,'dropboxPath');
 
 subjs = {'BMC','KAS','MAB'};

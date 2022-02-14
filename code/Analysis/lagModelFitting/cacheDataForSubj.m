@@ -48,7 +48,7 @@ end
 
 
 % get prefs
-projectName = 'CorticalColorMapping';
+projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
 rParamsBtstrpStruct = struct;

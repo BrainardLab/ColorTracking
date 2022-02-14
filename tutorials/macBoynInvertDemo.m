@@ -1,7 +1,7 @@
 close all 
 clear all
 
-resourcesDir =  getpref('CorticalColorMapping','CalDataFolder');
+resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
 calCell = 4;
 cal = cals{calCell};

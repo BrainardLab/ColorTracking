@@ -12,7 +12,7 @@ function [C, sampleBaseTheta, targetL, targetS,expDirPoints] = generateIsorepson
 %    params            - Parameters from the CTM model fit:
 %                        weightL, weightS, amplitude, minLag.
 %    targetLag         - The target lag for the isolag contour.
-%    numSamples        - number of sample in the contour.
+%    numMechanisms     - number of mechanisms  the contour.
 %
 % Outputs:
 %    C                 - Contrasts need to reach the target lag.
@@ -21,7 +21,10 @@ function [C, sampleBaseTheta, targetL, targetS,expDirPoints] = generateIsorepson
 %    targetS           - S cone contrast component
 %
 % Optional key/value pairs:
-%    None
+%    numSamples        - The sample resolution of the contour
+%    dataDirections    - the direction tested in the LS plane (in angles).
+%                        If provided, the itersection of the direction and
+%                        the contour will be plotted.
 
 % MAB 11/18/21
 
@@ -42,8 +45,6 @@ sampleResolution = 360./numSamples;
 % create the theta sample base
 sampleBaseTheta = 0:sampleResolution:360;
 
-
-
 % % use the target lag to get the m output
 m = -log((targetLag - params.minLag) ./ params.amplitude);
 %
@@ -59,8 +60,6 @@ elseif numMechanisms == 2
     C = min([C_1,C_2]);
 end
 
-
-
 posMechIndx = find(C >0);
 negMechIndx = find(C <0);
 
@@ -71,7 +70,6 @@ negMechIndx = find(C <0);
 if ~isempty(p.Results.dataDirections)
     dataDirections = p.Results.dataDirections;
     dataDirPoints = m ./ (sqrt(params.weightL.^2 + params.weightS.^2) .* cosd(dataDirections + atand(params.weightS./params.weightL)));
-    %m ./ abs((params.weightL .* cosd(p.Results.dataDirections)) - (params.weightS .* sind(p.Results.dataDirections)));
     [expDirL, expDirS] = pol2cart(deg2rad(p.Results.dataDirections),dataDirPoints);
     expDirPoints= [expDirL; expDirS];
 else

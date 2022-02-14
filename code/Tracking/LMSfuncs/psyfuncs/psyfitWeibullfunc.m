@@ -43,11 +43,12 @@ if ~exist('figh','var')  || isempty(figh),  figh = [];                     end
 % CDF 
 % PC = normcdf( 0.5.*sqrt(nIntrvl).*DP,0,1); % sign() reinstates sign of Xcmp-mFit 
 
-PC = 1-exp(-(Xcmp./sFit).^bFit);
+PC0 = 0.5;
+PC = 1-(1-PC0).*exp(-(Xcmp./sFit).^bFit);
 
 crt = normcdf(0.5.*sqrt(nIntrvl).*DPcrt);
 % SIGNAL AT THRESHOLD
-T  = abs(-sFit.*log(1-crt).^(1./bFit));
+T  = abs(-sFit.*log((1-crt)./(1-PC0)).^(1./bFit));
 
 if bPLOT
     % OPEN FIGURE

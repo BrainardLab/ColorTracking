@@ -61,6 +61,25 @@ if p.Results.bPLOTpsfs
         axis square; 
         formatFigure('Michelson Contrast (%)','Proportion Correct',[num2str(targetContrastAngleUnq(i)) 'deg, T=' num2str(tFit(i)*100,2) '%']);
     end
+    
+    for i = 1:length(targetContrastAngleUnq)
+        if targetContrastAngleUnq(i) ==0
+           tFitPlotLS(i,:) = tFit(i).*100.*[1 0];
+        elseif targetContrastAngleUnq(i)==90
+           tFitPlotLS(i,:) = tFit(i).*100.*[0 1]; 
+        else
+           tFitPlotLS(i,:) = tFit(i).*100.*[1 tand(targetContrastAngleUnq(i))]./norm([1 tand(targetContrastAngleUnq(i))]);
+        end
+    end
+    figure;
+    plot(tFitPlotLS(:,1),tFitPlotLS(:,2),'kx','MarkerSize',10);
+    hold on;
+    plot([-5 5],[0 0],'k-');
+    plot([0 0],[-5 5],'k-');
+    axis square;
+    formatFigure('L','S');
+    xlim([-5 5]);
+    ylim([-5 5]);
 end
 
 end

@@ -88,7 +88,7 @@ switch userID
     otherwise
         setpref(projectName,'dropboxPath',['/Users/' userID '/Dropbox (Aguirre-Brainard Lab)']);
         CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
-        CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),crossValCacheFolder,'CNST_analysis','ColorTracking');
+        CNST_analysis = fullfile(getpref(projectName,'dropboxPath'),'CNST_analysis','ColorTrackingTask');
         paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
         bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
         figureSavePath = fullfile(CNST_analysis, 'Results');

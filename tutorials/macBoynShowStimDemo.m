@@ -45,23 +45,9 @@ adaptDist = 0.0126;
 lAdapt = lMod+lsBackground(1);
 sAdapt = sMod+lsBackground(2);
 
-%% Get the mac-boyn coordinates of the target patch\
-% vector angle in mac-boyn sl plane
-adaptDir  = 90;
-% vector magnitude in mac-boyn sl plane
-adaptDist = 0.0126;
-% convert to s and l coordinates 
-[lMod,sMod] = pol2cart(deg2rad(adaptDir),adaptDist);
-% add to the background
-lTarget = lMod+lsBackground(1);
-sTarget = sMod+lsBackground(2);
-
 %% go from mac-boyn to cone space
 [LMSfactors] = calcMacBoynLmsFactors(T_cones_ss2,T_CIE_Y2);
 [LMSadapt] = MacBoynToLMS(lAdapt,sAdapt,Y,LMSfactors);
-
-%% go from mac-boyn to cone space
-[LMStarget] = MacBoynToLMS(lTarget,sTarget,Y,LMSfactors);
 
 %% get the background settings
 bgSetting = PrimaryToSettings(calObj,bgPrimaries);
@@ -70,7 +56,8 @@ bgSetting = PrimaryToSettings(calObj,bgPrimaries);
 adaptSettings = SensorToSettings(calObj,LMSadapt)';
 
 %% get the target field settings
-targetSettings = SensorToSettings(calObj,LMStarget)';
+LMSExcitations = ContrastToExcitations([0,0,.1]',bgExcitations)
+targetSettings = SensorToSettings(calObj,LMSExcitations);
 
 %% Show the stuff
 PsychDefaultSetup(2);
@@ -78,23 +65,29 @@ PsychDefaultSetup(2);
 screens = Screen('Screens');
 screenNumber = max(screens);
 
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSetting);
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber,bgSetting);% adaptSettings);
 
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 [xCenter, yCenter] = RectCenter(windowRect);
 baseRect = [0 0 150 150];
 centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
+pause
 
 % put up the adapt sqaure
-Screen('FillRect', window, adaptSettings, centeredRect);
+Screen('FillRect', window, bgSetting, windowRect);
 Screen('Flip', window);
 
-pause
+pause(0.400)
 
 % put up the target sqaure
 Screen('FillRect', window, targetSettings, centeredRect);
 Screen('Flip', window);
-pause;
+pause(.04);
+
+Screen('FillRect', window, bgSetting, windowRect);
+Screen('Flip', window);
+pause(.3)
 sca
+
 
 

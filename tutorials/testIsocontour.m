@@ -1,7 +1,7 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
 %
 %% Load the data  
-subjID = 'MAB';
+subjID = 'KAS';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
@@ -16,6 +16,7 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
+% load the data mat files
 load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
 load(fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']));
 % Get the CIs
@@ -86,25 +87,31 @@ targetLag = 0.40;
 measuredDirections = uniqueColorDirs(:)';
 contourColors = [84,39,143]./255;
 
-% plot contour
-[targetL, targetS,~] = generateIsolagContour(fitParamsTwoMech, targetLag, 2);
+% Get the one mechanism model 
+[targetL_one, targetS_one,~] = generateIsolagContour(fitParamsOneMech, targetLag, 1);
 
-% Work out the contour shape
-mech1Pos =min([vecnorm([targetL;targetS.posMech1]);vecnorm([targetL;targetS.posMech2])]);
+% Get the two mechanism model
+[targetL_two, targetS_two,~] = generateIsolagContour(fitParamsTwoMech, targetLag, 2);
+
 %% plot the isolag contour
 figHndl = figure;
 hold on;
 % get current axes
 axh = gca;
 
-plot(targetL,targetS.negMech1,'r')
-plot(targetL,targetS.posMech1,'r')
-plot(targetL,targetS.negMech2,'b')
-plot(targetL,targetS.posMech2,'b')
-
 % plot x and y axes
 line([-20 20], [0 0], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 line([0 0], [-6 6], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
+
+% plot the 2 mech isolag
+plot(targetL_two,targetS_two.negMech1,'Color',[1,.1,0],'LineWidth',1.5)
+plot(targetL_two,targetS_two.posMech1,'Color',[1,.1,0],'LineWidth',1.5)
+plot(targetL_two,targetS_two.negMech2,'Color',[0.60,.2,0],'LineWidth',1.5)
+plot(targetL_two,targetS_two.posMech2,'Color',[0.60,.2,0],'LineWidth',1.5)
+
+plot(targetL_one,targetS_one.neg,'Color',[.3,.3,.3],'LineStyle','--','LineWidth',1)
+plot(targetL_one,targetS_one.pos,'Color',[.3,.3,.3],'LineStyle','--','LineWidth',1)
+
 
 % set axes and figure labels
 hXLabel = xlabel('L Contrast');
@@ -114,10 +121,7 @@ set(gca,'FontSize',12);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
 set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
-xlim([-2 2]); ylim([-2 2]); axis('square');
 
-
-legend([p1{:}],num2str(targetLags(:)))
 axis square
 
 manTicks =  [-2:1:2];
@@ -139,3 +143,4 @@ set(gca, ...
 
 set(gcf, 'Color', 'white' );
 
+xlim([-2 2]); ylim([-2 2]); axis('square');

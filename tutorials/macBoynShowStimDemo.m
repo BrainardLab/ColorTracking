@@ -56,7 +56,7 @@ bgSetting = PrimaryToSettings(calObj,bgPrimaries);
 adaptSettings = SensorToSettings(calObj,LMSadapt)';
 
 %% get the target field settings
-LMSExcitations = ContrastToExcitations([0,0,.1]',bgExcitations)
+LMSExcitations = ContrastToExcitations([0,0,-.1]',bgExcitations)
 targetSettings = SensorToSettings(calObj,LMSExcitations);
 
 %% Show the stuff
@@ -65,26 +65,34 @@ PsychDefaultSetup(2);
 screens = Screen('Screens');
 screenNumber = max(screens);
 
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber,bgSetting);% adaptSettings);
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, adaptSettings);
 
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 [xCenter, yCenter] = RectCenter(windowRect);
 baseRect = [0 0 150 150];
 centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
+fixRectSize = [0 0 5 5];
+fixationRect = CenterRectOnPointd(fixRectSize, xCenter, yCenter);
+% put up the fixation sqaure
+Screen('FillRect', window, [0,0,0], fixationRect);
+Screen('Flip', window);
 pause
 
 % put up the adapt sqaure
 Screen('FillRect', window, bgSetting, windowRect);
+Screen('FillRect', window, [0,0,0], fixationRect);
 Screen('Flip', window);
 
 pause(0.400)
 
 % put up the target sqaure
 Screen('FillRect', window, targetSettings, centeredRect);
+Screen('FillRect', window, [0,0,0], fixationRect);
 Screen('Flip', window);
 pause(.04);
 
 Screen('FillRect', window, bgSetting, windowRect);
+Screen('FillRect', window, [0,0,0], fixationRect);
 Screen('Flip', window);
 pause(.3)
 sca

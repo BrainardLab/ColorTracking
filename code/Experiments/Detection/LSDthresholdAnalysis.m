@@ -1,4 +1,4 @@
-function [tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,DPcrt,varargin)
+function [tFit,mFit,sFit,bFit,PCdta,cSpacing] = LSDthresholdAnalysis(S,DPcrt,varargin)
 
 % function [tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,DPcrt,varargin)
 %
@@ -14,7 +14,7 @@ function [tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,DPcrt,varargin)
 
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('S',@isstruct);
-p.addParameter('bPLOTpsfs',0,@isnumeric);
+p.addParameter('showPlot',true,@islogical);
 p.addParameter('bPLOTthresholds',0,@isnumeric);
 p.addParameter('fitType','weibull',@ischar);
 p.parse(S,varargin{:});
@@ -30,8 +30,10 @@ for i = 1:length(targetContrastAngleUnq)
    for j = 1:nRepeats
        if strcmp(p.Results.fitType,'weibull')
           [mFitTmp(:,j),sFitTmp(:,j),bFitTmp(:,j),tFitTmp(:,j),PCdtaTmp(:,j),~,negLLtmp(:,j)] = psyfitWeibull(zeros(size(S.targetContrast(ind))),abs(S.targetContrast(ind)),S.R(ind) == S.cmpIntrvl(ind),0,[],[],DPcrt,nIntrvl,0);
+          cSpacing(:,i) = unique(abs(S.targetContrast(ind)));
        elseif strcmp(p.Results.fitType,'gaussian')
           [mFitTmp(:,j),sFitTmp(:,j),bFitTmp(:,j),tFitTmp(:,j),PCdtaTmp(:,j),~,negLLtmp(:,j)] = psyfitgengauss(zeros(size(S.targetContrast(ind))),abs(S.targetContrast(ind)),S.R(ind) == S.cmpIntrvl(ind),0,[],[],DPcrt,nIntrvl,0);
+          cSpacing(:,i) = unique(abs(S.targetContrast(ind)));
        else
           error('LSDthresholdAnalysis: fitType must either be ''weibull'' or ''gaussian'''); 
        end
@@ -46,7 +48,7 @@ for i = 1:length(targetContrastAngleUnq)
    PCdta(:,i) = PCdtaTmp(:,indBest);
 end
 
-if p.Results.bPLOTpsfs
+if p.Results.showPlot
     figure;
     set(gcf,'Position',[315 73 1240 863]);
     for i = 1:length(targetContrastAngleUnq)
@@ -82,6 +84,7 @@ if p.Results.bPLOTpsfs
            tFitPlotLS(i,:) = tFit(i).*100.*[1 tand(targetContrastAngleUnq(i))]./norm([1 tand(targetContrastAngleUnq(i))]);
         end
     end
+
     figure;
     plot(tFitPlotLS(:,1),tFitPlotLS(:,2),'kx','MarkerSize',10);
     hold on;

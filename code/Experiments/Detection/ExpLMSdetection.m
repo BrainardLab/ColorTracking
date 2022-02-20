@@ -226,8 +226,8 @@ D.stereoMode = stereoMode;
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
 oldResolution=Screen('Resolution', D.sid,[],[],60);
 % OPEN WINDOW
-% [D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
-[D.wdwPtr, D.wdwXYpix]  = BitsPlusPlus('OpenWindowBits++',D.sid,[128 128 128]');
+ [D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
+%[D.wdwPtr, D.wdwXYpix]  = BitsPlusPlus('OpenWindowBits++',D.sid,[128 128 128]');
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
 Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
 % SET DEFAULT TEXT
@@ -431,8 +431,6 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.tgtXmmL = squeeze(tgtXmmL(:,:,i));
     S.tgtXmmR = squeeze(tgtXmmR(:,:,i));
     S.tgtYmmL = squeeze(tgtYmmL(:,:,i));
-    maxContrastForThisAngle = max(targetContrast(abs(targetContrastAngle-unique(S.targetContrastAngle))<0.001));
-    indPrimer = find(abs(targetContrastAngle-unique(S.targetContrastAngle))<0.001 & abs(targetContrast-maxContrastForThisAngle)<0.001);
     % MAKE TEMPORAL WINDOW
     S.timeWindow = cosWindowFlattop([1 numFrm+1],floor((numFrm+1)/2),ceil((numFrm+1)/2),0,0);
     % S.timeWindow = cosWindowFlattop([1 numFrm],0,numFrm,0,0);

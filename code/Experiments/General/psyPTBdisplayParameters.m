@@ -80,6 +80,13 @@ elseif strcmp(localHostName, 'BrainardLab-21-01')      % imac
     D.gamFncExponent = 2.2;
     D.comp       = 'MACI64';
     D.lumCdm2max = [];
+elseif strcmp(localHostName, 'laforge')      % imac
+    D.scrnZmm    = 500;       % VIEWING DISTANCE
+    D.scrnXYmm   = [595 359]; % DISPLAY SIZE IN MM AND PIXELS
+    D.bitsIn     = 12;
+    D.gamFncExponent = 2.2;
+    D.comp       = 'MACI64';
+    D.lumCdm2max = [];    
 %%%%%%%%%%%%%%%%%%%%%
 % BLOBFISH COMPUTER %
 %%%%%%%%%%%%%%%%%%%%%

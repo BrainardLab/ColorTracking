@@ -226,8 +226,8 @@ D.stereoMode = stereoMode;
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
 oldResolution=Screen('Resolution', D.sid,[],[],60);
 % OPEN WINDOW
- [D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
-%[D.wdwPtr, D.wdwXYpix]  = BitsPlusPlus('OpenWindowBits++',D.sid,[128 128 128]');
+%[D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.bgd, [],[], [], D.stereoMode);
+[D.wdwPtr, D.wdwXYpix]  = BitsPlusPlus('OpenWindowBits++',D.sid,[128 128 128]');
 [saveGamma,~]=Screen('ReadNormalizedGammaTable',D.wdwPtr);
 Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
 % SET DEFAULT TEXT

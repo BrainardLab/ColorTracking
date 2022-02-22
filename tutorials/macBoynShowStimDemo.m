@@ -34,7 +34,7 @@ bgExcitations = PrimaryToSensor(calObj,bgPrimaries')
 % Get the mac-boyn coodiantes of the background
 lsBackground = LMSToMacBoyn(bgExcitations,T_cones_ss2,T_CIE_Y2);
 
-%% Get the mac-boyn coordinates of the adapting patch
+% Get the mac-boyn coordinates of the adapting patch
 % vector angle in mac-boyn sl plane
 adaptDir  = 270;
 % vector magnitude in mac-boyn sl plane
@@ -45,7 +45,7 @@ adaptDist = 0.0126;
 lAdapt = lMod+lsBackground(1);
 sAdapt = sMod+lsBackground(2);
 
-%% go from mac-boyn to cone space
+% go from mac-boyn to cone space
 [LMSfactors] = calcMacBoynLmsFactors(T_cones_ss2,T_CIE_Y2);
 [LMSadapt] = MacBoynToLMS(lAdapt,sAdapt,Y,LMSfactors);
 
@@ -53,6 +53,7 @@ sAdapt = sMod+lsBackground(2);
 bgSetting = PrimaryToSettings(calObj,bgPrimaries);
 
 %% get the adapt field settings
+LMSadapt= bgExcitations + (bgExcitations .* [0;0;-.5]);
 adaptSettings = SensorToSettings(calObj,LMSadapt)';
 
 %% get the target field settings

@@ -110,11 +110,8 @@ contrastImage = generateStimContrastProfile(S.imgSzXYdeg(1,:),S.smpPerDeg(1),S.f
 for ii = 1:length(targetContrastAngle)
     [contrastLMS] = generateStimContrasts(0,targetContrastAngle(ii),targetContrast(ii))
     [stm(:,:,:,ii),~,~] = generateChromaticGabor(calObj,contrastImage,bgExcitations,contrastLMS');
-    
-    if any(badIndex ~= 0)
-        warning('WARNING: %2.2f is out of gamut\n',targetContrast(i));
-    end
-    S.lookupTableSettings(:,:,ii) = lookupTableSettings';
+%% ADD l=m=s noise
+
 end
 
 % *** REPLACE THIS WHEN THE PROPER STIMULUS IS READY ***

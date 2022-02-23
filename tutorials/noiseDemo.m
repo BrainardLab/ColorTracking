@@ -41,7 +41,7 @@ noiseMax =  0.07;
 noiseMod = round((noiseMax-noiseMin).*rand(noiseSize,noiseSize) + noiseMin,3);
 noiseMat = repmat(noiseMod(:),1,3)';
 noiseExcitations = bgExcitations + (bgExcitations.*noiseMat);
-
+SensorToSettings(calObj,noiseExcitations);
 noisePatch = reshape(noiseExcitations',[noiseSize,noiseSize,3]);
 test = reshape(noiseMat',[noiseSize,noiseSize,3]);
 

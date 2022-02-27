@@ -111,15 +111,7 @@ for ii = 1:length(targetContrastAngle)
     [contrastLMS] = generateStimContrasts(0,targetContrastAngle(ii),targetContrast(ii))
     [stm(:,:,:,ii),~,~] = generateChromaticGabor(calObj,contrastImage,bgExcitations,contrastLMS');
 %% ADD l=m=s noise
-
 end
-
-% *** REPLACE THIS WHEN THE PROPER STIMULUS IS READY ***
-t = 1;
-stm = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
-stm = stm./2 + 0.5;
-stm = round(stm.*255);
-% *******
 
 S.stmLE = stm;
 S.stmRE = stm;

@@ -80,6 +80,17 @@ for ii = 1:length(p.Results.rampOnOff)
     % Create the stimulus excitations
     stimExcitations(:,:,ii) = repmat(backgroundExcitations, [1, size(stimConeContrast,2)]) .* (1 + (p.Results.rampOnOff(ii).*stimConeContrast));
 
+    % add noise
+    noiseMax = max(p.Results.addNoise);
+    noiseMin = min(p.Results.addNoise);
+    if ~(noiseMax == 0 && noiseMin ==0)
+        noiseSize = size (stimExcitations(:,:,ii),1);
+        noiseMod = round((noiseMax-noiseMin).*rand(noiseSize,noiseSize) + noiseMin,3);
+        noiseMat = repmat(noiseMod(:),1,3)';
+        noiseExcitations =backgroundExcitations.*noiseMat;
+        stimExcitations(:,:,ii) = stimExcitations(:,:,ii) + noiseExcitations;
+    end
+    
     % Check Dimensions
     assert(size(stimExcitations(:,:,ii),1) == 3, 'Cone excitations must have 3 rows');
 

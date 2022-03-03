@@ -26,6 +26,9 @@ p.addRequired('calStructOBJ',@isobject);
 p.addRequired('contrastImage',@ismatrix);
 p.addRequired('backgroundPrimaries',@isvector);
 p.addRequired('LMScontrastModulation',@isvector);
+p.addParameter('rampOnOff',[1],@isvector);
+p.addParameter('addNoise',[0 0],@isvector);
+
 p.parse(calStructOBJ,contrastImage,backgroundExcitations,stimLMScontrast, varargin{:});
 
 
@@ -72,22 +75,36 @@ end
 assert(size(stimConeContrast,1) == 3, 'cone contrasts must be a [3 x N] matrix');
 assert((size(backgroundExcitations,1) == 3)  && (size(backgroundExcitations,2) == 1), 'background  cone excitations must be a [3 x 1] matrix');
 
-% Create the stimulus excitations
-stimExcitations = repmat(backgroundExcitations, [1, size(stimConeContrast,2)]) .* (1 + stimConeContrast);
 
-% Check Dimensions
-assert(size(stimExcitations,1) == 3, 'Cone excitations must have 3 rows');
+for ii = 1:length(p.Results.rampOnOff)
+    % Create the stimulus excitations
+    stimExcitations(:,:,ii) = repmat(backgroundExcitations, [1, size(stimConeContrast,2)]) .* (1 + (p.Results.rampOnOff(ii).*stimConeContrast));
 
-% Convert excitation to settings
-[stimSettings2D, badIndex] = SensorToSettings(calStructOBJ,stimExcitations);
+    % add noise
+    noiseMax = max(p.Results.addNoise);
+    noiseMin = min(p.Results.addNoise);
+    if ~(noiseMax == 0 && noiseMin ==0)
+        noiseSize = size (stimExcitations(:,:,ii),1);
+        noiseMod = round((noiseMax-noiseMin).*rand(noiseSize,noiseSize) + noiseMin,3);
+        noiseMat = repmat(noiseMod(:),1,3)';
+        noiseExcitations =backgroundExcitations.*noiseMat;
+        stimExcitations(:,:,ii) = stimExcitations(:,:,ii) + noiseExcitations;
+    end
+    
+    % Check Dimensions
+    assert(size(stimExcitations(:,:,ii),1) == 3, 'Cone excitations must have 3 rows');
 
-% check and warn for out of gamut pixles
-if sum(badIndex) > 0
-    fprintf('\n <strong> WARNGING: </strong> %2.3f%% of pixels out of gamut.\n', 100*(sum(badIndex)./size(stimSettings2D,2)));
+    % Convert excitation to settings
+    [stimSettings2D, badIndex] = SensorToSettings(calStructOBJ,stimExcitations(:,:,ii));
+
+    % check and warn for out of gamut pixles
+    if sum(badIndex) > 0
+        fprintf('\n <strong> WARNGING: </strong> %2.3f%% of pixels out of gamut.\n', 100*(sum(badIndex)./size(stimSettings2D,2)));
+    end
+
+    % reshape to an mxnx3 image
+    stimSettings(:,:,:,ii) = reshape(stimSettings2D',[imgInfo.rows, imgInfo.cols, 3]);
 end
-
-% reshape to an mxnx3 image
-stimSettings = reshape(stimSettings2D',[imgInfo.rows, imgInfo.cols, 3]);
 
 end
 

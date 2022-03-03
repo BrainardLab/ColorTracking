@@ -1,4 +1,4 @@
-function [stm,adaptSettings,S] = LSDstimulusGeneration(targetContrast,targetContrastAngle,frqCpd,phsDeg,ortDeg,BWoct,cmpIntrvl)
+function [stm,adaptSettings,S] = TTstimulusGeneration(targetContrast,targetContrastAngle,frqCpd,phsDeg,ortDeg,BWoct,cmpIntrvl)
 
 % function [stm,S] = LSDstimulusGeneration(targetContrast,targetContrastAngle,frqCpd,phsDeg,ortDeg,BWoct,cmpIntrvl)
 %

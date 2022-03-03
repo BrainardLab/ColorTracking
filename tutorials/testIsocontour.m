@@ -68,16 +68,24 @@ lagsFromFitMat = reshape(lagsFromFitOneMech.values,size(lagsMat));
 lagsFromFitTwoMech = ctmOBJmechTwo.computeResponse(fitParamsTwoMech,thePacket.stimulus,thePacket.kernel);
 lagsFromFitMat = reshape(lagsFromFitTwoMech.values,size(lagsMat));
 
+%% get the l and s cones weights for mech 2 
+weightL_2 = fitParamsTwoMech.weightS_1 .* fitParamsTwoMech.weight_M2;
+weightS_2 = -1.*fitParamsTwoMech.weightL_1 .* fitParamsTwoMech.weight_M2;
+fitParamsTwoMechFull = fitParamsTwoMech;
+fitParamsTwoMechFull.weight_M2 = [];
+fitParamsTwoMechFull.weightL_2 = weightL_2;
+fitParamsTwoMechFull.weightS_2 = weightS_2;
+
 %% Print the params
 fprintf('\ntfeCTM One Mechanism Parameters:\n');
 ctmOBJmechOne.paramPrint(fitParamsOneMech)
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
-ctmOBJmechTwo.paramPrint(fitParamsTwoMech)
+ctmOBJmechTwo.paramPrint(fitParamsTwoMechFull)
 
 %% Get the null direction
 nullDirectionOneMech = atand(fitParamsOneMech.weightL ./ fitParamsOneMech.weightS);
 nullDirectionTwoMech1 = atand(fitParamsTwoMech.weightL_1 ./ fitParamsTwoMech.weightS_1);
-nullDirectionTwoMech2 = atand(fitParamsTwoMech.weightL_2 ./ fitParamsTwoMech.weightS_2);
+nullDirectionTwoMech2 = atand(fitParamsTwoMechFull.weightL_2 ./ fitParamsTwoMechFull.weightS_2);
 
 fprintf('One Mechanism: The null direction is -- %1.2f\n',nullDirectionOneMech)
 fprintf('Two Mechanism: The null directions are: %1.2f & %1.2f\n ',nullDirectionTwoMech1,nullDirectionTwoMech2)
@@ -91,7 +99,7 @@ contourColors = [84,39,143]./255;
 [targetL_one, targetS_one,~] = generateIsolagContour(fitParamsOneMech, targetLag, 1);
 
 % Get the two mechanism model
-[targetL_two, targetS_two,~] = generateIsolagContour(fitParamsTwoMech, targetLag, 2);
+[targetL_two, targetS_two,~] = generateIsolagContour(fitParamsTwoMechFull, targetLag, 2);
 
 %% plot the isolag contour
 figHndl = figure;

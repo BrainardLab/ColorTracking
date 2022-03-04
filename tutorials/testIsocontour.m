@@ -1,7 +1,7 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
 %
 %% Load the data  
-subjID = 'KAS';
+subjID = 'MAB';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
@@ -63,8 +63,15 @@ lagsFromFitOneMech = ctmOBJmechOne.computeResponse(fitParamsOneMech,thePacket.st
 lagsFromFitMat = reshape(lagsFromFitOneMech.values,size(lagsMat));
 
 % Two Mechanism
+initialParams = fitParamsOneMech;
+initialParams.weight_M2 = 1;
+initialParams.weightL_1 = fitParamsOneMech.weightL;
+initialParams.weightS_1 = fitParamsOneMech.weightS;
+initialParams = rmfield(initialParams,'weightL');
+initialParams = rmfield(initialParams,'weightS');
+
 [fitParamsTwoMech,fVal,objFitResponses] = ctmOBJmechTwo.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+    'initialParams',initialParams, 'fitErrorScalar',fitErrorScalar);
 lagsFromFitTwoMech = ctmOBJmechTwo.computeResponse(fitParamsTwoMech,thePacket.stimulus,thePacket.kernel);
 lagsFromFitMat = reshape(lagsFromFitTwoMech.values,size(lagsMat));
 
@@ -72,14 +79,14 @@ lagsFromFitMat = reshape(lagsFromFitTwoMech.values,size(lagsMat));
 weightL_2 = fitParamsTwoMech.weightS_1 .* fitParamsTwoMech.weight_M2;
 weightS_2 = -1.*fitParamsTwoMech.weightL_1 .* fitParamsTwoMech.weight_M2;
 fitParamsTwoMechFull = fitParamsTwoMech;
-fitParamsTwoMechFull.weight_M2 = [];
 fitParamsTwoMechFull.weightL_2 = weightL_2;
 fitParamsTwoMechFull.weightS_2 = weightS_2;
-
+fitParamsTwoMechFull = rmfield(fitParamsTwoMechFull,'weight_M2');
 %% Print the params
 fprintf('\ntfeCTM One Mechanism Parameters:\n');
 ctmOBJmechOne.paramPrint(fitParamsOneMech)
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
+ctmOBJmechTwo.paramPrint(fitParamsTwoMech)
 ctmOBJmechTwo.paramPrint(fitParamsTwoMechFull)
 
 %% Get the null direction

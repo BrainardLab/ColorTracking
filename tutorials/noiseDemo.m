@@ -33,7 +33,7 @@ contrastImage = generateStimContrastProfile(sizeDeg,smpPerDeg,theFreq,theAngle,t
 
 % get the number of frames for an interval
 screenHz = 1/60;
-stimDuration = 2;
+stimDuration = .4;
 numFrames = round(stimDuration./screenHz);
 
 % get the ramp on and ramp off weighting vector
@@ -46,26 +46,14 @@ rampVec(1:length(rampOn)) = rampOn;
 rampVec(end-(length(rampOff)-1):end) = rampOff;
 
 % add the chromatic bits
+noiseMin = -0.3;
+noiseMax =  0.3;
+noise = [noiseMin,noiseMax];
 [contrastLMS] = generateStimContrasts(0,90,.5);
-[~,stimExcitations,~] = generateChromaticGabor(calObj,contrastImage,bgExcitations,contrastLMS','rampOnOff',rampVec);
-
-%% set up the noise and the ramp on and off
-noiseSize = 150;
-noiseMin = -0.7;
-noiseMax =  0.7;
-
-%% generate the frames of the interval
-for ii = 1:numFrames
-    noiseMod = round((noiseMax-noiseMin).*rand(noiseSize,noiseSize) + noiseMin,3);
-    noiseMat = repmat(noiseMod(:),1,3)';
-    noiseExcitations =bgExcitations.*noiseMat;
-    theStimVec = stimExcitations(:,:,ii)+ noiseExcitations;
-    theStimSet = SensorToSettings(calObj,theStimVec);
-
-    theStimPatch(:,:,:,ii) = reshape(theStimSet',[noiseSize,noiseSize,3]);
-
-end
-
+profile on 
+[theStimPatch,stimExcitations,~] = generateChromaticGabor(calObj,contrastImage,bgExcitations,contrastLMS','rampOnOff',rampVec,'addNoise',noise);
+profile off 
+profile viewer
 %% Show the movie
 
 %% Show the stuff

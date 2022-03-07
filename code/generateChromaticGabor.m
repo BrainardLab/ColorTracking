@@ -84,8 +84,8 @@ for ii = 1:length(p.Results.rampOnOff)
     noiseMax = max(p.Results.addNoise);
     noiseMin = min(p.Results.addNoise);
     if ~(noiseMax == 0 && noiseMin ==0)
-        noiseSize = size (stimExcitations(:,:,ii),1);
-        noiseMod = round((noiseMax-noiseMin).*rand(noiseSize,noiseSize) + noiseMin,3);
+        noiseSize = size(stimExcitations(:,:,ii),2);
+        noiseMod = round((noiseMax-noiseMin).*rand(1,noiseSize) + noiseMin,3);
         noiseMat = repmat(noiseMod(:),1,3)';
         noiseExcitations =backgroundExcitations.*noiseMat;
         stimExcitations(:,:,ii) = stimExcitations(:,:,ii) + noiseExcitations;

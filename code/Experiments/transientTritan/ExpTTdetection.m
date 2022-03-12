@@ -82,7 +82,7 @@ S.mtnType      = repmat(mtnType,     [S.trlPerRun, 1]);      % MOTION   TYPE
 S.magORval     = 'mag';       % SUBJ RESPONDS ACCORDING TO MAGNITUDE OF VARIABLE VS. SIGN OF VARIABLE?
 S.numIntrvl = repmat(2,[S.trlPerRun 1]);
 % CMP IS ALWAYS 'GREATER' THAN STD
-S.stdX = zeros([S.trlPerRun 1]);
+S.stdX = zeros([S.trlPerRun 1]);theStimPatch
 S.cmpX = ones([S.trlPerRun 1]);
 S.bUseFeedback = repmat(bUseFeedback,[S.trlPerRun, 1]);
 

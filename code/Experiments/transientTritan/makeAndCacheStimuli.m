@@ -1,8 +1,9 @@
-function [] = makeAndCacheStimuli(subjId,varargin)
+function [theStimPatch] = makeAndCacheStimuli(subjId,varargin)
 
 % Input Parser
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('subjId',@ischar);
+p.addParameter('fileName','stimCache.mat',@ischar)
 p.parse(subjId, varargin{:});
 
 %% Get the Cal object and cone_ss and set gamma method
@@ -11,7 +12,7 @@ load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
 calCell = 4;
 cal = cals{calCell};
 calObj = ObjectToHandleCalOrCalStruct(cal);
-gammaMethod = 2;
+gammaMethod = 0;
 SetGammaMethod(calObj,gammaMethod);
 % Load the cone fundamentals
 load T_cones_ss2.mat
@@ -50,12 +51,20 @@ theDirections = expParams.targetDirections(:)';
 % get the excitations of the background
 bgExcitations = PrimaryToSensor(calObj,expParams.bgPrimaries);
 
-theStimPatch = zeros(expParams.imgSzXYpxl(1),expParams.imgSzXYpxl(2),3,length(theDirections));
+theStimPatch = zeros(expParams.imgSzXYpxl(1),expParams.imgSzXYpxl(2),3,numFrames,length(theDirections));
 
 for ii = 1:length(theDirections)
 
     [contrastLMS] = generateStimContrasts(0,theDirections(ii),theContrasts(ii));
 
-    theStimPatch(:,:,:,ii) = generateChromaticGabor(calObj,contrastImage,bgExcitations,contrastLMS','rampOnOff',rampVec,'addNoise',expParams.noise);
+    theStimPatch(:,:,:,:,ii) = generateChromaticGabor(calObj,contrastImage,bgExcitations,contrastLMS','rampOnOff',rampVec,'addNoise',expParams.noise);
+end
+theStimPatch = single(theStimPatch);
 
+
+%% save the stim
+
+filePath = fullfile(getpref('ColorTracking','dropboxPath'),'CNST_materials','ColorTrackingTask','stimCache','TTR',subjId);
+fileName = p.Results.fileName;
+save(fullfile(filePath,fileName),'theStimPatch','expParams','-v7.3');
 end

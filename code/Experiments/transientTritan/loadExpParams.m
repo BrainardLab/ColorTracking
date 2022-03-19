@@ -10,7 +10,7 @@ expParams.ortDeg = 0;
 expParams.BWoct  = 0.932;
 expParams.StDev  = bandwidthOct2sigma(expParams.frqCpd,expParams.BWoct);
 expParams.imgSzXYdeg = [4 4];
-expParams.smpPerDeg  = 128;
+expParams.smpPerDeg  = 24;
 expParams.imgSzXYpxl = expParams.imgSzXYdeg .* expParams.smpPerDeg;
 % Set the chromatic directions
 expParams.stimDirection = [100,90,80];
@@ -31,8 +31,8 @@ expParams.rampOnDur  = 0.1;
 expParams.rampOffDur = 0.1;
 
 % Set the achromatic noise contrast
-noiseMin = -0.3;
-noiseMax =  0.3;
+noiseMin = -0.07;
+noiseMax =  0.07;
 expParams.noise = [noiseMin,noiseMax];
 
 % Set the stimulus contrasts
@@ -46,7 +46,7 @@ elseif strcmp(subjId,'MAB')
 elseif strcmp(subjId,'KAS')
     maxContrasts= [0.04, 0.015, 0.01, 0.015, 0.04, 0.15]';
 elseif strcmp(subjId,'JNK')
-    maxContrasts= [0.5 0.5 0.5]';
+    maxContrasts= [0.4 0.4 0.4]';
 else
     maxContrasts = [0.07, 0.02, 0.02, 0.02, 0.07, 0.18]';
 end

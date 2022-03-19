@@ -40,9 +40,9 @@ theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJmechTwo = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 % set params to see if they can be recovered
-params.weight_M2 = 3;
-params.weightL_1 = 50;
-params.weightS_1 = 2;
+params.angle = 80;
+params.minAxisRatio = .1;
+params.scale = 2;
 params.amplitude = .4;
 params.minLag    = .35;
 

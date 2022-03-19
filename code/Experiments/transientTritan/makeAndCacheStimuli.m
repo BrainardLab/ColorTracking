@@ -59,7 +59,6 @@ for ii = 1:length(theDirections)
 
     theStimPatch(:,:,:,:,ii) = generateChromaticGabor(calObj,contrastImage,bgExcitations,contrastLMS','rampOnOff',rampVec,'addNoise',expParams.noise);
 end
-theStimPatch = single(theStimPatch);
 
 
 %% save the stim

@@ -36,9 +36,16 @@ noiseContrast   = repmat(linNoise,[3,1]);
 noiseExcitation = ContrastToExcitations(noiseContrast,bgExcitations);
 noiseSettings  = SensorToSettings(calObj,noiseExcitation);
 
+%% calculate the setting of the adapting background
+adaptDirection = -90;
+adaptContrast  = .7;
+[adaptLMScontrast] = generateStimContrasts(0,adaptDirection,adaptContrast)';
+adaptLMS = ContrastToExcitations(adaptLMScontrast,bgExcitations)
+adaptSettings = SensorToSettings(calObj,adaptLMS);
 
 %% Show the stuff
 numFrames = size(theStimPatch,4)
+
 
 PsychDefaultSetup(2);
 
@@ -47,6 +54,16 @@ screenNumber = max(screens);
 
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, bgSettings);
 
+% make fixation dot
+[xCenter, yCenter] = RectCenter(windowRect);
+fixRectSize = [0 0 5 5];
+fixationRect = CenterRectOnPointd(fixRectSize, xCenter, yCenter);
+fullRect = CenterRectOnPointd(windowRect, xCenter, yCenter);
+
+% put up adapting background
+Screen('FillRect', window, adaptSettings, fullRect);
+Screen('Flip', window);
+pause(120)
 for ii = 1:size(theStimPatch,5)
     for jj= 1:numFrames
         stimTex(jj) = Screen('MakeTexture', window, theStimPatch(:,:,:,jj,ii));
@@ -55,42 +72,46 @@ for ii = 1:size(theStimPatch,5)
         noiseTex(jj) = Screen('MakeTexture', window, noiseInterval);
     end
 
-    % make fixation dot
-    [xCenter, yCenter] = RectCenter(windowRect);
-    fixRectSize = [0 0 5 5];
-    fixationRect = CenterRectOnPointd(fixRectSize, xCenter, yCenter);
-
-    centeredRect = CenterRectOnPointd(windowRect, xCenter, yCenter);
     % show it
     intIndx = randperm(2);
+    % adapt for 7
+    Screen('FillRect', window, adaptSettings, fullRect);
+    Screen('Flip', window);
+    pause(7)
+    Screen('FillRect', window, bgSettings, fullRect);
+    Screen('Flip', window);
     for bb = 1:length(intIndx)
+
         % The signal
         if intIndx(bb) == 1
             for kk = 1:numFrames
+
                 Screen('DrawTextures', window, stimTex(kk));
                 Screen('FillRect', window, [0,0,0], fixationRect);
                 Screen('Flip', window);
             end
-            
-            Screen('FillRect', window, bgSettings, centeredRect);
+
+            Screen('FillRect', window, bgSettings, fullRect);
             Screen('Flip', window);
             if bb == 1
-            pause(expParams.intervalGap )
+                pause(expParams.intervalGap )
             end
-        % the noise    
+            % the noise
         elseif intIndx(bb) == 2
             for kk = 1:numFrames
                 Screen('DrawTextures', window, noiseTex(kk));
                 Screen('FillRect', window, [0,0,0], fixationRect);
                 Screen('Flip', window);
             end
-            Screen('FillRect', window, bgSettings, centeredRect);
+            Screen('FillRect', window, bgSettings, fullRect);
             Screen('Flip', window);
             if bb == 1
-            pause(expParams.intervalGap )
+                pause(expParams.intervalGap )
             end
         end
     end
+    Screen('FillRect', window, [0,0,0], fixationRect);
+    Screen('Flip', window);
     pause
 end
 sca

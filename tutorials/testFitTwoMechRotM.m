@@ -106,6 +106,6 @@ fprintf('\nRotM Recovered Parameters:\n');
 ctmRotMOBJ.paramPrint(fitParamsRotM)
 %% plot the lags/fits
 figure;hold on
-plot(lagsFromRotM.values,'k')
-plot(objFitResponses.values,'r')
+plot(lagsFromRotM.values,'k','LineWidth',3)
+plot(objFitResponses.values,'r','LineWidth',2)
 

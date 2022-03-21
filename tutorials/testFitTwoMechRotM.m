@@ -47,12 +47,12 @@ params.amplitude    = .4;
 params.minLag       = .35;
 
 % compute the lag for our stim and the params above
-lagsFromFRotM = ctmRotMOBJ.computeResponse(params,thePacket.stimulus,thePacket.kernel);
+lagsFromRotM = ctmRotMOBJ.computeResponse(params,thePacket.stimulus,thePacket.kernel);
 
 %% finish the packet
 % the lags from the model
-thePacket.response.values   = lagsFromFRotM.values;
-thePacket.response.timebase = lagsFromFRotM.timebase;
+thePacket.response.values   = lagsFromRotM.values;
+thePacket.response.timebase = lagsFromRotM.timebase;
 % The Meta Data 
 thePacket.metaData.stimDirections = atand(cS(:)./cL(:));
 thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
@@ -82,15 +82,30 @@ fitParamsTwoMechFull = fitParamsTwoMech;
 fitParamsTwoMechFull.weightL_2 = weightL_2;
 fitParamsTwoMechFull.weightS_2 = weightS_2;
 fitParamsTwoMechFull = rmfield(fitParamsTwoMechFull,'weight_M2');
+
+%% Go the other way
+lagsFrom2Mech = ctmOBJ.computeResponse(fitParamsTwoMech,thePacket.stimulus,thePacket.kernel);
+% the lags from the model
+thePacket.response.values   = lagsFrom2Mech.values;
+thePacket.response.timebase = lagsFrom2Mech.timebase;
+%% fit the packet (try to recover the params)
+fitErrorScalar = 1000;
+defaultParamsInfo = [];
+[fitParamsRotM,fVal,objFitResponses] = ctmRotMOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
         
 %% print the params
-fprintf('\ntfeCTM Original Parameters:\n');
+fprintf('\nRotM to Two Mech:\n');
+fprintf('\nRotM Original Parameters:\n');
 ctmOBJ.paramPrint(params2)
-fprintf('\ntfeCTM Recovered Parameters:\n');
+fprintf('\nTwo Mech Recovered Parameters:\n');
 ctmOBJ.paramPrint(fitParamsTwoMechFull)
 
+fprintf('\nTwo Mech to RotM:\n');
+fprintf('\nRotM Recovered Parameters:\n');
+ctmRotMOBJ.paramPrint(fitParamsRotM)
 %% plot the lags/fits
 figure;hold on
-plot(lagsFromFRotM.values,'k')
+plot(lagsFromRotM.values,'k')
 plot(objFitResponses.values,'r')
 

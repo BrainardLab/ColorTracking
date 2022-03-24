@@ -101,8 +101,8 @@ weightS_1 = classicParams.weightS_1/rotMParams.scale;
 
 % Find orthogonal direction
 weightL_2 = classicParams.weight_M2*weightS_1;
-weightS_2 = classicParams.weight_M2;
-rotMParms.minAxisRatio = norm([weightL_2 weightS_2]);
+weightS_2 = -classicParams.weight_M2;
+rotMParams.minAxisRatio = classicParams.weight_M2;
 
 
 rotMParams.minLag = classicParams.minLag;

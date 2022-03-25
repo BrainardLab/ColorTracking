@@ -33,7 +33,7 @@ theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJmechTwo = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% Set Up RotM params to generate lags
-rotMParams.angle = 80;
+rotMParams.angle = -81;
 rotMParams.minAxisRatio = .1;
 rotMParams.scale = 2;
 rotMParams.amplitude = .4;
@@ -58,54 +58,3 @@ figure; hold on
 plot(lagsFromRotM.values,'LineWidth',2,'Color','k');
 plot(lagsFromTwoMech.values,'LineWidth',1.5,'Color','r','LineStyle','--');
 
-
-function classicParams = ParamsRotMToClassic(rotMParams)
-
-R = deg2rotm(rotMParams.angle);
-E = [1,0;0,rotMParams.minAxisRatio];
-theWeights = (R*E*rotMParams.scale)';
-
-classicParams.weightL_1 = theWeights(1,1);
-classicParams.weightS_1 = theWeights(1,2);
-weightL_2 = theWeights(2,1);
-weightS_2 = theWeights(2,2);
-
-if (abs( weightL_2 / classicParams.weightS_1 - weightS_2 / classicParams.weightL_1) > 1e-10)
-    classicParams.weight_M2 = abs(weightL_2 ./ classicParams.weightS_1);
-else 
-    error('Check the weights!!!')
-end
-
-classicParams.minLag    = rotMParams.minLag;
-classicParams.amplitude = rotMParams.amplitude;
-
-end
-
-
-function rotMParams = ParamsClassicToRotM(classicParams)
-
-% Get angle
-rotMParams.angle = atand(classicParams.weightS_1/classicParams.weightL_1);
-
-% Rotate mechanism 1 back
-invR = deg2rotm(-rotMParams.angle);
-
-% Get raw mechanism 1 to get scale factor
-rawMech1 = invR*[classicParams.weightL_1 classicParams.weightS_1]';
-
-% Pull out scale factor
-rotMParams.scale = rawMech1(1);
-
-% Get scaled S cone weight
-weightS_1 = classicParams.weightS_1/rotMParams.scale;
-
-% Find orthogonal direction
-weightL_2 = classicParams.weight_M2*weightS_1;
-weightS_2 = -classicParams.weight_M2;
-rotMParams.minAxisRatio = classicParams.weight_M2;
-
-
-rotMParams.minLag = classicParams.minLag;
-rotMParams.amplitude = classicParams.amplitude;
-
-end

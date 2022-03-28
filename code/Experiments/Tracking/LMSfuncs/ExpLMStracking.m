@@ -6,17 +6,20 @@ function [S D] = ExpLMStracking(subjName,IPDmm,trlPerRun, phsDspArcmin, stmSzXYd
 %
 %   example call: % TEST CODE (2 SECOND TRACK)
 %                 ExpLMStracking('JNK',65,10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', 0.1.*[1 0 0], [0.5], [0.5], [4], [4], [0], [0], 0,[0.3461], [pi*(60/180)], 0, 1, 1, 0);
-% 
-%                 % PILOT DATA
-%                 % MaxContrastLMS = 0.1.*[0 1 0]; %m-iso-10p.pdf
-%                 % MaxContrastLMS = 0.9.*[0 0 1]; %s-iso-90p.pdf
-%                 % MaxContrastLMS = 0.1.*[0.7071 0.7071 0]; %l+m-iso-10p.pdf
-%                 % MaxContrastLMS = 0.1.*[1 0 0]; %l-iso-10p.pdf
-%                 MaxContrastLMS = 0.1.*[0.7071 -0.7071 0]; %l-m-iso-10p.pdf
-%                 MaxContrastLMS = [0.1.*[0.7071 -0.7071 0]; 0.1.*[0.7071 0.7071 0]; 0.9.*[0 0 1]; 0.1.*[0 1 0]; 0.1.*[1 0 0]];
-%                 ExpLMStracking('JNK',65,10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', MaxContrastLMS, [0.5], [0.5], [4], [4], [0], [0], 0, [0.3461], [pi*(60/180)], 0, 1, 0, 0);
-%                 ExpLMStracking('JNK',65,10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', MaxContrastLMS, [0.5], [0.5], [4], [4], [0], [0], 0, [0.3461], [pi*(60/180)], 0, 1, 1, 0);
-%
+%{ 
+                PILOT DATA
+                MaxContrastLMS = 0.1.*[0 1 0]; %m-iso-10p.pdf
+                MaxContrastLMS = 0.9.*[0 0 1]; %s-iso-90p.pdf
+                MaxContrastLMS = 0.1.*[0.7071 0.7071 0]; %l+m-iso-10p.pdf
+                MaxContrastLMS = 0.1.*[1 0 0]; %l-iso-10p.pdf
+                MaxContrastLMS = 0.1.*[0.7071 -0.7071 0]; %l-m-iso-10p.pdf
+                MaxContrastLMS = [0.1.*[0.7071 0 -0.7071]; 0.25.*[0.7071  0 0.7071]; 0.78.*[0 0 1]; 0.1.*[1 0 0]];
+                
+                % Without DEBUG mode
+                ExpLMStracking('JNK',65,8,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', MaxContrastLMS, [0.5], [0.5], [1], [1], [0], [0], 0, [1.5], [pi*(60/180)], 0, 1, 0, 0);
+                % With DEBUG Mode
+                ExpLMStracking('JNK',65,10,[0],[15 60]./60, 'UPENN', 0.00, 0.00, 0.0000, 0.0000, 0.00, 0.00, 'CGB', 'BXZ', MaxContrastLMS, [0.5], [0.5], [1], [1], [0], [0], 0, [1], [1.5], 0, 1, 1, 0);
+%}
 % run target tracking experiment to measure delays for different cone
 % contrast directions
 %
@@ -401,6 +404,7 @@ D.correctedBgd = PrimaryToSettings(calStructOBJ,D.bgd')';
 D.stereoMode = stereoMode;
 % DISPLAY SCREEN WITH MAX ID FOR EXPERIMENT
 D.sid = max(Screen('Screens')); % SCREEN, ONSCREEN WINDOW WITH GRAY BACKGROUND
+oldResolution=Screen('Resolution', D.sid,[],[],60);
 % OPEN WINDOW
 [D.wdwPtr, D.wdwXYpix]  = PsychImaging('OpenWindow', D.sid, D.correctedBgd, [],[], [], D.stereoMode);
 % SET DEFAULT TEXT
@@ -760,7 +764,7 @@ for t = 1:S.trlPerRun
         % QUIT IF MANY TRACKS ARE LOST ON SAME TRIAL (SOMETHING IS WRONG)
         if S.lostTrackCnt(t,1) > 3
             % SHOW CURSOR
-            ShowCursor();
+            ShowCursor(1);
             % CLOSE 1/F MASK TEXTURE
             if bUseMsk == 1,
                 Screen('Close', tex1oF);
@@ -816,7 +820,7 @@ for t = 1:S.trlPerRun
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if bEscKeyPressed == 1
         % SHOW CURSOR
-        ShowCursor();
+        ShowCursor(1);
         % RETURN PRIORITY TO DEFAULT STATE
         psySetPriorityDefault()
         % CLOSE 1/F MASK TEXTURE
@@ -892,7 +896,7 @@ if bUseMsk == 1,
     clear('tex1oF');
 end
 % SHOW CURSOR
-ShowCursor();
+ShowCursor(1);
 
 % CLOSE PTB WINDOW
 Screen('CloseAll');

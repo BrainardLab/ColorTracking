@@ -69,7 +69,7 @@ elseif strcmp(D.cmpInfo.localHostName,'ben-Precision-7520')
 else
     resourcesDir =  getpref('ColorTracking','CalDataFolder');
     load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
-    cal = cals{3};
+    cal = cals{4};
 end
 
 load T_cones_ss2

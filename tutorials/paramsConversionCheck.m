@@ -33,7 +33,7 @@ theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJmechTwo = tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% Set Up RotM params to generate lags
-rotMParams.angle = -81;
+rotMParams.angle = 80;
 rotMParams.minAxisRatio = .1;
 rotMParams.scale = 2;
 rotMParams.amplitude = .4;
@@ -48,7 +48,7 @@ rotMParamsCheck = ParamsClassicToRotM(classicParams)
 
 %% Compute the lag for our stim and the params above
 % the RotM mode
-lagsFromRotM = ctmRotMOBJ.computeResponse(rotMParams,thePacket.stimulus,thePacket.kernel);
+lagsFromRotM = ctmRotMOBJ.computeResponse(rotMParamsCheck,thePacket.stimulus,thePacket.kernel);
 
 % 2 mech with orth. constraint
 lagsFromTwoMech = ctmOBJmechTwo.computeResponse(classicParams,thePacket.stimulus,thePacket.kernel);

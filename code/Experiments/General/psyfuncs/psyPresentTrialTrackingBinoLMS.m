@@ -137,7 +137,7 @@ S.rspYmmR(:,t)  = zeros(size(S.tgtYmmR(:,t)));
 mssXpixBgn = D.scrnXYpixCtr(1); 
 mssYpixBgn = D.scrnXYpixCtr(2); 
 SetMouse(mssXpixBgn,mssYpixBgn,D.wdwPtr);
-HideCursor();
+HideCursor(1);
 
 %%%%%%%%%%%%%%%%%
 % PRESENT TRIAL %

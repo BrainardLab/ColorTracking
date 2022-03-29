@@ -40,9 +40,9 @@ theDimension= size(thePacket.stimulus.values, 1);
 ctmRotMOBJ= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% set params to see if they can be recovered
-paramsSimulateRotM.angle        = 80;
-paramsSimulateRotM.minAxisRatio = .2;
-paramsSimulateRotM.scale        = .2;
+paramsSimulateRotM.angle        = -5;
+paramsSimulateRotM.minAxisRatio = .62;
+paramsSimulateRotM.scale        = 21;
 paramsSimulateRotM.amplitude    = .7;
 paramsSimulateRotM.minLag       = .25;
 % params.weightL_1 = 2;
@@ -77,6 +77,7 @@ fitErrorScalar = 100000;
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
 % classicParamsCheck = ParamsRotMToClassic(rotMParams)
+rotMParams
 rotMParamsCheck = ParamsClassicToRotM(classicParams)
 
 figure; hold on

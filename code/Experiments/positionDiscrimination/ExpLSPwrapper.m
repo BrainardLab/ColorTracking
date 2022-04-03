@@ -8,6 +8,27 @@ targetContrastAngle = targetContrastAngle(:);
 targetContrast = [targetContrast1; targetContrast2];
 targetContrast = targetContrast(:);
 
+maxPosPix = 12*ones([size(targetContrast,1) 1]);
+
+trialsPerPos = 5;
+trialsPerBlock = 70;
+nPos = 6;
+
+indRnd = [];
+posXoffsetPix = [];
+
+for i = 1:length(targetContrast)
+    indRnd(:,i) = i.*ones([trialsPerBlock 1]);
+    posXoffsetPixTmp = repmat([-maxPosPix(i):maxPosPix(i)/nPos:-maxPosPix(i)/nPos 0 0 maxPosPix(i)/nPos:maxPosPix(i)/nPos:maxPosPix(i)],[trialsPerPos 1]);
+    posXoffsetPixTmp = posXoffsetPixTmp(:);
+    posXoffsetPixTmp = posXoffsetPixTmp(randperm(length(posXoffsetPixTmp)));
+    posXoffsetPix(:,i) = posXoffsetPixTmp;
+end
+
+indShuffle = randperm(size(indRnd,2));
+indRnd = indRnd(:,indShuffle);
+posXoffsetPix = posXoffsetPix(:,indShuffle);
+
 %%
 
 clear;

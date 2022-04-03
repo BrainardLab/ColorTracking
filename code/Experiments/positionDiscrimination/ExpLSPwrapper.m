@@ -28,6 +28,7 @@ end
 indShuffle = randperm(size(indRnd,2));
 indRnd = indRnd(:,indShuffle);
 posXoffsetPix = posXoffsetPix(:,indShuffle);
+cmpIntrvl = ones(size(indRnd));
 
 %%
 

@@ -276,7 +276,7 @@ S.Rimg=[];
 for i = 1:size(indRnd,2)
     for t = 1:S.trlPerRun
         % NUM FRAMES COMPUTED VIA DESIRED DURATION
-        if strcmp(S.mtnType(1,1),'B') || strcmp(S.mtnType(1,1),'O') % BROWNIAN MOTION
+        if strcmp(S.mtnType,'LIN') % BROWNIAN MOTION
             %% STIMULUS DURATION IN SECONDS
             secPerTrl    = 0.4;
             % STIMULUS DURATION IN MILLISECONDS
@@ -294,15 +294,20 @@ for i = 1:size(indRnd,2)
             % WORLD STANDARD DEVIATION IN MM PER FRAME
             sigmaQmm      = 0.8;
             S.sigmaQmm    = repmat(sigmaQmm,[S.trlPerRun, 1]);
-            % WORLD TARGET POSITION IN MM W.R.T. MONITOR CENTER
-            % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
-            tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            tgtYmm(:,t,i) =  zeros(numFrm,1);
-            tgtZmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
-            % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
-            [tgtXmmL(:,t,i),  tgtXmmR(:,t,i)]=screenXfromRangeXZ([tgtXmm(:,t,i) tgtZmm(:,t,i)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
-            tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
-
+%             % WORLD TARGET POSITION IN MM W.R.T. MONITOR CENTER
+%             % TARGET SPACE XYZ COORDS IN MM W.R.T. MONITOR CENTER
+%             tgtXmm(:,t,i) =  cumsum(sigmaQmm.*[0; randn(numFrm-1,1)]);
+%             tgtYmm(:,t,i) =  zeros(numFrm,1);
+%             tgtZmm(:,t,i) =  zeros(numFrm,1);
+%             % TARGET SPACE LR COORDS IN MM W.R.T. MONITOR CENTER
+%             [tgtXmmL(:,t,i),  tgtXmmR(:,t,i)]=screenXfromRangeXZ([tgtXmm(:,t,i) tgtZmm(:,t,i)+D.scrnZmm],D.scrnZmm,S.IPDmm,0); % axis tight
+%             tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
+            
+            tgtXpixTmp = zeros([numFrm 1]);
+            propFrmStim = 0.4;
+            numFrmStim = round(numFrm.*propFrmStim);
+            tgtXpixTmp(numFrmStim+1:numFrm-numFrmStim) = NaN;
+            tgtXpixTmp(numFrm-numFrmStim+1:numFrm) = S.posXoffsetPix(t,i);
             % SCREEN TARGET POSITION IN PIXELS
             tgtXpixL(:,t,i) = tgtXmmL(:,t,i).*D.pixPerMmXY(1);
             tgtXpixR(:,t,i) = tgtXmmR(:,t,i).*D.pixPerMmXY(1);

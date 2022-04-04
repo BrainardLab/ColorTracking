@@ -79,11 +79,10 @@ S.mtnType      = repmat(mtnType,     [S.trlPerRun, 1]);      % MOTION   TYPE
 
 % S.frqCpdCutoff = repmat(frqCpdCutoff,[S.trlPerRun, 1]);       %
 
-S.magORval     = 'mag';       % SUBJ RESPONDS ACCORDING TO MAGNITUDE OF VARIABLE VS. SIGN OF VARIABLE?
+S.magORval     = 'val';       % SUBJ RESPONDS ACCORDING TO MAGNITUDE OF VARIABLE VS. SIGN OF VARIABLE?
 S.numIntrvl = ones([S.trlPerRun 1]);
 % CMP IS ALWAYS 'GREATER' THAN STD
 S.stdX = zeros([S.trlPerRun 1]);
-S.cmpX = ones([S.trlPerRun 1]);
 S.bUseFeedback = repmat(bUseFeedback,[S.trlPerRun, 1]);
 
 % STIMULUS PARAMETERS IMAGE PARAMETERS
@@ -157,8 +156,8 @@ key_ESCAPE    = KbName('escape');
 key_RETURN    = KbName('return');
 key_SPACE_BAR = KbName('space');
 gamepadIndex = Gamepad('GetNumGamepads');
-bttnOneNum = 1;
-bttnTwoNum = 4;
+bttnOneNum = 3;
+bttnTwoNum = 2;
 
 % SETUP PSYCHTOOLBOX
 % psyPTBsetup(bSKIPSYNCTEST,bDEBUG); % call must come before psyPTBopenWindow
@@ -380,6 +379,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.tgtXpixR = squeeze(tgtXpixR(:,:,i));
     S.tgtYpixL = squeeze(tgtYpixL(:,:,i));
     S.tgtYpixR = squeeze(tgtYpixR(:,:,i));
+    S.cmpX = S.posXoffsetPix(:,i);
 %     S.tgtXmm = squeeze(tgtXmm(:,:,i));
 %     S.tgtYmm = squeeze(tgtYmm(:,:,i));
 %     S.tgtZmm = squeeze(tgtZmm(:,:,i));

@@ -34,7 +34,7 @@ D.cmpInfo = psyComputerInfo;
 
 S = struct;
 
-trlPerRun = length(targetContrastAngle);
+trlPerRun = size(posXoffsetPix,1);
 % HARD-CODED STRUCT FIELDS
 S.trlPerRun    = trlPerRun;
 S.imgSzXYdeg    = repmat(2.*[2 2],[S.trlPerRun, 1]);

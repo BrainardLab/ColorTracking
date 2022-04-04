@@ -127,27 +127,8 @@ for j = 0:[S.numIntrvl-1]
         %%%%%%%%%%%%%%
         % INTERVAL 1 % PRESENT STD or CMP STIMULUS (AS APPROPRIATE)
         %%%%%%%%%%%%%%
-        if j == 0
-            if     S.cmpIntrvl(t) == 0
-                Screen('DrawTexture', D.wdwPtr, texCmpImg(f), [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
-            elseif S.cmpIntrvl(t) == 1
-                Screen('DrawTexture', D.wdwPtr, texStdImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
-            end
-        end
-        %%%%%%%%%%%%%%
-        % INTERVAL 2 % PRESENT CMP or STD STIMULUS (AS APPROPRIATE)
-        %%%%%%%%%%%%%%
-        if j == 1
-            if     S.cmpIntrvl(t) == 0
-                % t0 = GetSecs;
-                Screen('DrawTexture', D.wdwPtr, texStdImg, [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
-                % Secs_DrawTexture(t) = GetSecs-t0;
-            elseif S.cmpIntrvl(t) == 1
-                % t0 = GetSecs;
-                Screen('DrawTexture', D.wdwPtr, texCmpImg(f), [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
-                % Secs_DrawTexture(t) = GetSecs-t0;
-            end
-        end
+        Screen('DrawTexture', D.wdwPtr, texCmpImg(f), [], [S.tgtXpixL(f,t) S.tgtYpixL(f,t) S.tgtXpixL(f,t) S.tgtYpixL(f,t)] + D.plySqrPix);
+
         % DRAW LEFT EYE 1/F TEXTURE
         if bUseMsk, 
         Screen('DrawTexture', D.wdwPtr, [tex1oF], [],[D.scrnXYpix.*(1-S.mskScale(t,:))/2 D.scrnXYpix-D.scrnXYpix.*(1-S.mskScale(t,:))/2], [], [], [], []); 

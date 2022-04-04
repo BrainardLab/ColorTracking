@@ -80,7 +80,7 @@ S.mtnType      = repmat(mtnType,     [S.trlPerRun, 1]);      % MOTION   TYPE
 % S.frqCpdCutoff = repmat(frqCpdCutoff,[S.trlPerRun, 1]);       %
 
 S.magORval     = 'mag';       % SUBJ RESPONDS ACCORDING TO MAGNITUDE OF VARIABLE VS. SIGN OF VARIABLE?
-S.numIntrvl = repmat(2,[S.trlPerRun 1]);
+S.numIntrvl = ones([S.trlPerRun 1]);
 % CMP IS ALWAYS 'GREATER' THAN STD
 S.stdX = zeros([S.trlPerRun 1]);
 S.cmpX = ones([S.trlPerRun 1]);
@@ -458,7 +458,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
         if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
         % PRESENT TRIAL
      %   psyPresentTrial2IFCmov(D,S,t,stdIphtXYTrgb(:,:,:,:,t),cmpIphtXYTrgb(:,:,:,:,t),msk1oF);
-         S = psyPresentTrialDetectionLMS(D,S,t,msk1oF,indRnd(t,i));
+         S = psyPresentTrialLSP(D,S,t,msk1oF,indRnd(t,i));
         if   bUseMsk; Screen('DrawTexture', D.wdwPtr, tex1oF, [],D.wdwXYpix); end
         
         Screen('TextSize', D.wdwPtr, 14);

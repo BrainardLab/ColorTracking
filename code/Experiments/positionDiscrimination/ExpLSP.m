@@ -276,7 +276,7 @@ S.Rimg=[];
 for i = 1:size(indRnd,2)
     for t = 1:S.trlPerRun
         % NUM FRAMES COMPUTED VIA DESIRED DURATION
-        if strcmp(S.mtnType,'LIN') % BROWNIAN MOTION
+        if strcmp(S.mtnType(1,:),'LIN') % BROWNIAN MOTION
             %% STIMULUS DURATION IN SECONDS
             secPerTrl    = 0.4;
             % STIMULUS DURATION IN MILLISECONDS
@@ -309,10 +309,10 @@ for i = 1:size(indRnd,2)
             tgtXpixTmp(numFrmStim+1:numFrm-numFrmStim) = NaN;
             tgtXpixTmp(numFrm-numFrmStim+1:numFrm) = S.posXoffsetPix(t,i);
             % SCREEN TARGET POSITION IN PIXELS
-            tgtXpixL(:,t,i) = tgtXmmL(:,t,i).*D.pixPerMmXY(1);
-            tgtXpixR(:,t,i) = tgtXmmR(:,t,i).*D.pixPerMmXY(1);
-            tgtYpixL(:,t,i) = tgtYmmL(:,t,i).*D.pixPerMmXY(2);
-            tgtYpixR(:,t,i) = tgtYmmR(:,t,i).*D.pixPerMmXY(2);
+            tgtXpixL(:,t,i) = tgtXpixTmp;
+            tgtXpixR(:,t,i) = tgtXpixTmp;
+            tgtYpixL(:,t,i) = zeros(size(tgtXpixTmp));
+            tgtYpixR(:,t,i) = zeros(size(tgtXpixTmp));
 
             %         % SCREEN TARGET POSITION IN DEGREES
             %         tgtXdegL(:,t,i) = atand(tgtXmmL(:,t,i)./D.scrnZmm);
@@ -380,12 +380,12 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     S.tgtXpixR = squeeze(tgtXpixR(:,:,i));
     S.tgtYpixL = squeeze(tgtYpixL(:,:,i));
     S.tgtYpixR = squeeze(tgtYpixR(:,:,i));
-    S.tgtXmm = squeeze(tgtXmm(:,:,i));
-    S.tgtYmm = squeeze(tgtYmm(:,:,i));
-    S.tgtZmm = squeeze(tgtZmm(:,:,i));
-    S.tgtXmmL = squeeze(tgtXmmL(:,:,i));
-    S.tgtXmmR = squeeze(tgtXmmR(:,:,i));
-    S.tgtYmmL = squeeze(tgtYmmL(:,:,i));
+%     S.tgtXmm = squeeze(tgtXmm(:,:,i));
+%     S.tgtYmm = squeeze(tgtYmm(:,:,i));
+%     S.tgtZmm = squeeze(tgtZmm(:,:,i));
+%     S.tgtXmmL = squeeze(tgtXmmL(:,:,i));
+%     S.tgtXmmR = squeeze(tgtXmmR(:,:,i));
+%     S.tgtYmmL = squeeze(tgtYmmL(:,:,i));
     % MAKE TEMPORAL WINDOW
     S.timeWindow = cosWindowFlattop([1 numFrm+1],floor((numFrm+1)/2),ceil((numFrm+1)/2),0,0);
     % S.timeWindow = cosWindowFlattop([1 numFrm],0,numFrm,0,0);

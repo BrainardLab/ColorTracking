@@ -3,7 +3,7 @@ close all;
 clear all;
 
 %% Load the data
-subjID = 'BMC';
+subjID = 'MAB';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 
@@ -48,21 +48,13 @@ ctmRotMOBJ= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanis
 
 %% Fit the Data
 defaultParamsInfo = ctmRotMOBJ.defaultParams;
-defaultParamsInfo.angle = 20;
+defaultParamsInfo.angle = 10;
 defaultParamsInfo.minLag = 0.2;
 %defaultParamsInfo.amplitude = 0.2;
-rotMInitialResponses = ctmRotMOBJ.computeResponse(defaultParamsInfo,thePacket.stimulus);
 fitErrorScalar = 100000;
 [rotMParams,fVal,rotmResponses] = ctmRotMOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-classicParamsCheck = ParamsRotMToClassic(rotMParams)
-
-[classicParams,fVal,classicResponses] = ctmOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-
-
 
 figure; hold on
 plot(lagVec,'LineWidth',3,'Color','k')
 plot(rotmResponses.values,'LineWidth',2,'Color','r')
-plot(rotMInitialResponses.values,'LineWidth',2,'Color','g')

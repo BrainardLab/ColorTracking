@@ -8,7 +8,7 @@ targetContrastAngle = targetContrastAngle(:);
 targetContrast = [targetContrast1; targetContrast2];
 targetContrast = targetContrast(:);
 
-maxPosPix = 24*ones([size(targetContrast,1) 1]);
+maxPosPix = 12*ones([size(targetContrast,1) 1]);
 
 trialsPerPos = 5;
 trialsPerBlock = 70;

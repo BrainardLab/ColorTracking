@@ -311,7 +311,10 @@ for i = 1:size(indRnd,2)
             tgtXpixR(:,t,i) = tgtXpixTmp;
             tgtYpixL(:,t,i) = zeros(size(tgtXpixTmp));
             tgtYpixR(:,t,i) = zeros(size(tgtXpixTmp));
-
+            tgtXdegL = tgtXpixL/D.pixPerDegXY(1);
+            tgtXdegR = tgtXpixR/D.pixPerDegXY(1);
+            tgtYdegL = tgtYpixL/D.pixPerDegXY(2);
+            tgtYdegR = tgtYpixR/D.pixPerDegXY(2);
             %         % SCREEN TARGET POSITION IN DEGREES
             %         tgtXdegL(:,t,i) = atand(tgtXmmL(:,t,i)./D.scrnZmm);
             %         tgtXdegR(:,t,i) = atand(tgtXmmR(:,t,i)./D.scrnZmm);
@@ -433,7 +436,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
     
 %    Screen('Close', texPrimer);
 %    Screen('LoadNormalizedGammaTable', D.wdwPtr, S.lookupTableSettingsInit,2);
-    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the green down button.'], ...
+    Screen('DrawText',D.wdwPtr, ['Block ' num2str(i) '. First trial starts exactly one second after you hit the blue left button.'], ...
            0.6.*[fPosX], 0.8.*[fPosY], round([D.wht].*255));
     Screen('FillRect', D.wdwPtr, round([D.wht,D.wht,D.wht].*255), D.fixStm);
     Screen('Flip',D.wdwPtr);

@@ -148,10 +148,6 @@ AssertOpenGL;
 
 % SETUP KEYBOARD
 KbName('UnifyKeyNames')
-key_U_ARROW   = KbName('upArrow');
-key_D_ARROW   = KbName('downArrow');
-key_L_ARROW   = KbName('leftArrow');
-key_R_ARROW   = KbName('rightArrow');
 key_ESCAPE    = KbName('escape');
 key_RETURN    = KbName('return');
 key_SPACE_BAR = KbName('space');
@@ -251,7 +247,6 @@ D.plyXYpix = bsxfun(@times,S.imgSzXYdeg, D.pixPerDegXY);
 
 % BUILD DESTINATION RECTANGLE IN MIDDLE OF DISPLAY
 D.plySqrPix    = CenterRect([0 0 D.plyXYpix(1, 1) D.plyXYpix(1, 2)], D.wdwXYpix);
-plySqrPixCrdXY = D.plySqrPix(1:2);
 
 % STIMULUS PARAMETERS IN PIXELS (REQUIRES DISPLAY INFO)
 S.imgSzXYpix    = bsxfun(@times,S.imgSzXYdeg,D.pixPerDegXY);
@@ -303,9 +298,13 @@ for i = 1:size(indRnd,2)
 %             tgtYmmL(:,t,i) = tgtYmm(:,t,i); tgtYmmR(:,t,i) = tgtYmm(:,t,i);
             
             tgtXpixTmp = zeros([numFrm 1]);
+            % PROPORTION OF TOTAL FRAMES TAKEN UP BY EACH STIMULUS
             propFrmStim = 0.4;
+            % NUMBER OF FRAMES TAKEN UP BY EACH STIMULUS 
             numFrmStim = round(numFrm.*propFrmStim);
+            % PUT STIMULUS OFF THE SCREEN FOR ISI
             tgtXpixTmp(numFrmStim+1:numFrm-numFrmStim) = NaN;
+            % POSITION OF SECOND STIMULUS
             tgtXpixTmp(numFrm-numFrmStim+1:numFrm) = S.posXoffsetPix(t,i);
             % SCREEN TARGET POSITION IN PIXELS
             tgtXpixL(:,t,i) = tgtXpixTmp;
@@ -480,16 +479,16 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
         while 1
             isResponse = 0;
             % WAIT FOR KEYPRESS
-            key_D_ARROW = Gamepad('GetButton', gamepadIndex, bttnOneNum);
-            if key_D_ARROW; isResponse = 1; end
-            key_U_ARROW = Gamepad('GetButton', gamepadIndex, bttnTwoNum);
-            if key_U_ARROW; isResponse = 1; end
+            key_L_ARROW = Gamepad('GetButton', gamepadIndex, bttnOneNum);
+            if key_L_ARROW; isResponse = 1; end
+            key_R_ARROW = Gamepad('GetButton', gamepadIndex, bttnTwoNum);
+            if key_R_ARROW; isResponse = 1; end
             [ keyIsDown, ~, keyCode ] = KbCheck(-1);
             if keyIsDown; isResponse = 1; end
             if isResponse
 
                 % DOWN ARROW RESPONSE
-                if key_D_ARROW
+                if key_L_ARROW
 
                     % 1ST INTERVAL SELECTED
                     chsIntrvl = 0;
@@ -505,7 +504,7 @@ for i = 1:size(indRnd,2) % FOR EACH RUN
                 end
 
                 % UP  ARROW RESPONSE
-                if key_U_ARROW
+                if key_R_ARROW
 
                     % 2ND INTERVAL SELECTED
                     chsIntrvl = 1;

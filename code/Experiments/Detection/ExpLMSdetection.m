@@ -5,14 +5,11 @@ function [S D] = ExpLMSdetection(S,subjName,IPDmm,stmType, mtnType, indRnd, bUse
 % + CHECK Screen('BlendFunction?') RE: DrawDots ANTIALIASING
 %
 %   example call: % TEST CODE
-%                 targetContrast = [0.1 0.05 0.4 0.2 0.1 0.05 0.4 0.2 0.5 0.25]';
-%                 targetContrastAngle = [45 45 75 75 -45 -45 -75 -75 90 90]';
-%                 cmpIntrvl = [ones([floor(length(targetContrast)/2) 1]); zeros([ceil(length(targetContrast)/2) 1])];
-%                 cmpIntrvl = [cmpIntrvl flipud(cmpIntrvl)];
-%                 indRnd = randperm(length(targetContrast))';
-%                 indRnd = [indRnd randperm(length(targetContrast))'];
-%                 [stm,S] = LSDstimulusGeneration(targetContrast,targetContrastAngle,1,0,0,0.932,cmpIntrvl);
-%                 ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', indRnd, 1, 0, 1);
+%{
+            ExpLMSdetectionWrapper
+            [stm,S] = LSDstimulusGeneration(targetContrast,targetContrastAngle,1,0,0,0.932,cmpIntrvl);
+            ExpLMSdetection(S,'JNK',65,'CGB', 'BXZ', indRnd, 1, 0, 0);
+%}
 %
 % run target detection experiment to measure thresholds for different cone
 % contrast directions. 

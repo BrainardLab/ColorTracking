@@ -56,26 +56,26 @@ thePacket.metaData.dirPlotColors = [230 172 178; ...
     127  205  187;...
     44   127  184;...
     ]./255;
-%% Make the fit two mechanism object
+%% Make the fit one mechanism object
 theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJOneMech= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 1 ,'fminconAlgorithm','active-set');
 
-% Make the rot mechanism object
+%% Make the fit two mechanism object
 theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJTwoMech= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% Fit the Data
-defaultParamsInfo = ctmOBJOneMech.defaultParams;
-defaultParamsInfo.angle = 10;
-defaultParamsInfo.minLag = 0.2;
-%defaultParamsInfo.amplitude = 0.2;
-fitErrorScalar = 100000;
-[rotMOneMechParams,fVal,rotmOneMechResponses] = ctmOBJOneMech.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+defaultParamsInfo = ctmOBJTwoMech.defaultParams;
+fitErrorScalar = 10000;
+% [rotMOneMechParams,fVal,rotmOneMechResponses] = ctmOBJOneMech.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+%     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 [rotMTwoMechParams,fVal,rotmTwoMechResponses] = ctmOBJTwoMech.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
+figure; hold on;
+plot(lagVec,'k')
 
+plot(rotmTwoMechResponses.values,'r')
 
 [figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket)
 

@@ -33,17 +33,17 @@ ctmOBJRotM = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechani
 
 
 % set the params
-paramsSimulateRotM.angle        = 37;
-paramsSimulateRotM.minAxisRatio = .05;
-paramsSimulateRotM.scale        = 22;
+paramsSimulateRotM.angle        = 80;
+paramsSimulateRotM.minAxisRatio = .03;
+paramsSimulateRotM.scale        = 03;
 paramsSimulateRotM.amplitude    = .44;
 paramsSimulateRotM.minLag       = .29;
 
-lagsFromFitRotM = ctmOBJRotM.computeResponse(paramsSimulateRotM,thePacket.stimulus,thePacket.kernel)
+simulateLags = ctmOBJRotM.computeResponse(paramsSimulateRotM,thePacket.stimulus,thePacket.kernel)
 
 
 % add the resposne
-thePacket.response.values   = lagsFromFitRotM.values;
+thePacket.response.values   = simulateLags.values;
 thePacket.response.timebase = timebase;
 
 
@@ -66,6 +66,6 @@ ctmOBJRotM.paramPrint(fitParamsRotM)
 
 %% Plot It
 figure; hold on
-plot(lagVec,'LineWidth',3,'Color','k')
+plot(simulateLags.values,'LineWidth',3,'Color','k')
 plot(lagsFromFitRotM.values,'LineWidth',2,'Color','r')
 legend('Lags','RotM')

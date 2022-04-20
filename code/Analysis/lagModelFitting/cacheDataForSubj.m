@@ -49,8 +49,8 @@ end
 
 % get prefs
 projectName = 'ColorTracking';
-paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
-bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
+paramsCacheFolder = getpref(projectName,'paramsCacheFolder','tracking');
+bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder','tracking');
 rParamsBtstrpStruct = struct;
 
 

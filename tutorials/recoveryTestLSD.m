@@ -20,11 +20,10 @@ end
 load(fullfile(paramsCacheFolder,'detection',[subjCode '_pcCache.mat']));
 
 
-paramsOrig.angle        = 60;
-paramsOrig.minAxisRatio = 0.1;
-paramsOrig.lambda       = .5;
-paramsOrig.exponent     = 5;
-paramsOrig.scale        = 1;
+paramsOrig.angle        = 78;
+paramsOrig.minAxisRatio = 0.5;
+paramsOrig.lambda       = .07;
+paramsOrig.exponent     = 9;
 
 % The stimulus
 thePacket.stimulus.values   = [cL(:),cS(:)]';
@@ -51,7 +50,7 @@ thePacket.response.timebase = timebase;
 
 %% Fit the Data
 defaultParamsInfo = lsdOBJ.defaultParams;
-fitErrorScalar = 10000;
+fitErrorScalar = 1000;
 [lsdRecoverParams,fVal,lsdRecoverResponses] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 

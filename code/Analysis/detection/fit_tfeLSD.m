@@ -1,7 +1,7 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
 %
 %% Load the data  
-subjID = 'BMC';
+subjID = 'MAB';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 
@@ -63,17 +63,23 @@ lsdOBJ = tfeLSD('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,
 
 %% Fit it
 defaultParamsInfo = [];
-fitErrorScalar    = 1000;
+% get subject specific error scalar
+if strcmp(subjID,'MAB')
+    fitErrorScalar    = 100;
+elseif strcmp(subjID,'BMC')
+    fitErrorScalar    = 10000;
+elseif strcmp(subjID,'KAS')
+   fitErrorScalar    = 100000;
+end
 
-% Two Mechanism
-[lsdMechParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+% fit it 
+[lsdParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
-%% Print the params
-fprintf('\ntfeLSD Parameters:\n');
-ctmOBJmechOne.paramPrint(rotMOneMechParams)
+%figure;hold on;
+%plot(pcVec,'k','LineWidth',2);
+%plot(pcFromFitParams.values,'r','LineWidth',2,'LineStyle','--')
 
 
-
-
+plotIsoContLSD(lsdParams,'thePacket',thePacket)
 

@@ -4,8 +4,6 @@
 subjID = 'BMC';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
-bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
-plotInfo.figSavePath = getpref(projectName,'figureSavePath');
 
 % get subject code
 if strcmp(subjID,'MAB')
@@ -16,17 +14,15 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
-load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
-load(fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']));
-% Get the CIs
-[upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68);
+load(fullfile(paramsCacheFolder,'detection',[subjCode '_pcCache.mat']));
+
 
 %% Make the packet
-lagVec = lagsMat(:)';
-timebase = 1:length(lagVec);
+pcVec = pcData(:)';
+timebase = 1:length(pcVec);
 
 % Initialize the packet
-thePacket.response.values   = lagVec;
+thePacket.response.values   = pcVec;
 thePacket.response.timebase = timebase;
 
 % The stimulus
@@ -59,82 +55,25 @@ thePacket.metaData.dirPlotColors  = [230 172 178; ...
     127  205  187;...
     44   127  184;...
     ]./255;
-matrixContrasts = reshape(thePacket.metaData.stimContrasts,size(lagsMat));
-
-%% Make the fit one mechanism object
-theDimension= size(thePacket.stimulus.values, 1);
-ctmOBJmechOne = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 1 ,'fminconAlgorithm','active-set');
+matrixContrasts = reshape(thePacket.metaData.stimContrasts,size(pcData));
 
 %% Make the fit two mechanism object
 theDimension= size(thePacket.stimulus.values, 1);
-ctmOBJmechTwo = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
+lsdOBJ = tfeLSD('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% Fit it
 defaultParamsInfo = [];
-fitErrorScalar    = 100000;
-
-% One mechanism
-[rotMOneMechParams,~,lagsFromFitOneMech] = ctmOBJmechOne.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-lagsOneMechMat = reshape(lagsFromFitOneMech.values,size(lagsMat));
+fitErrorScalar    = 1000;
 
 % Two Mechanism
-[rotMTwoMechParams,fVal,lagsFromFitTwoMech] = ctmOBJmechTwo.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+[lsdMechParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-lagsTwoMechMat = reshape(lagsFromFitTwoMech.values,size(lagsMat));
 
 %% Print the params
-fprintf('\ntfeCTM One Mechanism Parameters:\n');
+fprintf('\ntfeLSD Parameters:\n');
 ctmOBJmechOne.paramPrint(rotMOneMechParams)
-fprintf('\ntfeCTM Two Mechanism Parameters:\n');
-ctmOBJmechTwo.paramPrint(rotMTwoMechParams)
-
-%% Do the isolag contours -- one mechanism 
-targetLags = [0.3,0.35,0.4,0.45,0.5];
-measuredDirections = uniqueColorDirs(:)';
-contourColors = [242,240,247;...
-203,201,226;...
-158,154,200;...
-117,107,177;...
-84,39,143]./255;
-
-%[figHndl] = plotIsoContAndNonLin(rotMOneMechParams,'thePacket',thePacket)
 
 
-[figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket)
 
-% Save it!
-figureSizeInches = [8 8];
-% set(tcHndl, 'PaperUnits', 'inches');
-% set(tcHndl, 'PaperSize',figureSizeInches);
-figHndl.Units  = 'inches';
-figHndl.PaperUnits  = 'inches';
-figHndl.PaperSize = figureSizeInches;
-figHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-figHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
 
-figNameTc =  fullfile(plotInfo.figSavePath,[subjCode, '_isolag_1mech.pdf']);
-% Save it
-%print(figHndl, figNameTc, '-dpdf', '-r300');
-
-plotInfo.title  = 'Lag Vs. Contrast'; plotInfo.xlabel  = 'Contrast (%)';
-plotInfo.ylabel = 'Lag (s)'; plotInfo.figureSizeInches = [20 11];
-plotInfo.subjCode    = subjCode;
-
-if strcmp(subjID,'MAB')
-    directionGroups = {[0,90],[75,
-    -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.6,88.6,87.6],[22.5,-1.4,-22.5]}; yLimVals = [0.2 0.9];
-elseif strcmp(subjID,'BMC')
-    directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-0.9,-22.5]};
-    yLimVals = [0.2 0.6];
-elseif strcmp(subjID,'KAS')
-    directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-1.9,-22.5]};
-    yLimVals = [0.2 0.8];
-end
-
-CIs.upper = abs(upperCI - meanLagBtstrpLagMat);
-CIs.lower = abs(meanLagBtstrpLagMat - lowerCI);
-
-plotColors = thePacket.metaData.dirPlotColors;
-plotDirectionPairs(matrixContrasts,lagsMat,lagsTwoMechMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors','errorBarsCI',CIs,'yLimVals',yLimVals)
 

@@ -1,5 +1,14 @@
 function [] = loadAndCacheLSD(subjID)
 
+% get subject code
+if strcmp(subjID,'MAB')
+    subjCode = 'Subject1';
+elseif strcmp(subjID,'BMC')
+    subjCode = 'Subject2';
+elseif strcmp(subjID,'KAS')
+    subjCode = 'Subject3';
+end
+
 S = loadPSYdataLMSall('JND', subjID, 'LSD', 'CGB',{[1:48]}, 'blobfish', 'local');
 
 theAngles = unique(S.targetContrastAngle)';
@@ -20,6 +29,6 @@ infoParams.computeDate = date;
 %% save out the params
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
-paramsCacheFileName     = fullfile(paramsCacheFolder,'detection',[subjID '_pcCache.mat']);
+paramsCacheFileName     = fullfile(paramsCacheFolder,'detection',[subjCode '_pcCache.mat']);
 save(paramsCacheFileName,'infoParams','pcData','targetContrast','cL','cS','theAngles')
 end

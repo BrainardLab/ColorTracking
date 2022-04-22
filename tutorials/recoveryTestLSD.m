@@ -1,9 +1,7 @@
 % fitDemoTwoMechanisms.m
-close all;
-clear all;
 
 %% Load the data
-subjID = 'KAS';
+subjID = 'BMC';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 
@@ -18,13 +16,14 @@ end
 
 % load the data mat files
 load(fullfile(paramsCacheFolder,'detection',[subjCode '_pcCache.mat']));
-
-
-paramsOrig.angle        = 78;
-paramsOrig.minAxisRatio = 0.5;
-paramsOrig.lambda       = .07;
-paramsOrig.exponent     = 9;
-
+%% Make the fit LSD object
+theDimension= size(thePacket.stimulus.values, 1);
+lsdOBJ= tfeLSD('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
+% paramsOrig.angle        = 89;
+% paramsOrig.minAxisRatio = 0.08;
+% paramsOrig.lambda       = .1;
+% paramsOrig.exponent     = 2;
+paramsOrig = lsdOBJ.defaultParams;
 % The stimulus
 thePacket.stimulus.values   = [cL(:),cS(:)]';
 timebase = 1:length(thePacket.stimulus.values);
@@ -37,10 +36,6 @@ thePacket.kernel.timebase = [];
 % The Meta Data
 thePacket.metaData.stimDirections = atand(cS(:)./cL(:));
 thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
-
-%% Make the fit LSD object
-theDimension= size(thePacket.stimulus.values, 1);
-lsdOBJ= tfeLSD('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 simulatedPC = lsdOBJ.computeResponse(paramsOrig,thePacket.stimulus,thePacket.kernel);
 
@@ -55,8 +50,8 @@ fitErrorScalar = 1000;
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
 figure; hold on;
-plot(simulatedPC.values,'k','LineWidth',2)
-plot(lsdRecoverResponses.values,'r')
+plot(simulatedPC.values,'k','LineWidth',4)
+plot(lsdRecoverResponses.values,'r','LineWidth',2,'LineStyle','--')
 
 
 

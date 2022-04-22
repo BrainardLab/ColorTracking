@@ -42,9 +42,11 @@ targetPC     = p.Results.targetPC;
 
 %% Ellipse Figure
 % Calculate the Minv matrix to tranform a unit circle to the ellipse and do it
-
-
-desiredEqContrast = -paramsLSD.lambda.*log((targetPC - 1)./(-(1-paramsLSD.scale))).^1/paramsLSD.exponent;
+%                    PC  = 1-(1-0.5).*exp(-(m./lambda)).^exponent;
+%         ((PC-1)./-0.5) = exp(-(m./lambda)).^exponent)
+%         log(((PC-1)./-0.5)) = -(m./lambda).^exponent
+% paramsLSD.lambda.* ((-log(((targetPC-1)./-0.5)))^(1/paramsLSD.exponent)) = m
+desiredEqContrast = paramsLSD.lambda.*(-log((targetPC-1)./-(1-0.5))).^(1/paramsLSD.exponent);
 circlePoints = desiredEqContrast*UnitCircleGenerate(nPoints);
 [M,Minv,Q] = EllipsoidMatricesGenerate([1 1./paramsLSD.minAxisRatio paramsLSD.angle]','dimension',2);
 ellipsePoints = Minv*circlePoints;
@@ -53,8 +55,6 @@ ellipsePoints = Minv*circlePoints;
 % Plot it
 figHndl = figure;
 h1 = subplot(1,2,1); hold on
-xlim([-1 1])
-ylim([-1 1])
 
 % get current axes
 axh = gca;
@@ -106,21 +106,23 @@ set(gca, ...
     'YGrid'       , 'off'      , ...
     'XColor'      , [.3 .3 .3], ...
     'YColor'      , [.3 .3 .3], ...
-    'YTick'       , -1:.2:1    , ...
+    'YTick'       , -.1:.05:.1    , ...
+    'XTick'       , -.1:.05:.1    , ...
     'LineWidth'   , 2         , ...
     'ActivePositionProperty', 'OuterPosition');
 axis square
+xlim([-.1 .1])
+ylim([-.1 .1])
 
 
 %% Non-linearity figure
 
-% Get the NR params
+% Get the NL params
 lambda   = paramsLSD.lambda;
-scale    = paramsLSD.scale;
 exponent = paramsLSD.exponent;
 
-% Define NR function
-lagNL = @(c) 1-(1-paramsLSD.scale).*exp(-c./paramsLSD.lambda).^paramsLSD.exponent;
+% Define NL function
+lagNL = @(m) 1-(1-0.5).*exp(-(m./lambda).^exponent);
 
 % Plot it
 h2 = subplot(1,2,2);
@@ -167,18 +169,22 @@ if ~isempty(p.Results.thePacket)
 
     % get the current plot size
     originalSize = get(gca, 'Position');
-
-    %     % set the color map to custom 8 color
-    %     colormap(eqContrast.colorMap);
-    %
-    %     % set color map range
-    %     caxis([-45,112.5]);
-    %
-    %     % set color bar location and labels
-    %     c = colorbar('Location','eastoutside' ,'Ticks',[-35,-15,5,25,42.5,62.5,82.5,102.5],...
-    %              'TickLabels',{'-45^o','-22.5^o','0^o','22.5^o','45^o','67.5^o','90^o','112.5^o'});
-    %     c.Label.String = 'Chromatic Direction (angles in L/M plane)';
-    %     c.Label.FontSize = 12;
+        % turn colors into color map
+         nColors = size(cVals,1)
+%         nRepeats  = 255./nColors;
+      
+        % set the color map to custom 8 color
+        colormap(cVals);
+    
+        % set color map range
+        caxis([-86.25,90]);
+    
+        % set color bar location and labels [-76.25,-72.50,-68.75,-65.00,-45.00,10.00,35.00,65.00,68.75,72.50,76.25,80.00']
+        c = colorbar('Location','eastoutside' ,'Ticks',-76.25:abs(-76.25-100)./nColors:100-abs(-76.25-100)./nColors,...
+                 'TickLabels',{'-86.25^o','-82.50^o','-78.75^o','-75.00^o','-45.00^o','0.00^o',...
+                 '45.00^o','75.00^o','78.75^o','82.50^o','86.25^o','90.00^o'});
+        c.Label.String = 'Chromatic Direction (angles in L/S plane)';
+        c.Label.FontSize = 12;
 
     % resize figure to original size
     set(h2, 'Position', originalSize);
@@ -241,8 +247,8 @@ set(gca, ...
     'XColor'      , [.3 .3 .3], ...
     'YColor'      , [.3 .3 .3], ...
     'YTick'       , .4:.2:1    , ...
-    'XTick'       , [0, 0.03, 0.05, 0.1, 0.2, 0.5], ...
-    'XTickLabel'  , {'0%','3%','5%','10%','20%','50%'}, ...
+    'XTick'       , [0, 0.05, 0.1, 0.2, 0.5], ...
+    'XTickLabel'  , {'0%','5%','10%','20%','50%'}, ...
     'LineWidth'   , 2         , ...
     'ActivePositionProperty', 'OuterPosition',...
     'xscale','linear');

@@ -48,12 +48,6 @@ thePacket.metaData.dirPlotColors  = [230 172 178; ...
     255  255  153;...
     56   108  176;...
     240    2  127;...
-%     179  226  205;...
-%     253  205  172;...
-%     203  213  232;...
-%     237  248  177;...
-%     127  205  187;...
-%     44   127  184;...
     ]./255;
 matrixContrasts = reshape(thePacket.metaData.stimContrasts,size(pcData));
 
@@ -75,7 +69,7 @@ end
 % get the pc from start params
 pcFromStartParams = lsdOBJ.computeResponse(lsdOBJ.defaultParams,thePacket.stimulus,thePacket.kernel);
 % fit it 
-[lsdParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+[pcParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
 figure;hold on;
@@ -84,5 +78,17 @@ plot(pcFromStartParams.values,'g','LineWidth',2,'LineStyle','-')
 plot(pcFromFitParams.values,'r','LineWidth',2,'LineStyle','--')
 
 
-plotIsoContLSD(lsdParams,'thePacket',thePacket)
+plotIsoContLSD(pcParams,'thePacket',thePacket)
+
+
+
+uniqColorDirs = unique(thePacket.metaData.stimDirections)';
+
+plotInfo.xlabel  = 'Contrast (%)';
+plotInfo.ylabel = 'Percent Correct'; plotInfo.figureSizeInches = [21 15];
+projectName = 'ColorTracking';
+plotInfo.figSavePath = getpref(projectName,'figureSavePath');
+plotInfo.subjCode    = subjCode;
+plotColors = thePacket.metaData.dirPlotColors;
+plotPsychometric(pcParams,pcData,matrixContrasts,uniqColorDirs,plotInfo,'plotColors',plotColors)
 

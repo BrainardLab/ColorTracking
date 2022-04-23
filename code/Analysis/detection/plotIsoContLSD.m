@@ -122,7 +122,7 @@ lambda   = paramsLSD.lambda;
 exponent = paramsLSD.exponent;
 
 % Define NL function
-lagNL = @(m) 1-(1-0.5).*exp(-(m./lambda).^exponent);
+pcNL = @(m) 1-(1-0.5).*exp(-(m./lambda).^exponent);
 
 % Plot it
 h2 = subplot(1,2,2);
@@ -170,7 +170,7 @@ if ~isempty(p.Results.thePacket)
     % get the current plot size
     originalSize = get(gca, 'Position');
         % turn colors into color map
-         nColors = size(cVals,1)
+         nColors = size(cVals,1);
 %         nRepeats  = 255./nColors;
       
         % set the color map to custom 8 color
@@ -192,12 +192,12 @@ if ~isempty(p.Results.thePacket)
 end
 
 %% Plot The Non-Linearity
-xMax = round(maxEqContrast*1.25,2)
+xMax = round(maxEqContrast*1.25,2);
 if isempty(xSampleBase)
     xSampleBase = 0:0.001:xMax;
 end
 % Evaluate the NR at the xSampleBase Points
-nlVals = lagNL(xSampleBase);
+nlVals = pcNL(xSampleBase);
 
 L1 = plot(xSampleBase,nlVals,'Color', plotColor, 'LineWidth', 2);
 
@@ -205,7 +205,7 @@ L1 = plot(xSampleBase,nlVals,'Color', plotColor, 'LineWidth', 2);
 hTitle  = title ('Response Nonlinearlity');
 hXLabel = xlabel('Equivalent Contrast'  );
 hYLabel = ylabel('Response');
-set(gca,'FontSize',12)
+set(gca,'FontSize',12);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
 set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');

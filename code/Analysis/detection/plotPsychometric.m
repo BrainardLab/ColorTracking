@@ -1,4 +1,4 @@
-function [] = plotPsychometric(pcFitsFromParams,MaxContrastLMS,rgbMatrixForPlotting,varargin)
+function [] = plotPsychometric(pcParams,pcData,matrixContrasts,uniqueColorDirs,plotInfo,varargin)
 %% Take in lags and model fits and plot them is a series of subplots.
 %
 % Synopsis
@@ -22,27 +22,27 @@ function [] = plotPsychometric(pcFitsFromParams,MaxContrastLMS,rgbMatrixForPlott
 
 % Input Parser
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
-p.addRequired('matrixContrasts',@ismatrix);
+p.addRequired('pcParams',@isstruct);
 p.addRequired('pcData',@ismatrix);
-p.addRequired('lagsFromFitMat',@ismatrix);
+p.addRequired('matrixContrasts',@ismatrix);
 p.addRequired('uniqColorDirs',@isnumeric);
 p.addRequired('plotInfo',@isstruct);
 p.addParameter('plotColors',[],@ismatrix);
 p.addParameter('errorBarsSTD',[],@isnumeric);
 p.addParameter('errorBarsCI',[],@isstruct);
-p.addParameter('semiLog',true,@islogical);
+p.addParameter('semiLog',false,@islogical);
 p.addParameter('sz',9,@isnumeric);
-p.addParameter('yLimVals',[0.2 0.8],@isnumeric);
 p.addParameter('figSaveInfo',true,@islogical);
+p.addParameter('nSmplPnts',50,@isnumeric);
 p.addParameter('legendLocation','northeast',@ischar);
-p.parse(matrixContrasts,lags,lagsFromFitMat, uniqueColorDirs,directionGroups, plotInfo, varargin{:});
+p.parse(pcParams,pcData,matrixContrasts, uniqueColorDirs, plotInfo, varargin{:});
 
 
 %% unpack the parser
 legendLocation  = p.Results.legendLocation;
 sz = p.Results.sz;
-yLimVals = p.Results.yLimVals;
-
+yLimVals = [min(pcData(:)) 1];
+nSmplPnts = p.Results.nSmplPnts;
 %% get a color map if none is provided
 if isempty(p.Results.plotColors)
     colorMapJet = jet;
@@ -68,105 +68,112 @@ else
 end
 
 % get the number of subplots/ rows and cols
-nColorDirPlots = length(directionGroups);
+nColorDirPlots = size(pcData,2);
 numPlotRows    = floor(sqrt(nColorDirPlots));
 numPlotCols    = ceil(nColorDirPlots./numPlotRows);
 
 tcHndl = figure;hold on
 
+% create the cumulative Weibull function
+theDimension= 2;
+lsdOBJ = tfeLSD('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
+thePacket.kernel.values = [];
+thePacket.kernel.timebase = [];
+
 % Break up direction into indivual subplots
 % the based on the directionGroups cell
-for ii = 1:(nColorDirPlots)
-    theDirections = directionGroups{ii};
-    directionIndx = find(sum(theDirections == uniqueColorDirs,2));
-    xAxisVals = matrixContrasts(:,directionIndx);
-    yAxisVals = lags(:,directionIndx);
-    modelFitLags = lagsFromFitMat(:,directionIndx);
-    currPlotColors = plotColors(:,directionIndx);
-    
+for ii = 1:nColorDirPlots
+    xAxisVals = matrixContrasts(:,ii);
+    yAxisVals = pcData(:,ii);
+    currPlotColor = plotColors(ii,:);
+
     subplot( numPlotRows,numPlotCols,ii)
-    
-    for kk = 1:length(theDirections)
-        plotInfo.legend{kk} = sprintf('%s°',num2str(theDirections(kk)));
+
+    hold on;
+    if ~isempty(p.Results.errorBarsSTD)
+        e = errorbar(xAxisVals(:,jj),yAxisVals(:,jj),theErrorMat(:,jj),'o')
+    elseif ~isempty(p.Results.errorBarsCI);
+        e = errorbar(xAxisVals(:,jj),yAxisVals(:,jj),theErrorMat.lower(:,jj),theErrorMat.upper(:,jj),...
+            'o','LineWidth',2,'Color',currPlotColors(:,jj));
     end
-    
-    
-    for jj = 1:length(theDirections)
-        
-        hold on;
-        if ~isempty(p.Results.errorBarsSTD)
-            e = errorbar(xAxisVals(:,jj),yAxisVals(:,jj),theErrorMat(:,jj),'o')
-        elseif ~isempty(p.Results.errorBarsCI);
-            e = errorbar(xAxisVals(:,jj),yAxisVals(:,jj),theErrorMat.lower(:,jj),theErrorMat.upper(:,jj),...
-                'o','LineWidth',2,'Color',currPlotColors(:,jj));
-        end
-        
-        
-        plot(xAxisVals(:,jj),modelFitLags(:,jj),'--', ...
-            'MarkerEdgeColor',.3*currPlotColors(:,jj),...
-            'MarkerFaceColor',currPlotColors(:,jj),...
-            'Color',currPlotColors(:,jj),...
-            'LineWidth',2,...
-            'MarkerSize',sz);
-        
-       h{jj} =  plot(xAxisVals(:,jj),yAxisVals(:,jj),'o', ...
-            'MarkerEdgeColor',.3*currPlotColors(:,jj),...
-            'MarkerFaceColor',currPlotColors(:,jj),...
-            'Color',currPlotColors(:,jj),...
-            'LineWidth',2,...
-            'MarkerSize',sz);
-    end
+
+    % Make the packet for current direction
+    cSmpleBase = 0:max(xAxisVals)./nSmplPnts:max(xAxisVals);
+    cS = cSmpleBase.*sind(uniqueColorDirs(ii));
+    cL = cSmpleBase.*cosd(uniqueColorDirs(ii));
+    thePacket.stimulus.values = [cL;cS];
+    thePacket.stimulus.timebase = 1:length(cS);
+    pcFromParamsFit = lsdOBJ.computeResponse(pcParams,thePacket.stimulus,thePacket.kernel);
+
+
+    plot(cSmpleBase,pcFromParamsFit.values,'--', ...
+        'MarkerEdgeColor',.3*currPlotColor,...
+        'MarkerFaceColor',currPlotColor,...
+        'Color',currPlotColor,...
+        'LineWidth',2,...
+        'MarkerSize',sz);
+
+    h{ii} =  plot(xAxisVals,yAxisVals,'o', ...
+        'MarkerEdgeColor',.3*currPlotColor,...
+        'MarkerFaceColor',currPlotColor,...
+        'Color',currPlotColor,...
+        'LineWidth',2,...
+        'MarkerSize',sz);
+
     axis square;
-    
+
     if p.Results.semiLog
         set(gca,'Xscale','log');
     end
-    
+
     ylim(yLimVals)
-    xlim([0,1])
-    autoTicksY = 0:.1:1;
-    
+    xlim([0,max(xAxisVals.*1.15)])
+
+    nTicks = 3;
+    autoTicksX = round(0:max(xAxisVals)./nTicks:max(xAxisVals),4);
     set(gca, ...
         'Box'         , 'off'     , ...
         'TickDir'     , 'out'     , ...
-        'FontSize'    , 16        , ...
+        'FontSize'    , 12        , ...
         'TickLength'  , [.02 .02] , ...
         'XMinorTick'  , 'on'      , ...
         'YMinorTick'  , 'on'      , ...
         'YGrid'       , 'on'      , ...
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
-        'YTick'       , autoTicksY, ...
-        'XTick'       ,[0.03 0.1 0.3 1],...
+        'YTick'       , 0:.1:1, ...
         'LineWidth'   , 2         , ...
         'ActivePositionProperty', 'OuterPosition');
     
+    xticks(autoTicksX)
+
+    for jj = 1:length(autoTicksX)
+        tickNames{jj} = sprintf('%1.1f',100*autoTicksX(jj)); 
+    end
+    xticklabels(tickNames)
+
     set(gcf, 'Color', 'white' );
-    
-    
+
+
     %% Format fonts
-    
-    
+
+
     %% Add labels
-    
-    hTitle  = title (plotInfo.title);
-    
-    
+
+    hTitle  = title (sprintf('%2.2f^o',uniqueColorDirs(ii)));
+
+
     hXLabel = xlabel(plotInfo.xlabel);
-    
-    
+
+
     hYLabel = ylabel(plotInfo.ylabel);
-    
-    
+
+
     %% Add Legend
-    
-    legend([h{:}],plotInfo.legend,'Location',legendLocation);
-    
     set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
-    set([hXLabel, hYLabel,],'FontSize', 18);
-    set( hTitle, 'FontSize', 18,'FontWeight' , 'bold');
-    
-    plotInfo = rmfield(plotInfo,'legend');
+    set([hXLabel, hYLabel,],'FontSize', 14);
+    set( hTitle, 'FontSize', 16,'FontWeight' , 'normal');
+
 
 end
 
@@ -181,9 +188,9 @@ tcHndl.PaperSize = figureSizeInches;
 tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
 tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
 
-figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_model_fit_allData_2mech.pdf']);
+figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_LSD_psychometric.pdf']);
 % Save it
-%print(tcHndl, figNameTc, '-dpdf', '-r300');
-%exportgraphics(tcHndl,figNameTc)
+print(tcHndl, figNameTc, '-dpdf', '-r300');
+exportgraphics(tcHndl,figNameTc)
 
 end

@@ -183,6 +183,5 @@ tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
 tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
 
 figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_model_fit_allData_2mech.pdf']);
-% Save it
-%print(tcHndl, figNameTc, '-dpdf', '-r300');
-%exportgraphics(tcHndl,figNameTc)
+print(tcHndl, figNameTc, '-dpdf', '-r300');
+exportgraphics(tcHndl,figNameTc)

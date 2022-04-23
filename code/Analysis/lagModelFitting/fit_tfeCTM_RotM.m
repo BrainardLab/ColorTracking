@@ -16,8 +16,8 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
-load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
-load(fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']));
+load(fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']));
+load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
 % Get the CIs
 [upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68);
 

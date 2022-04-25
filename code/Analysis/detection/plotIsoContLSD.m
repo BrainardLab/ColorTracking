@@ -1,4 +1,4 @@
-function [figHndl] = plotIsoContLSD(paramsLSD, varargin)
+function [tcHndl] = plotIsoContLSD(paramsLSD, varargin)
 % Plot the normalized ellipse and non-linearity from the QCM param
 %
 % Syntax:
@@ -26,11 +26,12 @@ p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('paramsLSD',@isstruct);
 p.addParameter('targetPC',.76,@isnumeric);
 p.addParameter('nPoints',100,@isnumeric);
-p.addParameter('plotColor',[0.3 0.45 0.81],@isvector);
+p.addParameter('plotColor',[0.4 0.4 0.4],@isvector);
 p.addParameter('xSampleBase',[],@isvector);
 p.addParameter('lSampleBase',[-.5:0.01:.5],@isvector);
 p.addParameter('dispParams',false,@islogical);
 p.addParameter('thePacket',[],@isstruct);
+p.addParameter('plotInfo',[],@isstruct);
 p.parse(paramsLSD,varargin{:});
 
 % Pull stuff out of the results struct
@@ -39,7 +40,7 @@ plotColor    = p.Results.plotColor;
 xSampleBase  = p.Results.xSampleBase;
 lSampleBase  = p.Results.lSampleBase;
 targetPC     = p.Results.targetPC;
-
+plotInfo     = p.Results.plotInfo;
 %% Ellipse Figure
 % Calculate the Minv matrix to tranform a unit circle to the ellipse and do it
 %                    PC  = 1-(1-0.5).*exp(-(m./lambda)).^exponent;
@@ -53,7 +54,7 @@ ellipsePoints = Minv*circlePoints;
 
 
 % Plot it
-figHndl = figure;
+tcHndl = figure;
 h1 = subplot(1,2,1); hold on
 
 % get current axes
@@ -64,16 +65,16 @@ line([-1 1], [0 0], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 line([0 0], [-1 1], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 
 % plot ellipse
-line(ellipsePoints(1,:),ellipsePoints(2,:),'color', plotColor, 'LineWidth', 2);
+line(ellipsePoints(1,:),ellipsePoints(2,:),'color', plotColor, 'LineWidth', 1.5);
 
 % set axes and figure labels
 hXLabel = xlabel('L Contrast');
-hYLabel = ylabel('M Contrast');
+hYLabel = ylabel('S Contrast');
 hTitle  = title('Isoresponse Contour');
-set(gca,'FontSize',12);
+set(gca,'FontSize',8);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
-set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
+set( hTitle, 'FontSize', 10,'FontWeight' , 'normal');
 
 % Add paramters to the plot
 if p.Results.dispParams
@@ -99,7 +100,7 @@ end
 % format the figure
 set(gca, ...
     'Box'         , 'off'     , ...
-    'TickDir'     , 'in'     , ...
+    'TickDir'     , 'out'     , ...
     'TickLength'  , [.02 .02] , ...
     'XMinorTick'  , 'off'      , ...
     'YMinorTick'  , 'off'      , ...
@@ -108,7 +109,7 @@ set(gca, ...
     'YColor'      , [.3 .3 .3], ...
     'YTick'       , -.1:.05:.1    , ...
     'XTick'       , -.1:.05:.1    , ...
-    'LineWidth'   , 2         , ...
+    'LineWidth'   , 1         , ...
     'ActivePositionProperty', 'OuterPosition');
 axis square
 xlim([-.1 .1])
@@ -155,7 +156,7 @@ if ~isempty(p.Results.thePacket)
     for ii = 1:size(eqContrastMat,2)
 
         % set the marker size
-        markerSize = 7.5;
+        markerSize = 4;
         markerAreaPtsSquared = markerSize^2;
 
         % plot it
@@ -184,7 +185,7 @@ if ~isempty(p.Results.thePacket)
                  'TickLabels',{'-86.25^o','-82.50^o','-78.75^o','-75.00^o','-45.00^o','0.00^o',...
                  '45.00^o','75.00^o','78.75^o','82.50^o','86.25^o','90.00^o'});
         c.Label.String = 'Chromatic Direction (angles in L/S plane)';
-        c.Label.FontSize = 12;
+        c.FontSize = 8;
 
     % resize figure to original size
     set(h2, 'Position', originalSize);
@@ -199,16 +200,16 @@ end
 % Evaluate the NR at the xSampleBase Points
 nlVals = pcNL(xSampleBase);
 
-L1 = plot(xSampleBase,nlVals,'Color', plotColor, 'LineWidth', 2);
+L1 = plot(xSampleBase,nlVals,'Color', plotColor, 'LineWidth', 1.5);
 
 % set the axes and figure labels
 hTitle  = title ('Response Nonlinearlity');
 hXLabel = xlabel('Equivalent Contrast'  );
 hYLabel = ylabel('Response');
-set(gca,'FontSize',12);
+set(gca,'FontSize',8);
 set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
-set( hTitle, 'FontSize', 14,'FontWeight' , 'bold');
+set( hTitle, 'FontSize', 10,'FontWeight' , 'normal');
 
 % add parameters to the plot
 if p.Results.dispParams
@@ -249,12 +250,28 @@ set(gca, ...
     'YTick'       , .4:.2:1    , ...
     'XTick'       , [0, 0.05, 0.1, 0.2, 0.5], ...
     'XTickLabel'  , {'0%','5%','10%','20%','50%'}, ...
-    'LineWidth'   , 2         , ...
+    'LineWidth'   , 1         , ...
     'ActivePositionProperty', 'OuterPosition',...
     'xscale','linear');
 ylim([.4 1]);
 xlim([0 xMax]);
 set(gcf, 'Color', 'white' );
 axis square
+
+
+
+% Save it!
+figureSizeInches = [6.5 3];
+% set(tcHndl, 'PaperUnits', 'inches');
+% set(tcHndl, 'PaperSize',figureSizeInches);
+tcHndl.Units  = 'inches';
+tcHndl.PaperUnits  = 'inches';
+tcHndl.PaperSize = figureSizeInches;
+tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+
+figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_Nonlin_LSD.pdf']);
+% Save it
+print(tcHndl, figNameTc, '-dpdf', '-r300');
 
 end

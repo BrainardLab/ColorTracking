@@ -1,7 +1,7 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
 %
 %% Load the data  
-subjID = 'KAS';
+subjID = 'BMC';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 
@@ -13,6 +13,10 @@ elseif strcmp(subjID,'BMC')
 elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
+
+projectName = 'ColorTracking';
+plotInfo.figSavePath = getpref(projectName,'figureSavePath');
+plotInfo.subjCode    = subjCode;
 
 load(fullfile(paramsCacheFolder,'detection',[subjCode '_pcCache.mat']));
 
@@ -78,17 +82,15 @@ plot(pcFromStartParams.values,'g','LineWidth',2,'LineStyle','-')
 plot(pcFromFitParams.values,'r','LineWidth',2,'LineStyle','--')
 
 
-plotIsoContLSD(pcParams,'thePacket',thePacket)
+plotIsoContLSD(pcParams,'thePacket',thePacket,'plotInfo',plotInfo)
 
 
 
 uniqColorDirs = unique(thePacket.metaData.stimDirections)';
 
 plotInfo.xlabel  = 'Contrast (%)';
-plotInfo.ylabel = 'Percent Correct'; plotInfo.figureSizeInches = [21 15];
-projectName = 'ColorTracking';
-plotInfo.figSavePath = getpref(projectName,'figureSavePath');
-plotInfo.subjCode    = subjCode;
+plotInfo.ylabel = 'Percent Correct'; plotInfo.figureSizeInches = [6 5];
+
 plotColors = thePacket.metaData.dirPlotColors;
 plotPsychometric(pcParams,pcData,matrixContrasts,uniqColorDirs,plotInfo,'plotColors',plotColors)
 

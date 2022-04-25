@@ -1,11 +1,11 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
 %
 %% Load the data  
-subjID = 'BMC';
+subjID = 'KAS';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
-plotInfo.figSavePath = getpref(projectName,'figureSavePath');
+
 
 % get subject code
 if strcmp(subjID,'MAB')
@@ -15,6 +15,9 @@ elseif strcmp(subjID,'BMC')
 elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
+
+plotInfo.figSavePath = getpref(projectName,'figureSavePath');
+plotInfo.subjCode    = subjCode;
 
 load(fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']));
 load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
@@ -101,29 +104,15 @@ contourColors = [242,240,247;...
 %[figHndl] = plotIsoContAndNonLin(rotMOneMechParams,'thePacket',thePacket)
 
 
-[figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket)
+[figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket,'plotInfo',plotInfo)
 
-% Save it!
-figureSizeInches = [8 8];
-% set(tcHndl, 'PaperUnits', 'inches');
-% set(tcHndl, 'PaperSize',figureSizeInches);
-figHndl.Units  = 'inches';
-figHndl.PaperUnits  = 'inches';
-figHndl.PaperSize = figureSizeInches;
-figHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-figHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
-
-figNameTc =  fullfile(plotInfo.figSavePath,[subjCode, '_isolag_1mech.pdf']);
-% Save it
-%print(figHndl, figNameTc, '-dpdf', '-r300');
 
 plotInfo.title  = 'Lag Vs. Contrast'; plotInfo.xlabel  = 'Contrast (%)';
 plotInfo.ylabel = 'Lag (s)'; plotInfo.figureSizeInches = [20 11];
-plotInfo.subjCode    = subjCode;
+
 
 if strcmp(subjID,'MAB')
-    directionGroups = {[0,90],[75,
-    -75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.6,88.6,87.6],[22.5,-1.4,-22.5]}; yLimVals = [0.2 0.9];
+    directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.6,88.6,87.6],[22.5,-1.4,-22.5]}; yLimVals = [0.2 0.9];
 elseif strcmp(subjID,'BMC')
     directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-0.9,-22.5]};
     yLimVals = [0.2 0.6];

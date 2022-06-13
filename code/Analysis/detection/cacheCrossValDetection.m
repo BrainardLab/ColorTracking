@@ -30,25 +30,25 @@ for jj = 1:size(uniqueColorDirs,1)
     
     ind = abs(Sall.targetContrastAngle-uniqueColorDirs(jj))<0.001;
     
-    Sdir = structElementSelect(Sall,ind,size(Sall.cmpIntrvl,2));
+    Sdir = structElementSelect(Sall,ind,size(Sall.cmpIntrvl,1));
     
-    colorAngle    = round(atand(Sdir.MaxContrastLMS(:,3)./Sdir.MaxContrastLMS(:,1)));
-    colorContrast = round(sqrt(Sdir.MaxContrastLMS(:,3).^2+Sdir.MaxContrastLMS(:,1).^2),3);
+    colorAngle    = abs(Sdir.targetContrastAngle);
+    colorContrast = abs(Sdir.targetContrast);
     colorAngleContrastUnq = unique([colorAngle colorContrast],'rows');
     
     for kk = 1:size(colorAngleContrastUnq,1)
         ind =   abs(colorAngle-colorAngleContrastUnq(kk,1))<0.001 ...
             & abs(colorContrast-colorAngleContrastUnq(kk,2))<0.001;
-        SsplitDet(jj,kk) = structElementSelect(Sdir,ind,size(Sdir.MaxContrastLMS,1));
+        SsplitDet(jj,kk) = structElementSelect(Sdir,ind,size(Sdir.cmpIntrvl,1));
     end
 end
 
 
 % set the
-cacheInfo.cacheDate = date;
+cacheInfoDet.cacheDate = date;
 
 % save the split data struct
-outFileName = fullfile(crossValCacheFolder,[subjCode '_crossVal_chached.mat']);
-save(outFileName,'SsplitTrack','cacheInfo')
+outFileName = fullfile(crossValCacheFolder,[subjCode '_crossValDet_chached.mat']);
+save(outFileName,'SsplitDet','cacheInfoDet');
 
 end

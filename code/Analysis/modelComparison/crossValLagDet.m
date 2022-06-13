@@ -23,8 +23,9 @@ projectName = 'ColorTracking';
 crossValCacheFolder = getpref(projectName,'crossValCacheFolder');
 
 % Load the cross val data cache
-dataCacheName = fullfile(crossValCacheFolder,[subjCode '_crossVal_chached.mat']);
-load(dataCacheName);
+dataCacheTrackName = fullfile(crossValCacheFolder,[subjCode '_crossValTrack_chached.mat']);
+load(dataCacheTrackName);
 
 % Load the 
-
+dataCacheDetName = fullfile(crossValCacheFolder,[subjCode '_crossValDet_chached.mat']);
+load(dataCacheDetName);

@@ -67,7 +67,7 @@ end
 cacheInfo.cacheDate = date;
 
 % save the split data struct 
-outFileName = fullfile(crossValCacheFolder,[subjCode '_crossVal_chached.mat']);
+outFileName = fullfile(crossValCacheFolder,[subjCode '_crossValTrack_chached.mat']);
 save(outFileName,'SsplitTrack','cacheInfo')
 
 end

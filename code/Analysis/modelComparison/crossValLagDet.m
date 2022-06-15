@@ -19,7 +19,16 @@ elseif strcmp(subjID,'KAS')
 end
 
 % get prefs
+modelType = p.Results.fitMethod;
 nCrossValIter = p.Results.nCrossValIter;
+fitErrorScalar = p.Results.fitErrorScalar;
+
+rStdK = 1.5;
+initType = 'RND';
+smpBgnEnd = 1;
+bPLOTxcorr = false;
+maxLagSec = 2;
+
 projectName = 'ColorTracking';
 crossValCacheFolder = getpref(projectName,'crossValCacheFolder');
 
@@ -41,8 +50,8 @@ load(dataCacheDetName);
 nContrastDet = size(SsplitDet,2);
 nDirectionDet = size(SsplitDet,1);
 
-nContrastDet = size(SsplitDet,2);
-nDirectionDet = size(SsplitDet,1);
+nContrastTrk = size(SsplitTrk,2);
+nDirectionTrk = size(SsplitTrk,1);
 
 % loop over nCrossValIter
 for ii = 1:nCrossValIter
@@ -57,9 +66,10 @@ for ii = 1:nCrossValIter
     testSetIndxTrk = shuffleOrderTrk(1:10);
     trainSetIndxTrk = shuffleOrderTrk(11:20);
     
+    % %%%%%%%%%% DETECTION %%%%%%%%%%%%%
     for jj = 1:nDirectionDet
         for kk = 1:nContrastDet
-            % %%%%%%%%%% DETECTION %%%%%%%%%%%%%
+            
             % Split the runs into train and test
             testSetDet  = structElementSelect(SsplitDet(jj,kk),testSetIndxDet,size(SsplitDet(jj,kk).cmpIntrvl,1));
             trainSetDet = structElementSelect(SsplitDet(jj,kk),trainSetIndxDet,size(SsplitDet(jj,kk).cmpIntrvl,1));
@@ -74,20 +84,21 @@ for ii = 1:nCrossValIter
         end
     end
     
+    % %%%%%%%%%% TRACKING %%%%%%%%%%%%%
     for jj = 1:nDirectionTrk
         for kk = 1:nContrastTrk
-            % %%%%%%%%%% TRACKING %%%%%%%%%%%%%
+            
             % Split the runs into train and test
-            testSet = structElementSelect(splitCell{jj,kk},testSetIndxTrk,size(splitCell{jj,kk}.tgtXmm,2));
-            trainSet = structElementSelect(splitCell{jj,kk},trainSetIndxTrk,size(splitCell{jj,kk}.tgtXmm,2));
+            testSet = structElementSelect(SsplitTrk(jj,kk),testSetIndxTrk,size(SsplitTrk(jj,kk).tgtXmm,2));
+            trainSet = structElementSelect(SsplitTrk(jj,kk),trainSetIndxTrk,size(SsplitTrk(jj,kk).tgtXmm,2));
             
             % testing
             [rTest, rLagValTest,rAllTest] = xcorrEasy(diff(testSet.tgtXmm),diff(testSet.rspXmm),[testSet.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr);
             rhoXXstdTest = std(rAllTest,[],2);
             [rSmoothTest,rParamTest,tSecFitTest,negLLTest] = xcorrFitMLE(rLagValTest,rTest,rhoXXstdTest,rStdK,modelType,initType);
             lagsTestMat(jj,kk,ii) = rParamTest(2);
-            test_cL(jj,kk,ii) = testSet.MaxContrastLMS(1,1);
-            test_cS(jj,kk,ii) = testSet.MaxContrastLMS(1,3);
+            test_cL_Trk(jj,kk,ii) = testSet.MaxContrastLMS(1,1);
+            test_cS_Trk(jj,kk,ii) = testSet.MaxContrastLMS(1,3);
             
             % training
             [rTrain, rLagValTrain,rAllTrain] = xcorrEasy(diff(trainSet.tgtXmm),diff(trainSet.rspXmm),[trainSet.tSec; 15],maxLagSec,'coeff',smpBgnEnd,bPLOTxcorr);
@@ -99,33 +110,53 @@ for ii = 1:nCrossValIter
         end
     end
     
-    
-    %% Make the training packet
+    %% %%%%%%%%%% TRACKING %%%%%%%%%%%%%
+    % Make the training packet
     tmpLagMat = lagsTrainMat(:,:,ii)';
-    tmpcLMat = test_cL(:,:,ii)';
-    tmpcSMat = test_cS(:,:,ii)';
+    tmpcLMat = test_cL_Trk(:,:,ii)';
+    tmpcSMat = test_cS_Trk(:,:,ii)';
     lagVec = tmpLagMat(:)';
     train_cLVec = tmpcLMat(:)';
     train_cSVec = tmpcSMat(:)';
-    timebase = 1:length(lagVec);
+    timebaseTrk = 1:length(lagVec);
     
     % Initialize the packet
-    thePacket.response.values   = lagVec;
-    thePacket.response.timebase = timebase;
+    thePacketTrk.response.values   = lagVec;
+    thePacketTrk.response.timebase = timebaseTrk;
     
     % The stimulus
-    thePacket.stimulus.values   = [train_cLVec;train_cSVec];
-    thePacket.stimulus.timebase = timebase;
+    thePacketTrk.stimulus.values   = [train_cLVec;train_cSVec];
+    thePacketTrk.stimulus.timebase = timebaseTrk;
     
     % The kernel
-    thePacket.kernel.values = [];
-    thePacket.kernel.timebase = [];
+    thePacketTrk.kernel.values = [];
+    thePacketTrk.kernel.timebase = [];
     
     % The metadata
-    thePacket.metaData.stimDirections = atand(train_cSVec./train_cLVec);
-    thePacket.metaData.stimContrasts  = vecnorm([train_cLVec',train_cSVec']');
+    thePacketTrk.metaData.stimDirections = atand(train_cSVec./train_cLVec);
+    thePacketTrk.metaData.stimContrasts  = vecnorm([train_cLVec',train_cSVec']');
     
+    %% %%%%%%%%%% DETECTION %%%%%%%%%%%%%
+    % Initialize the packet
+    tmpPcMat = pcTrain(:,:,ii)';
+    pcVec = tmpPcMat(:);
     
+    thePacketDet.response.values   = pcVec;
+    thePacketDet.response.timebase = timebaseTrk;
+    
+    % The stimulus
+    thePacketDet.stimulus.values   = [train_cLVec;train_cSVec];
+    thePacketDet.stimulus.timebase = timebaseTrk;
+    
+    % The kernel
+    thePacketDet.kernel.values = [];
+    thePacketDet.kernel.timebase = [];
+    
+    % The metadata
+    thePacketDet.metaData.stimDirections = atand(train_cSVec./train_cLVec);
+    thePacketDet.metaData.stimContrasts  = vecnorm([train_cLVec',train_cSVec']');
+    
+    %% Fit the models
     
 end
 

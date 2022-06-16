@@ -75,10 +75,13 @@ for ii = 1:nCrossValIter
             trainSetDet = structElementSelect(SsplitDet(jj,kk),trainSetIndxDet,size(SsplitDet(jj,kk).cmpIntrvl,1));
             
             % training
-            pcTrain(kk,jj,ii) = (sum(testSetDet.R == testSetDet.cmpIntrvl))./length(testSetDet.R);
-            
+            pcTrain(kk,jj,ii) = (sum(trainSetDet.R == trainSetDet.cmpIntrvl))./length(trainSetDet.R);
+            train_cL_Trk(jj,kk,ii) = abs(trainSetDet.targetContrast(1)).*cosd(trainSetDet.targetContrastAngle(1));
+            train_cS_Trk(jj,kk,ii) = abs(trainSetDet.targetContrast(1)).*sind(trainSetDet.targetContrastAngle(1));
+
+
             % testing
-            pcTest(kk,jj,ii)  = (sum(trainSetDet.R == trainSetDet.cmpIntrvl))./length(trainSetDet.R);
+            pcTest(kk,jj,ii)  = (sum(testSetDet.R == testSetDet.cmpIntrvl))./length(testSetDet.R);
             
             
         end
@@ -142,11 +145,11 @@ for ii = 1:nCrossValIter
     pcVec = tmpPcMat(:);
     
     thePacketDet.response.values   = pcVec;
-    thePacketDet.response.timebase = timebaseTrk;
+    thePacketDet.response.timebase = timebaseDet;
     
     % The stimulus
     thePacketDet.stimulus.values   = [train_cLVec;train_cSVec];
-    thePacketDet.stimulus.timebase = timebaseTrk;
+    thePacketDet.stimulus.timebase = timebaseDet;
     
     % The kernel
     thePacketDet.kernel.values = [];

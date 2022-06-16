@@ -76,6 +76,11 @@ pcFromStartParams = lsdOBJ.computeResponse(lsdOBJ.defaultParams,thePacket.stimul
 [pcParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
+%% Print the params
+fprintf('\ntfeCTM Two Mechanism Parameters:\n');
+lsdOBJ.paramPrint(pcParams)
+
+
 figure;hold on;
 plot(pcVec,'k','LineWidth',2);
 plot(pcFromStartParams.values,'g','LineWidth',2,'LineStyle','-')

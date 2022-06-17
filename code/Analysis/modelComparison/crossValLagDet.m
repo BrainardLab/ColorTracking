@@ -53,6 +53,13 @@ nDirectionDet = size(SsplitDet,1);
 nContrastTrk = size(SsplitTrk,2);
 nDirectionTrk = size(SsplitTrk,1);
 
+%% Initialize the model objects
+% The Lag Model CTM
+lagObjCTM = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2,'fminconAlgorithm','active-set');
+
+% the Lag Model Indiv
+lagObjIndiv = tfeCTMIndiv('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
+
 % loop over nCrossValIter
 for ii = 1:nCrossValIter
     
@@ -76,9 +83,11 @@ for ii = 1:nCrossValIter
             
             % training
             pcTrain(kk,jj,ii) = (sum(trainSetDet.R == trainSetDet.cmpIntrvl))./length(trainSetDet.R);
-            train_cL_Trk(jj,kk,ii) = abs(trainSetDet.targetContrast(1)).*cosd(trainSetDet.targetContrastAngle(1));
-            train_cS_Trk(jj,kk,ii) = abs(trainSetDet.targetContrast(1)).*sind(trainSetDet.targetContrastAngle(1));
-
+            train_cL_Det(jj,kk,ii) = abs(trainSetDet.targetContrast(1)).*cosd(trainSetDet.targetContrastAngle(1));
+            train_cS_Det(jj,kk,ii) = abs(trainSetDet.targetContrast(1)).*sind(trainSetDet.targetContrastAngle(1));
+            
+            train_angles(jj,kk,ii) = trainSetDet.targetContrastAngle(1);
+            train_contrasts(jj,kk,ii) = abs(trainSetDet.targetContrast(1));
 
             % testing
             pcTest(kk,jj,ii)  = (sum(testSetDet.R == testSetDet.cmpIntrvl))./length(testSetDet.R);
@@ -108,47 +117,57 @@ for ii = 1:nCrossValIter
             rhoXXstdTrain = std(rAllTrain,[],2);
             [rSmoothTrain,rParamTrain,tSecFitTrain,negLLTrain] = xcorrFitMLE(rLagValTrain,rTrain,rhoXXstdTrain,rStdK,modelType,initType);
             lagsTrainMat(jj,kk,ii) = rParamTrain(2);
-            train_cL(jj,kk,ii) = trainSet.MaxContrastLMS(1,1);
-            train_cS(jj,kk,ii) = trainSet.MaxContrastLMS(1,3);
+            train_cL_Trk(jj,kk,ii) = trainSet.MaxContrastLMS(1,1);
+            train_cS_Trk(jj,kk,ii) = trainSet.MaxContrastLMS(1,3);
         end
     end
     
     %% %%%%%%%%%% TRACKING %%%%%%%%%%%%%
     % Make the training packet
     tmpLagMat = lagsTrainMat(:,:,ii)';
-    tmpcLMat = test_cL_Trk(:,:,ii)';
-    tmpcSMat = test_cS_Trk(:,:,ii)';
+    tmpcLMat = train_cL_Trk(:,:,ii)';
+    tmpcSMat = train_cS_Trk(:,:,ii)';
     lagVec = tmpLagMat(:)';
-    train_cLVec = tmpcLMat(:)';
-    train_cSVec = tmpcSMat(:)';
+    train_cLTrk = tmpcLMat(:)';
+    train_cSTrk = tmpcSMat(:)';
     timebaseTrk = 1:length(lagVec);
+
     
     % Initialize the packet
     thePacketTrk.response.values   = lagVec;
     thePacketTrk.response.timebase = timebaseTrk;
     
     % The stimulus
-    thePacketTrk.stimulus.values   = [train_cLVec;train_cSVec];
+    thePacketTrk.stimulus.values   = [train_cLTrk;train_cSTrk];
     thePacketTrk.stimulus.timebase = timebaseTrk;
     
     % The kernel
-    thePacketTrk.kernel.values = [];
+    thePacketTrk.kernel.values   = [];
     thePacketTrk.kernel.timebase = [];
     
     % The metadata
-    thePacketTrk.metaData.stimDirections = atand(train_cSVec./train_cLVec);
-    thePacketTrk.metaData.stimContrasts  = vecnorm([train_cLVec',train_cSVec']');
+    thePacketTrk.metaData.stimDirections = atand(train_cSTrk./train_cLTrk);
+    thePacketTrk.metaData.stimContrasts  = vecnorm([train_cLTrk',train_cSTrk']');
+    
     
     %% %%%%%%%%%% DETECTION %%%%%%%%%%%%%
-    % Initialize the packet
+    % Put stuff in packet format
     tmpPcMat = pcTrain(:,:,ii)';
-    pcVec = tmpPcMat(:);
+    pcVec = tmpPcMat(:)';
+    tmpcLDet= train_cL_Det(:,:,ii)';
+    tmpcSDet = train_cS_Det(:,:,ii)';
+    train_cLDet = tmpcLDet(:)';
+    train_cSDet = tmpcSDet(:)';
+    timebaseDet = 1:length(pcVec);
+    train_angles =train_angles';
+    train_contrasts = train_contrasts';
     
+    % Initialize the packet
     thePacketDet.response.values   = pcVec;
     thePacketDet.response.timebase = timebaseDet;
     
     % The stimulus
-    thePacketDet.stimulus.values   = [train_cLVec;train_cSVec];
+    thePacketDet.stimulus.values   = [train_cLDet;train_cSDet];
     thePacketDet.stimulus.timebase = timebaseDet;
     
     % The kernel
@@ -156,10 +175,12 @@ for ii = 1:nCrossValIter
     thePacketDet.kernel.timebase = [];
     
     % The metadata
-    thePacketDet.metaData.stimDirections = atand(train_cSVec./train_cLVec);
-    thePacketDet.metaData.stimContrasts  = vecnorm([train_cLVec',train_cSVec']');
+    thePacketDet.metaData.stimDirections = train_angles(:)';
+    thePacketDet.metaData.stimContrasts  = train_contrasts(:)';
     
     %% Fit the models
+    
+   
     
 end
 

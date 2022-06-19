@@ -59,7 +59,7 @@ lagObjCTM = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanis
 
 % the Lag Model Indiv
 lagObjIndiv = tfeCTMIndiv('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
-
+a = tfeLSDIndiv('verbosity','none','dimension',2, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 % loop over nCrossValIter
 for ii = 1:nCrossValIter
     

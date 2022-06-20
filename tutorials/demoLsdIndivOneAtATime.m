@@ -67,7 +67,7 @@ for whichDirection = 1:length(theDirections)
 
     %% Fit it
     %
-    % Tne needed fitErrorScalar varies not only by subject but also by
+    % The needed fitErrorScalar varies not only by subject but also by
     % direction.  What a pain.  Could handle this automatically by trying
     % a whole list of scalars and picking the one where fit error divided
     % by scalar is the smallest.  May need to do this for the bootstrapping

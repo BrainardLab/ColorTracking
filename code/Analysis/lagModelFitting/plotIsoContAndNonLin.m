@@ -36,7 +36,7 @@ p.parse(paramsCTM,varargin{:});
 
 % Pull stuff out of the results struct
 nPoints      = p.Results.nPoints;
-elPlotColor    = p.Results.elPlotColor;
+elPlotColor  = p.Results.elPlotColor;
 xSampleBase  = p.Results.xSampleBase;
 lSampleBase  = p.Results.lSampleBase;
 targetLag    = p.Results.targetLag;
@@ -287,8 +287,11 @@ tcHndl.PaperSize = figureSizeInches;
 tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
 tcHndl.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
 
-figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_Nonlin_CTM.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
+
+if ~isempty(plotInfo)
+    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_Nonlin_CTM.pdf']);
+    % Save it
+    print(tcHndl, figNameTc, '-dpdf', '-r300');
+end
 
 end

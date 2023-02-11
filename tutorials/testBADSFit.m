@@ -56,26 +56,39 @@ thePacket.metaData.dirPlotColors = [230 172 178; ...
     127  205  187;...
     44   127  184;...
     ]./255;
-%% Make the fit one mechanism object
-theDimension= size(thePacket.stimulus.values, 1);
-ctmOBJOneMech= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 1 ,'fminconAlgorithm','active-set');
 
-%% Make the fit two mechanism object
+%% Make the BADS object
 theDimension= size(thePacket.stimulus.values, 1);
-ctmOBJTwoMech= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
+ctmOBJBads= tfeCTMBads('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
+
+
+%% Make the fmincon object
+theDimension= size(thePacket.stimulus.values, 1);
+ctmOBJfmincon= tfeCTMBads('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% Fit the Data
-defaultParamsInfo = ctmOBJTwoMech.defaultParams;
-fitErrorScalar = 10000;
-% [rotMOneMechParams,fVal,rotmOneMechResponses] = ctmOBJOneMech.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-%     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-[rotMTwoMechParams,fVal,rotmTwoMechResponses] = ctmOBJTwoMech.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+defaultParamsInfo = ctmOBJBads.defaultParams;
+fitErrorScalar = 1;
+
+[rotMFminParams,fVal,rotmFminResponses] = ctmOBJfmincon.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+    'initialParams',[], 'fitErrorScalar',fitErrorScalar,'searchMethod','fmincon');
+
+[rotMBadsParams,fVal,rotmBadsResponses] = ctmOBJBads.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+    'initialParams',[], 'fitErrorScalar',fitErrorScalar,'searchMethod','bads');
+
+[rotMBadsfMinParams,fVal,rotmBadsfMinResponses] = ctmOBJBads.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+    'initialParams',rotMFminParams, 'fitErrorScalar',fitErrorScalar,'searchMethod','bads');
+
+
 
 figure; hold on;
 plot(lagVec,'k')
 
-plot(rotmTwoMechResponses.values,'r')
+plot(rotmBadsResponses.values,'r')
 
-[figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket)
+plot(rotmBadsfMinResponses.values,'g')
+
+plot(rotmFminResponses.values,'b--')
+
+[figHndl] = plotIsoContAndNonLin(rotMFminParams,'thePacket',thePacket)
 

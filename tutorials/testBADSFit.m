@@ -1,4 +1,5 @@
-% fitDemoTwoMechanisms.m
+% testBADSFit.m
+% Demo to test the BADS fit agianst the fmincon fit
 close all;
 clear all;
 
@@ -61,7 +62,6 @@ thePacket.metaData.dirPlotColors = [230 172 178; ...
 theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJBads= tfeCTMBads('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
-
 %% Make the fmincon object
 theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJfmincon= tfeCTMBads('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
@@ -80,15 +80,18 @@ fitErrorScalar = 1;
     'initialParams',rotMFminParams, 'fitErrorScalar',fitErrorScalar,'searchMethod','bads');
 
 
-
+%% Plot it
 figure; hold on;
+% The Lags
 plot(lagVec,'k')
-
+% The BADS fit
 plot(rotmBadsResponses.values,'r')
-
+% The BADS fit with initaial params set to fmincom solution 
 plot(rotmBadsfMinResponses.values,'g')
-
+% The fmincon fit
 plot(rotmFminResponses.values,'b--')
+legend('Lags','BADS','BADS from fmin', 'fmincon')
 
-[figHndl] = plotIsoContAndNonLin(rotMFminParams,'thePacket',thePacket)
 
+% The isocontour and non-linearity
+[figHndl] = plotIsoContAndNonLin(rotMBadsfMinParams,'thePacket',thePacket)

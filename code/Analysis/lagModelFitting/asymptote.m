@@ -1,7 +1,7 @@
 %%%%%%% Do the CTM for the RotM model %%%%%%%
 %
 %% Load the data  
-subjID = 'KAS';
+subjID = 'MAB';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
@@ -81,3 +81,20 @@ lagsTwoMechMat = reshape(lagsFromFitTwoMech.values,size(lagsMat));
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
 ctmOBJmechTwo.paramPrint(rotMTwoMechParams)
 
+%% Get the highest 2 contrast lags for each direction from the sorted data
+theta = round(thePacket.metaData.stimDirections,2);
+dist = thePacket.metaData.stimContrasts;
+
+uniqDir = unique(theta,"sorted");
+numDirections = length(uniqDir)
+
+for ii = 1:numDirections
+    mask = find(theta == uniqDir(ii))
+    minLags(ii,:) = thePacket.response.values(mask(1:2))
+end
+
+asymptotes = mean(minLags,2);
+
+plot(1:numDirections,asymptotes)
+xticks(1:numDirections)
+xticklabels(uniqDir)

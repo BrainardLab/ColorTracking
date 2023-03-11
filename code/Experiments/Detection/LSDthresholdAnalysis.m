@@ -1,6 +1,6 @@
-function [tFit,mFit,sFit,bFit,PCdta,cSpacing] = LSDthresholdAnalysis(S,DPcrt,varargin)
+function [tFit,mFit,sFit,bFit,PCdta,cSpacing,tFitBoot,mFitBoot,targetContrastAngleUnq] = LSDthresholdAnalysis(S,DPcrt,varargin)
 
-% function [tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,DPcrt,varargin)
+% function [tFit,mFit,sFit,bFit,PCdta,cSpacing,tFitBoot,mFitBoot,targetContrastAngleUnq] = LSDthresholdAnalysis(S,DPcrt,varargin)
 %
 % example call: 
 %
@@ -17,6 +17,7 @@ p.addRequired('S',@isstruct);
 p.addParameter('showPlot',true,@islogical);
 p.addParameter('bPLOTthresholds',0,@isnumeric);
 p.addParameter('fitType','weibull',@ischar);
+p.addParameter('nBoot',0,@isnumeric);
 p.parse(S,varargin{:});
 
 nIntrvl = 2;
@@ -46,6 +47,37 @@ for i = 1:length(targetContrastAngleUnq)
    sFit(i) = sFitTmp(indBest);
    bFit(i) = bFitTmp(indBest);
    PCdta(:,i) = PCdtaTmp(:,indBest);
+end
+
+if p.Results.nBoot>0
+    for i = 1:p.Results.nBoot
+        for j = 1:length(targetContrastAngleUnq)
+           ind = abs(S.targetContrastAngle-targetContrastAngleUnq(j))<0.01;
+           indBoot = randsample(find(ind),sum(ind),1);
+           for k = 1:nRepeats
+               if strcmp(p.Results.fitType,'weibull')
+                  [mFitTmp(:,k),sFitTmp(:,k),bFitTmp(:,k),tFitTmp(:,k),PCdtaTmp(:,k),~,negLLtmp(:,k)] = psyfitWeibull(zeros(size(S.targetContrast(indBoot))),abs(S.targetContrast(indBoot)),S.R(indBoot) == S.cmpIntrvl(indBoot),0,[],[],DPcrt,nIntrvl,0);
+                  cSpacing(:,j) = unique(abs(S.targetContrast(indBoot)));
+               elseif strcmp(p.Results.fitType,'gaussian')
+                  [mFitTmp(:,k),sFitTmp(:,k),bFitTmp(:,k),tFitTmp(:,k),PCdtaTmp(:,k),~,negLLtmp(:,k)] = psyfitgengauss(zeros(size(S.targetContrast(indBoot))),abs(S.targetContrast(indBoot)),S.R(indBoot) == S.cmpIntrvl(indBoot),0,[],[],DPcrt,nIntrvl,0);
+                  cSpacing(:,j) = unique(abs(S.targetContrast(indBoot)));
+               else
+                  error('LSDthresholdAnalysis: fitType must either be ''weibull'' or ''gaussian'''); 
+               end
+           end
+           indBestAll = find(abs(negLLtmp-min(negLLtmp))<0.001);
+           indBest = indBestAll(1);
+           tFitBoot(j,i) = tFitTmp(indBest);
+           mFitBoot(j,i) = mFitTmp(indBest);
+           sFitBoot(j,i) = sFitTmp(indBest);
+           bFitBoot(j,i) = bFitTmp(indBest);
+           PCdtaBoot(:,j,i) = PCdtaTmp(:,indBest);
+           display([' Condition ' num2str(j) ' Boot ' num2str(i)]);
+        end
+        if mod(i,20)==0
+            save('/home/ben/Documents/ColorTracking/detectionBootsTmp','tFitBoot','tFit','targetContrastAngleUnq');
+        end
+    end
 end
 
 if p.Results.showPlot

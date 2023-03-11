@@ -18,6 +18,8 @@ p.addParameter('showPlot',true,@islogical);
 p.addParameter('bPLOTthresholds',0,@isnumeric);
 p.addParameter('fitType','weibull',@ischar);
 p.addParameter('nBoot',0,@isnumeric);
+p.addParameter('tFitBoot',[],@isnumeric);
+p.addParameter('subjNum',[],@isnumeric);
 p.parse(S,varargin{:});
 
 nIntrvl = 2;
@@ -74,8 +76,21 @@ if p.Results.nBoot>0
            PCdtaBoot(:,j,i) = PCdtaTmp(:,indBest);
            display([' Condition ' num2str(j) ' Boot ' num2str(i)]);
         end
-        if mod(i,20)==0
-            save('/home/ben/Documents/ColorTracking/detectionBootsTmp','tFitBoot','tFit','targetContrastAngleUnq');
+        saveInterval = 10;
+        if mod(i,saveInterval)==0
+            if isfile(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'])
+                tFitBootCurrent = tFitBoot;
+                tFitBootNew = tFitBoot(:,(size(tFitBoot,2)-saveInterval+1):size(tFitBoot,2));
+                load(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'],'tFitBoot');
+                tFitBootOld = tFitBoot;
+                tFitBoot = cat(2,tFitBootOld,tFitBootNew);
+                save(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'], ...
+                     'tFitBoot','tFit','targetContrastAngleUnq');
+                tFitBoot = tFitBootCurrent;
+            else
+                save(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'], ...
+                     'tFitBoot','tFit','targetContrastAngleUnq');
+            end
         end
     end
 end

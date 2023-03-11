@@ -3,7 +3,7 @@ close all;
 clear all;
 
 %% Load the data
-subjID = 'BMC';
+subjID = 'KAS';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 
@@ -17,7 +17,7 @@ elseif strcmp(subjID,'KAS')
 end
 
 % load the data mat files
-load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
+load(fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']));
 
 %% Make the packet
 lagVec = lagsMat(:)';
@@ -37,32 +37,45 @@ thePacket.kernel.timebase = [];
 % The Meta Data
 thePacket.metaData.stimDirections = atand(cS(:)./cL(:));
 thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
+thePacket.metaData.dirPlotColors = [230 172 178; ...
+    194  171  253; ...
+    36   210  201; ...
+    32   140  163; ...
+    253  182    44; ...
+    252  153  233;...
+    127  201  127;...
+    190  174  212;...
+    253  192  134;...
+    255  255  153;...
+    56   108  176;...
+    240    2  127;...
+    179  226  205;...
+    253  205  172;...
+    203  213  232;...
+    237  248  177;...
+    127  205  187;...
+    44   127  184;...
+    ]./255;
+%% Make the fit one mechanism object
+theDimension= size(thePacket.stimulus.values, 1);
+ctmOBJOneMech= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 1 ,'fminconAlgorithm','active-set');
 
 %% Make the fit two mechanism object
 theDimension= size(thePacket.stimulus.values, 1);
-ctmOBJ= tfeCTM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
-
-% Make the rot mechanism object
-theDimension= size(thePacket.stimulus.values, 1);
-ctmRotMOBJ= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
+ctmOBJTwoMech= tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% Fit the Data
-defaultParamsInfo = ctmRotMOBJ.defaultParams;
-defaultParamsInfo.angle = 20;
-defaultParamsInfo.minLag = 0.2;
-%defaultParamsInfo.amplitude = 0.2;
-rotMInitialResponses = ctmRotMOBJ.computeResponse(defaultParamsInfo,thePacket.stimulus);
-fitErrorScalar = 100000;
-[rotMParams,fVal,rotmResponses] = ctmRotMOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-classicParamsCheck = ParamsRotMToClassic(rotMParams)
-
-[classicParams,fVal,classicResponses] = ctmOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+defaultParamsInfo = ctmOBJTwoMech.defaultParams;
+fitErrorScalar = 10000;
+% [rotMOneMechParams,fVal,rotmOneMechResponses] = ctmOBJOneMech.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+%     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+[rotMTwoMechParams,fVal,rotmTwoMechResponses] = ctmOBJTwoMech.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
+figure; hold on;
+plot(lagVec,'k')
 
+plot(rotmTwoMechResponses.values,'r')
 
-figure; hold on
-plot(lagVec,'LineWidth',3,'Color','k')
-plot(rotmResponses.values,'LineWidth',2,'Color','r')
-plot(rotMInitialResponses.values,'LineWidth',2,'Color','g')
+[figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket)
+

@@ -25,7 +25,7 @@ orientation = 0;
 MaxContrastLMS = .1*[.7071 -.7071 0];
 
 
-[stimPrimariesMod,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS, 0, 'stimHalfSize', 60, 'fx', 6, 'sigma',.14);
+[stimPrimariesMod,coneExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,backgroundPrimaries,MaxContrastLMS', 0, 'stimHalfSize', 60, 'fx', 6, 'sigma',.14);
 
 % Make the background
 for ii = 1: length(backgroundPrimaries)

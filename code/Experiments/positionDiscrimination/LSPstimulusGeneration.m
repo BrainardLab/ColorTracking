@@ -34,20 +34,21 @@ D.cmpInfo = psyComputerInfo;
 
 S = struct;
 
-trlPerRun = size(posXoffsetPix,1);
+trlPerBlock = length(targetContrastAngle);
 % HARD-CODED STRUCT FIELDS
-S.trlPerRun    = trlPerRun;
-S.imgSzXYdeg    = repmat(2.*[2 2],[S.trlPerRun, 1]);
-S.smpPerDeg     = repmat(128,     [S.trlPerRun, 1]);
+S.trlPerBlock    = trlPerBlock;
+S.trlPerRun = size(cmpIntrvl,1);
+S.imgSzXYdeg    = repmat(2.*[2 2],[S.trlPerBlock, 1]);
+S.smpPerDeg     = repmat(128,     [S.trlPerBlock, 1]);
 
 % TURN INPUT PARAMETERS INTO STRUCT FIELDS
 nCmp = size(frqCpd,2);
-frqCpd     = imresize(frqCpd,[S.trlPerRun nCmp],'nearest');
-phsDeg     = imresize(phsDeg,[S.trlPerRun nCmp],'nearest');
-S.targetContrast = imresize(targetContrast,[S.trlPerRun nCmp],'nearest');
-S.targetContrastAngle = imresize(targetContrastAngle,[S.trlPerRun nCmp],'nearest');
-S.ortDeg      = imresize(ortDeg,[S.trlPerRun, nCmp],'nearest');
-S.BWoct       = imresize(BWoct,[S.trlPerRun,1],'nearest');
+frqCpd     = imresize(frqCpd,[S.trlPerBlock nCmp],'nearest');
+phsDeg     = imresize(phsDeg,[S.trlPerBlock nCmp],'nearest');
+S.targetContrast = imresize(targetContrast,[S.trlPerBlock nCmp],'nearest');
+S.targetContrastAngle = imresize(targetContrastAngle,[S.trlPerBlock nCmp],'nearest');
+S.ortDeg      = imresize(ortDeg,[S.trlPerBlock, nCmp],'nearest');
+S.BWoct       = imresize(BWoct,[S.trlPerBlock,1],'nearest');
 
 S.frqCpdL = frqCpd;
 S.frqCpdR = frqCpd;

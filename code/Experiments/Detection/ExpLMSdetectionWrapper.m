@@ -13,20 +13,20 @@ subjName = 'MAB';
 % rng(randSeed);
 
 % targetContrast1 = 1.5.*[0.0016 0.0032 0.0048 0.0064 0.008 0.0096 0.002 0.004 0.006 0.008 0.01 0.012 0.002 0.004 0.006 0.008 0.01 0.012 0.0065 0.013 0.0195 0.026 0.0325 0.039 0.0065 0.013 0.0195 0.026 0.0325 0.039 0.013 0.026 0.039 0.052 0.065 0.078]';
-targetContrastAngle1 = [-75 -75 -75 -75 -75 -75 -45 -45 -45 -45 -45 -45 0 0 0 0 0 0 45 45 45 45 45 45 75 75 75 75 75 75 90 90 90 90 90 90]';
+targetContrastAngle1 = [-86.25 -86.25 -86.25 -86.25 -86.25 -86.25 -82.5 -82.5 -82.5 -82.5 -82.5 -82.5 -78.75 -78.75 -78.75 -78.75 -78.75 -78.75 78.75 78.75 78.75 78.75 78.75 78.75 82.5 82.5 82.5 82.5 82.5 82.5 86.25 86.25 86.25 86.25 86.25 86.25]';
 % targetContrast2 = -1.5.*[0.0016 0.0032 0.0048 0.0064 0.008 0.0096 0.002 0.004 0.006 0.008 0.01 0.012 0.002 0.004 0.006 0.008 0.01 0.012 0.0065 0.013 0.0195 0.026 0.0325 0.039 0.0065 0.013 0.0195 0.026 0.0325 0.039 0.013 0.026 0.039 0.052 0.065 0.078]';
 targetContrastAngle2 = targetContrastAngle1;
 % targetContrast = [targetContrast1; targetContrast2];
 targetContrastAngle = [targetContrastAngle1; targetContrastAngle2];
 
 if strcmp(subjName,'BMC')
-    maxContrasts = [0.04, 0.0125, 0.01, 0.0125, 0.04, 0.09]';
+    maxContrasts= [0.10, 0.07, 0.05, 0.05, 0.07, 0.10]';
 elseif strcmp(subjName,'MAB')
-    maxContrasts = [0.06, 0.025, 0.0175, 0.02, 0.07, 0.18];
+    maxContrasts = [0.14, 0.10, 0.09, 0.07, 0.10, 0.18]';
 elseif strcmp(subjName,'KAS')
-    maxContrasts= [0.04, 0.015, 0.01, 0.015, 0.04, 0.15]';
+    maxContrasts= [0.10, 0.08, 0.055, 0.055, 0.08, 0.10]';
 else
-    maxContrasts = [0.07, 0.02, 0.02, 0.02, 0.07, 0.18]';
+    maxContrasts= [0.14, 0.10, 0.09, 0.07, 0.10, 0.18]';
 end
  targetContrast1 = [linspace(maxContrasts(1)/6,maxContrasts(1),6),...
                     linspace(maxContrasts(2)/6,maxContrasts(2),6),...

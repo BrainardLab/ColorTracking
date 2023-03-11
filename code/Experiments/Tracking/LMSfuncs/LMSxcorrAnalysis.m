@@ -1,4 +1,4 @@
-function [r, rSmooth, rParam, negLL, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType,varargin)
+function [r, rSmooth, rParam, negLL, btstrpStruct, tSecFit] = LMSxcorrAnalysis(Sall,modelType,varargin)
 %
 % function [r, rSmooth, rParam, negLL, btstrpStruct] = LMSxcorrAnalysis(Sall,modelType)
 %

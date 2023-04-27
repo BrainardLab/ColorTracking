@@ -19,6 +19,8 @@ p.addParameter('bPLOTthresholds',0,@isnumeric);
 p.addParameter('fitType','weibull',@ischar);
 p.addParameter('nBoot',0,@isnumeric);
 p.addParameter('tFitBoot',[],@isnumeric);
+p.addParameter('sFitBoot',[],@isnumeric);
+p.addParameter('bFitBoot',[],@isnumeric);
 p.addParameter('subjNum',[],@isnumeric);
 p.parse(S,varargin{:});
 
@@ -28,7 +30,7 @@ targetContrastAngleUnq = unique(S.targetContrastAngle);
 
 nRepeats = 10;
 
-if exist('p.Results.tFitBoot','var')
+if exist('p.Results.tFitBoot','var') && exist('p.Results.sFitBoot','var') && exist('p.Results.bFitBoot','var')
     bIncomingBoots = true;
 else
     bIncomingBoots = false; 
@@ -123,12 +125,15 @@ if p.Results.showPlot
         contrastUnq = unique(abs(S.targetContrast(ind)));
         contrasts4plot = (contrastMinMax(1)-diff(contrastMinMax)*0.1):0.0001:(contrastMinMax(2)+diff(contrastMinMax)*0.1);
         if strcmp(p.Results.fitType,'weibull')
+            PCfitBoot = psyfitWeibullfunc(zeros(size(contrasts4plot)),contrasts4plot,zeros(size(p.Results.sFitBoot(i,:)))',p.Results.sFitBoot(i,:)',p.Results.bFitBoot(i,:)',DPcrt,nIntrvl,0);
+            PCfitCI = quantile(PCfitBoot,[0.16 0.84],1);
             PCfit = psyfitWeibullfunc(zeros(size(contrasts4plot)),contrasts4plot,mFit(i),sFit(i),bFit(i),DPcrt,nIntrvl,0);
         elseif strcmp(p.Results.fitType,'gaussian')
             PCfit = psyfitgengaussfunc(zeros(size(contrasts4plot)),contrasts4plot,mFit(i),sFit(i),bFit(i),DPcrt,nIntrvl,0);
         end
         subplot(2,3,i);
         hold on;
+        fill([contrasts4plot.*100 fliplr(contrasts4plot.*100)],[PCfitCI(1,:) fliplr(PCfitCI(2,:))],[0.9 0.9 0.9],'EdgeColor','none');
         plot(contrasts4plot.*100,PCfit,'k-');
         for j = 1:length(PCdta(:,i))
            nTrlPerCond = sum(abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01 & abs(abs(S.targetContrast)-contrastUnq(j))<0.001);
@@ -153,12 +158,15 @@ if p.Results.showPlot
             contrastUnq = unique(abs(S.targetContrast(ind)));
             contrasts4plot = (contrastMinMax(1)-diff(contrastMinMax)*0.1):0.0001:(contrastMinMax(2)+diff(contrastMinMax)*0.1);
             if strcmp(p.Results.fitType,'weibull')
+                PCfitBoot = psyfitWeibullfunc(zeros(size(contrasts4plot)),contrasts4plot,zeros(size(p.Results.sFitBoot(i,:)))',p.Results.sFitBoot(i,:)',p.Results.bFitBoot(i,:)',DPcrt,nIntrvl,0);
+                PCfitCI = quantile(PCfitBoot,[0.16 0.84],1);
                 PCfit = psyfitWeibullfunc(zeros(size(contrasts4plot)),contrasts4plot,mFit(i),sFit(i),bFit(i),DPcrt,nIntrvl,0);
             elseif strcmp(p.Results.fitType,'gaussian')
                 PCfit = psyfitgengaussfunc(zeros(size(contrasts4plot)),contrasts4plot,mFit(i),sFit(i),bFit(i),DPcrt,nIntrvl,0);
             end
             subplot(2,3,i-6);
             hold on;
+            fill([contrasts4plot.*100 fliplr(contrasts4plot.*100)],[PCfitCI(1,:) fliplr(PCfitCI(2,:))],[0.9 0.9 0.9],'EdgeColor','none');
             plot(contrasts4plot.*100,PCfit,'k-');
             for j = 1:length(PCdta(:,i))
                nTrlPerCond = sum(abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01 & abs(abs(S.targetContrast)-contrastUnq(j))<0.001);

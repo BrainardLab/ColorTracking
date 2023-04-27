@@ -90,15 +90,25 @@ if p.Results.nBoot>0
             if isfile(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'])
                 tFitBootCurrent = tFitBoot;
                 tFitBootNew = tFitBoot(:,(size(tFitBoot,2)-saveInterval+1):size(tFitBoot,2));
-                load(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'],'tFitBoot');
+                sFitBootCurrent = sFitBoot;
+                sFitBootNew = sFitBoot(:,(size(sFitBoot,2)-saveInterval+1):size(sFitBoot,2));
+                bFitBootCurrent = bFitBoot;
+                bFitBootNew = bFitBoot(:,(size(bFitBoot,2)-saveInterval+1):size(bFitBoot,2));                
+                load(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'],'tFitBoot','sFitBoot','bFitBoot');
                 tFitBootOld = tFitBoot;
                 tFitBoot = cat(2,tFitBootOld,tFitBootNew);
+                sFitBootOld = sFitBoot;
+                sFitBoot = cat(2,sFitBootOld,sFitBootNew);        
+                bFitBootOld = bFitBoot;
+                bFitBoot = cat(2,bFitBootOld,bFitBootNew);                
                 save(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'], ...
-                     'tFitBoot','tFit','targetContrastAngleUnq');
+                     'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq');
                 tFitBoot = tFitBootCurrent;
+                sFitBoot = sFitBootCurrent;
+                bFitBoot = bFitBootCurrent;
             else
                 save(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'], ...
-                     'tFitBoot','tFit','targetContrastAngleUnq');
+                     'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq');
             end
         end
     end

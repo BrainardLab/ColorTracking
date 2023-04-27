@@ -130,6 +130,10 @@ if p.Results.showPlot
         subplot(2,3,i);
         hold on;
         plot(contrasts4plot.*100,PCfit,'k-');
+        for j = 1:length(PCdta(:,i))
+           nTrlPerCond = sum(abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01 & abs(abs(S.targetContrast)-contrastUnq(j))<0.001);
+           plot(contrastUnq(j).*[100 100],binoinv([0.16 0.84],nTrlPerCond,PCdta(j,i))./nTrlPerCond,'k'); 
+        end
         plot(contrastUnq.*100,PCdta(:,i),'ko','MarkerSize',10,'MarkerFaceColor','w');
         xlimTmp = xlim;
         plot([tFit(i)*100 tFit(i)*100],[0.4 normcdf(0.5.*sqrt(nIntrvl).*DPcrt)],'k--');
@@ -156,6 +160,10 @@ if p.Results.showPlot
             subplot(2,3,i-6);
             hold on;
             plot(contrasts4plot.*100,PCfit,'k-');
+            for j = 1:length(PCdta(:,i))
+               nTrlPerCond = sum(abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01 & abs(abs(S.targetContrast)-contrastUnq(j))<0.001);
+               plot(contrastUnq(j).*[100 100],binoinv([0.16 0.84],nTrlPerCond,PCdta(j,i))./nTrlPerCond,'k'); 
+            end
             plot(contrastUnq.*100,PCdta(:,i),'ko','MarkerSize',10,'MarkerFaceColor','w');
             xlimTmp = xlim;
             plot([tFit(i)*100 tFit(i)*100],[0.4 normcdf(0.5.*sqrt(nIntrvl).*DPcrt)],'k--');

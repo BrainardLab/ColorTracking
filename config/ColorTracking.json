@@ -38,6 +38,19 @@
 		"url": ""
 	},
     {
+        "flavor": "",
+        "hook": "",
+        "importance": "",
+        "localHookTemplate": "",
+        "name": "bads",
+        "pathPlacement": "append",
+        "subfolder": "",
+        "toolboxRoot": "",
+        "type": "git",
+        "update": "",
+        "url": "https:\/\/github.com\/acerbilab\/bads.git"
+    },
+    {
 		"flavor": "",
 		"hook": "",
 		"importance": "",

@@ -1,7 +1,7 @@
 %%%%%%% Do the CTM for the RotM model %%%%%%%
 %
 %% Load the data  
-subjID = 'MAB';
+subjID = 'KAS';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
@@ -94,7 +94,7 @@ for ii = 1:numDirections
 end
 
 asymptotes = mean(minLags,2);
-
+figure;
 plot(1:numDirections,asymptotes)
 xticks(1:numDirections)
 xticklabels(uniqDir)

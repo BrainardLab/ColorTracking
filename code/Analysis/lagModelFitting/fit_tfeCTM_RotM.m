@@ -1,7 +1,7 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
 %
 %% Load the data  
-subjID = 'KAS';
+subjID = 'MAB';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');

@@ -1,5 +1,9 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
 %
+% DHB: This version is broken.  I added 'tracking' to the cache file names,
+% but that was not the only issue.  I think the RotMversion is the real
+% version.
+%
 %% Load the data  
 subjID = 'BMC';
 projectName = 'ColorTracking';
@@ -16,8 +20,9 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
-load(fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']));
-load(fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']));
+load(fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']));
+load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
+
 % Get the CIs
 [upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68);
 

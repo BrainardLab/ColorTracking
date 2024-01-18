@@ -1,13 +1,12 @@
 %%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
-%
+
 %% Load the data  
-subjID = 'MAB';
+subjID = 'BMC';
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
 
-
-% get subject code
+%% Get subject code
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
 elseif strcmp(subjID,'BMC')
@@ -19,8 +18,13 @@ end
 plotInfo.figSavePath = getpref(projectName,'figureSavePath');
 plotInfo.subjCode    = subjCode;
 
+%% Load data
 load(fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']));
-load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
+
+% DHB: 1/18/24. There seems to have been some bootstrapping done, but this is not used
+% currently, so I commented it out to avoid confusion.
+%load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
+
 % Get the CIs
 [upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68);
 

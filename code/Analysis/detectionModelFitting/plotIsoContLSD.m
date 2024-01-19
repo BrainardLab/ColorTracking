@@ -32,6 +32,9 @@ p.addParameter('lSampleBase',[-.5:0.01:.5],@isvector);
 p.addParameter('dispParams',false,@islogical);
 p.addParameter('thePacket',[],@isstruct);
 p.addParameter('plotInfo',[],@isstruct);
+p.addParameter('desiredEqContrast',[],@isvector);
+p.addParameter('ellipseXLim',0.1,@isnumeric);
+p.addParameter('ellipseYLim',0.1,@isnumeric);
 p.parse(paramsLSD,varargin{:});
 
 % Pull stuff out of the results struct
@@ -41,13 +44,17 @@ xSampleBase  = p.Results.xSampleBase;
 lSampleBase  = p.Results.lSampleBase;
 targetPC     = p.Results.targetPC;
 plotInfo     = p.Results.plotInfo;
+desiredEqContrast = p.Results.desiredEqContrast;
+
 %% Ellipse Figure
 % Calculate the Minv matrix to tranform a unit circle to the ellipse and do it
 %                    PC  = 1-(1-0.5).*exp(-(m./lambda)).^exponent;
 %         ((PC-1)./-0.5) = exp(-(m./lambda)).^exponent)
 %         log(((PC-1)./-0.5)) = -(m./lambda).^exponent
 % paramsLSD.lambda.* ((-log(((targetPC-1)./-0.5)))^(1/paramsLSD.exponent)) = m
-desiredEqContrast = paramsLSD.lambda.*(-log((targetPC-1)./-(1-0.5))).^(1/paramsLSD.exponent);
+if (isempty(desiredEqContrast))
+    desiredEqContrast = paramsLSD.lambda.*(-log((targetPC-1)./-(1-0.5))).^(1/paramsLSD.exponent);
+end
 circlePoints = desiredEqContrast*UnitCircleGenerate(nPoints);
 [M,Minv,Q] = EllipsoidMatricesGenerate([1 1./paramsLSD.minAxisRatio paramsLSD.angle]','dimension',2);
 ellipsePoints = Minv*circlePoints;
@@ -107,17 +114,16 @@ set(gca, ...
     'YGrid'       , 'off'      , ...
     'XColor'      , [.3 .3 .3], ...
     'YColor'      , [.3 .3 .3], ...
-    'YTick'       , -.1:.05:.1    , ...
-    'XTick'       , -.1:.05:.1    , ...
     'LineWidth'   , 1         , ...
     'ActivePositionProperty', 'OuterPosition');
 axis square
-xlim([-.1 .1])
-ylim([-.1 .1])
-
+    % 'YTick'       , -.1:.05:.1    , ...
+    % 'XTick'       , -.1:.05:.1    , ...
+xlim([-p.Results.ellipseXLim p.Results.ellipseXLim])
+ylim([-p.Results.ellipseYLim p.Results.ellipseYLim]);
 
 %% Non-linearity figure
-
+%
 % Get the NL params
 lambda   = paramsLSD.lambda;
 exponent = paramsLSD.exponent;

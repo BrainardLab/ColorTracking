@@ -108,7 +108,7 @@ contourColors = [242,240,247;...
 %% Plots ellipse and summary fit plot 
 %[figHndl] = plotIsoContAndNonLin(rotMOneMechParams,'thePacket',thePacket)
 [figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket,'plotInfo',plotInfo, ...
-    'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25)
+    'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25);
 plotInfo.title  = 'Lag Vs. Contrast'; plotInfo.xlabel  = 'Contrast (%)';
 plotInfo.ylabel = 'Lag (s)'; plotInfo.figureSizeInches = [20 11];
 

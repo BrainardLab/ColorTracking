@@ -1,6 +1,6 @@
 function [] = loadAndCacheLSD(subjID)
 %{
-    loadandCacheLSD('MAB');
+    loadAndCacheLSD('MAB');
 %}
 
 % get subject code
@@ -20,8 +20,8 @@ theAngles = unique(S.targetContrastAngle)';
 targetContrast = flipud(targetContrast);
 anglesMat = repmat(theAngles,[size(targetContrast,1),1]);
 
+% Convert angles to L and S contrast
 cS = targetContrast.*sind(anglesMat);
-
 cL = targetContrast.*cosd(anglesMat);
 
 [tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,1,'bPLOTpsfs',1,'fitType','weibull','showPlot',false);

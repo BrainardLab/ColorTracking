@@ -1,4 +1,7 @@
 function [] = loadAndCacheLSD(subjID)
+%{
+    loadandCacheLSD('MAB');
+%}
 
 % get subject code
 if strcmp(subjID,'MAB')

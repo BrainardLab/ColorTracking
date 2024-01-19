@@ -32,6 +32,9 @@ p.addParameter('lSampleBase',[-.5:0.01:.5],@isvector);
 p.addParameter('dispParams',false,@islogical);
 p.addParameter('thePacket',[],@isstruct);
 p.addParameter('plotInfo',[],@isstruct);
+p.addParameter('desiredEqContrast',[],@isvector);
+p.addParameter('ellipseXLim',1.25,@isnumeric);
+p.addParameter('ellipseYLim',1.25,@isnumeric);
 p.parse(paramsCTM,varargin{:});
 
 % Pull stuff out of the results struct
@@ -41,16 +44,22 @@ xSampleBase  = p.Results.xSampleBase;
 lSampleBase  = p.Results.lSampleBase;
 targetLag    = p.Results.targetLag;
 plotInfo     = p.Results.plotInfo;
+desiredEqContrast = p.Results.desiredEqContrast;
 
 %% Ellipse Figure
+%
 % Calculate the Minv matrix to tranform a unit circle to the ellipse and do it
 if paramsCTM.minAxisRatio < 10^-5 % one mech case
-    desiredEqContrast = -1* log((targetLag-paramsCTM.minLag)./paramsCTM.amplitude)./paramsCTM.scale;
+    if (isempty(desiredEqContrast))
+        desiredEqContrast = -1* log((targetLag-paramsCTM.minLag)./paramsCTM.amplitude)./paramsCTM.scale;
+    end
     S1 = (desiredEqContrast-lSampleBase*cosd(paramsCTM.angle))./sin(paramsCTM.angle);
     S2 = (desiredEqContrast-lSampleBase*cosd(paramsCTM.angle))./sin(paramsCTM.angle);
     [~,~,Q] = EllipsoidMatricesGenerate([1 paramsCTM.minAxisRatio paramsCTM.angle]','dimension',2);
 else
-    desiredEqContrast = -1* log((targetLag-paramsCTM.minLag)./paramsCTM.amplitude)./paramsCTM.scale;
+    if (isempty(desiredEqContrast))
+        desiredEqContrast = -1* log((targetLag-paramsCTM.minLag)./paramsCTM.amplitude)./paramsCTM.scale;
+    end
     circlePoints = desiredEqContrast*UnitCircleGenerate(nPoints);
     [M,Minv,Q] = EllipsoidMatricesGenerate([1 1./paramsCTM.minAxisRatio paramsCTM.angle]','dimension',2);
     ellipsePoints = Minv*circlePoints;
@@ -59,8 +68,8 @@ end
 % Plot it
 tcHndl = figure;
 h1 = subplot(1,2,1); hold on
-xlim([-1.25 1.25])
-ylim([-1.25 1.25])
+xlim([-p.Results.ellipseXLim p.Results.ellipseXLim])
+ylim([-p.Results.ellipseYLim p.Results.ellipseYLim]);
 
 % get current axes
 axh = gca;
@@ -74,9 +83,9 @@ if paramsCTM.minAxisRatio < 10^-5 % one mech case
     plot(lSampleBase,S1)
     plot(lSampleBase,S2)
 else
-
     line(ellipsePoints(1,:),ellipsePoints(2,:),'color', elPlotColor, 'LineWidth', 1.5);
 end
+
 % set axes and figure labels
 hXLabel = xlabel('L Contrast');
 hYLabel = ylabel('S Contrast');

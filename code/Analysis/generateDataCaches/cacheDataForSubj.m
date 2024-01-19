@@ -138,10 +138,10 @@ if p.Results.isBootstrap
 end
 
 %% save out the params and the bootstrap params
-paramsCacheFileName     = fullfile(paramsCacheFolder,[subjCode '_paramsCache.mat']);
+paramsCacheFileName     = fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']);
 save(paramsCacheFileName,'infoParams','lagsMat','MaxContrastLMS','cL','cS','uniqueColorDirs')
 
 if p.Results.isBootstrap
-    bootParamsCacheFileName = fullfile(bootParamsCacheFolder,[subjCode '_bootParamsCache.mat']);
+    bootParamsCacheFileName = fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']);
     save(bootParamsCacheFileName,'infoBootParams','meanLagBtstrpLagMat','sDevBtstrpLagMat','rParamsBtstrpStruct');
 end

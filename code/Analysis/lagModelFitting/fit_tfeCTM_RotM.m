@@ -1,10 +1,7 @@
-%%%%%%% Do the CTM for the 1 and 2 mech models %%%%%%%
+%%%%%%% Do the CTM fits for the 1 and 2 mech models %%%%%%%
 
 %% Load the data  
 subjID = 'BMC';
-projectName = 'ColorTracking';
-paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
-bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
 
 %% Get subject code
 if strcmp(subjID,'MAB')
@@ -15,17 +12,17 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
+projectName = 'ColorTracking';
+paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
 plotInfo.figSavePath = getpref(projectName,'figureSavePath');
 plotInfo.subjCode    = subjCode;
 
 %% Load data
 load(fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']));
 
-% DHB: 1/18/24. There seems to have been some bootstrapping done, but this is not used
-% currently, so I commented it out to avoid confusion.
-%load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
-
-% Get the CIs
+%% Bootstrap info
+bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
+load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
 [upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68);
 
 %% Make the packet
@@ -76,7 +73,7 @@ ctmOBJmechOne = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMech
 theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJmechTwo = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
-%% Fit it
+%% Fit
 defaultParamsInfo = [];
 fitErrorScalar    = 100000;
 
@@ -105,16 +102,19 @@ contourColors = [242,240,247;...
 117,107,177;...
 84,39,143]./255;
 
+%% Plots ellipse and summary fit plot 
 %[figHndl] = plotIsoContAndNonLin(rotMOneMechParams,'thePacket',thePacket)
-
-
 [figHndl] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket,'plotInfo',plotInfo)
-
-
 plotInfo.title  = 'Lag Vs. Contrast'; plotInfo.xlabel  = 'Contrast (%)';
 plotInfo.ylabel = 'Lag (s)'; plotInfo.figureSizeInches = [20 11];
 
 
+%% Plot montage of lag vs contrast for each direction
+% Confidence interval info
+CIs.upper = abs(upperCI - meanLagBtstrpLagMat);
+CIs.lower = abs(meanLagBtstrpLagMat - lowerCI);
+
+% Customize directions and group into pairs for montaging
 if strcmp(subjID,'MAB')
     directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.6,88.6,87.6],[22.5,-1.4,-22.5]}; yLimVals = [0.2 0.9];
 elseif strcmp(subjID,'BMC')
@@ -125,9 +125,7 @@ elseif strcmp(subjID,'KAS')
     yLimVals = [0.2 0.8];
 end
 
-CIs.upper = abs(upperCI - meanLagBtstrpLagMat);
-CIs.lower = abs(meanLagBtstrpLagMat - lowerCI);
-
+% Do the plot
 plotColors = thePacket.metaData.dirPlotColors;
 plotDirectionPairs(matrixContrasts,lagsMat,lagsTwoMechMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors','errorBarsCI',CIs,'yLimVals',yLimVals)
 

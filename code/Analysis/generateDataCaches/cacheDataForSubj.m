@@ -27,7 +27,7 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
 
 % Examples that run this for our purposes
 %{
-    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20), 'isBootstrap', true, 'nBootIters', 5);
+    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20, 'isBootstrap', true, 'nBootIters', 5);
 %}
 
 %% Input Parser

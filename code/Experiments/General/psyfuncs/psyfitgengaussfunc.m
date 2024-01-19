@@ -59,7 +59,7 @@ if bPLOT
     % PLOT STUFF
     plot(Xcmp,PC,'color',color,'linewidth',2);
     formatFigure([xLbl],[yLbl],['T=' num2str(T,'%.2f') ': \mu=' num2str(mFit,'%1.2f') ',\sigma=' num2str(sFit,'%1.2f') ',\beta=' num2str(bFit,'%1.2f') ',nIntrvl=' num2str(nIntrvl)]);
-    xlim(minmax(Xcmp)+[-.1 .1]); ylim([0 1])
+    xlim(minmaxLocal(Xcmp)+[-.1 .1]); ylim([0 1])
     axis square
 
     % WRITE STUFF TO SCREEN

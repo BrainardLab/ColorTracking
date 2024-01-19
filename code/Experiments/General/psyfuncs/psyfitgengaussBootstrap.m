@@ -110,7 +110,7 @@ if bPLOT
     end
     % PSYCHOMETRIC FUNCTION FIT
     subplot(1,4,1);
-    XcmpPlt = linspace(min(minmax(Xcmp)),max(minmax(Xcmp)),101);
+    XcmpPlt = linspace(min(minmaxLocal(Xcmp)),max(minmaxLocal(Xcmp)),101);
     % PchsPlt = psyfuncgengauss([],XcmpPlt,mDta,sDta,bDta,DPcrt,0);
     PchsPlt = psyfitgengaussfunc([],XcmpPlt,mDta,sDta,bDta,DPcrt,nIntrvl,0);
     plot(XcmpPlt,PchsPlt,'k'); hold on;

@@ -102,7 +102,7 @@ rFit = xcorrFitMLEfunc(rLagFit,log(rLagFit),modelType,rParam);
 % PLOT RESULTS
 if bPLOT == 1
     figure; hold on;
-    xLim=minmax(rLagVal);
+    xLim=minmaxLocal(rLagVal);
     % DATA
     h(1)=plot(rLagVal,r,   'k--','linewidth',1);
     % FIT

@@ -79,13 +79,13 @@ if bPLOT
     plot(gamPix,gamFnc,'k','linewidth',2);
     errorbar(Gdata(:,1),Gdata(:,2),std(GAMDATA(:,2:end),[],2), 'ko','linewidth',2);
     formatFigure(['Pixel Value'],'Luminance');
-    xlim([minmax(Gdata(:,1))])
+    xlim([minmaxLocal(Gdata(:,1))])
     axis square;
     
     subplot(1,2,2);
     plot(gamFnc,gamPix,'k','linewidth',2);
     formatFigure('Luminance',['Pixel Value']);
-    xlim([minmax(Gdata(:,2))])
+    xlim([minmaxLocal(Gdata(:,2))])
     axis square;
-    ylim(minmax(gamPix));
+    ylim(minmaxLocal(gamPix));
 end

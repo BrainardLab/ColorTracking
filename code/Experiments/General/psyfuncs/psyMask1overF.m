@@ -48,7 +48,7 @@ CIsz = 99./100;
 [Qlohi]=quantile(mskNoise(:),[(1 - CIsz)./2  1-(1 - CIsz)./2]);
 mskNoise = (mskNoise - Qlohi(1))./(Qlohi(2) - Qlohi(1)); 
 
-% minmax(mskNoise)
+% minmaxLocal(mskNoise)
 bIndLo = mskNoise<0;
 bIndHi = mskNoise>1;
 mskNoise(bIndLo) = 0;

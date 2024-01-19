@@ -159,11 +159,11 @@ if bPLOT
     subplot(2,2,1);
     try
         imagesc(posXmat(1,:),posYmat(:,1)',log(I)); hold on;
-        caxis(minmax((I(I>min(I(:))))))
+        caxis(minmaxLocal((I(I>min(I(:))))))
         formatFigure('Pos or Freq','Pos or Freq','Input');
     catch
         imagesc(posXmat(1,:),posYmat(:,1)',(I)); hold on;
-        caxis(minmax(log(I(I>min(I(:))))))
+        caxis(minmaxLocal(log(I(I>min(I(:))))))
         formatFigure('Pos or Freq','Pos or Freq','Log(Input)');
     end
     for b = 1:length(posBinLims)

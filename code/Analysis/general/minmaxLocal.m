@@ -1,8 +1,8 @@
-function [MinMax] = minmax(X)
+function [MinMax] = minmaxLocal(X)
 
-% function [MinMax] = minmax(X)
+% function [MinMax] = minmaxLocal(X)
 % 
-%   example call: minmax(1:5)
+%   example call: minmaxLocal(1:5)
 %
 % returns min and max values of vector or matrix
 %

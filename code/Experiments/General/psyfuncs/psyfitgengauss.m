@@ -94,7 +94,7 @@ m0  = mFix;
 s0  = sFix;
 b0  = bFix;
 if isempty(m0); m0 = mean([min(Xcmp(:)) max(Xcmp(:))]); m0 = m0  + .1.*randn; end
-if isempty(s0); s0 = diff(minmax(abs(Xcmp)))./6;        s0 = s0  + .1.*s0.*randn; end
+if isempty(s0); s0 = diff(minmaxLocal(abs(Xcmp)))./6;        s0 = s0  + .1.*s0.*randn; end
 if isempty(b0); b0 = 1;                                 b0 = b0  + .1.*b0.*randn; end
 p0 = [m0 s0 b0];
 
@@ -146,6 +146,6 @@ if bPLOT
     writeText(1-.1,.1,{['n=' num2str(numel(RcmpChs))]},'ratio',18,'right')
     end
     formatFigure([xLbl],[yLbl],['T=' num2str(T,'%.2f') ': \mu=' num2str(mFit,'%1.2f') ',\sigma=' num2str(sFit,'%1.2f') ',\beta=' num2str(bFit,'%1.2f')]);
-    xlim(minmax(Xcmp)+[-.1 .1]); ylim([0 1])
+    xlim(minmaxLocal(Xcmp)+[-.1 .1]); ylim([0 1])
     axis square
 end

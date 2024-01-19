@@ -78,6 +78,6 @@ if bPLOT
    subplot(1,2,2)
    plot(X(floor(size(W,1)/2+1),:) , W(floor(size(W,1)/2+1),:),'k','linewidth',2)
    axis square;
-   axis([minmax(X) -.1 1.1]);
+   axis([minmaxLocal(X) -.1 1.1]);
    formatFigure([],[],'1D');
 end

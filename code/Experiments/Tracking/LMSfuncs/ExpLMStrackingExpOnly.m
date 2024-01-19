@@ -383,7 +383,7 @@ S.Apix          = S.Adeg.*D.pixPerDegXY(1);
 % STIMULUS GENERATION %
 %%%%%%%%%%%%%%%%%%%%%%
 % SET MEAN LUMINANCE
-% S.lumL(1:S.trlPerRun,1)  = D.correctedBgd;  % PROPORTION OF LUMINANCE RANGE... e.g. 0.5 = min(L)+0.5.*diff(minmax(L))
+% S.lumL(1:S.trlPerRun,1)  = D.correctedBgd;  % PROPORTION OF LUMINANCE RANGE... e.g. 0.5 = min(L)+0.5.*diff(minmaxLocal(L))
 % S.lumR(1:S.trlPerRun,1)  = D.correctedBgd;
 S.meanDC(1:S.trlPerRun,1) = mean(D.correctedBgd);
 

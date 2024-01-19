@@ -7,9 +7,6 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
 %    contrast on L, the contrast on S, the Lags, and the unique color
 %    directions.
 %
-% This breaks with isBootstrap false because there aren't conditionals
-% around all the places there should be.
-%
 % Inputs:
 %    subjId            - Subject ID
 %    expNameCell       - Cell array of the experiment code names.
@@ -27,7 +24,7 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
 
 % Examples that run this for our purposes
 %{
-    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20, 'isBootstrap', true, 'nBootIters', 5);
+    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20, 'isBootstrap', false, 'nBootIters', 5);
 %}
 
 %% Input Parser
@@ -98,10 +95,12 @@ for ii = 1:length(expNameCell)
         end
     end
     
-    for kk = 1:length(btstrpStruct)
-        rParamsBtstrp(:,:,:,kk) = btstrpStruct(kk).rParamBtstrp;
+    if p.Results.isBootstrap
+        for kk = 1:length(btstrpStruct)
+            rParamsBtstrp(:,:,:,kk) = btstrpStruct(kk).rParamBtstrp;
+        end
+        rParamsBtstrpStruct(ii).rParamsBtstrp = rParamsBtstrp;
     end
-    rParamsBtstrpStruct(ii).rParamsBtstrp = rParamsBtstrp;
    
     % Calculate the lags
     if strcmp(p.Results.fitMethod,'LGS')
@@ -121,8 +120,10 @@ end
 
 % Reshape the parameters
 lagsMat = reshape(lags,[size(lags,1) size(lags,2)*size(lags,3)]);
-meanLagBtstrpLagMat = reshape(meanLagBtstrp,[size(meanLagBtstrp,1) size(meanLagBtstrp,2)*size(meanLagBtstrp,3)]);
-sDevBtstrpLagMat    = reshape(sDevBtstrpLag,[size(sDevBtstrpLag,1) size(sDevBtstrpLag,2)*size(sDevBtstrpLag,3)]);
+if p.Results.isBootstrap
+    meanLagBtstrpLagMat = reshape(meanLagBtstrp,[size(meanLagBtstrp,1) size(meanLagBtstrp,2)*size(meanLagBtstrp,3)]);
+    sDevBtstrpLagMat    = reshape(sDevBtstrpLag,[size(sDevBtstrpLag,1) size(sDevBtstrpLag,2)*size(sDevBtstrpLag,3)]);
+end
 
 % create info struct for checks used in the dependant functions.
 infoParams.computeDate = date;

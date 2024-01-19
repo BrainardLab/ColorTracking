@@ -1,14 +1,14 @@
 function Sall = loadPSYdataLMSall(expType, subjNames, expName, stmType, dataFileNums, localHostName, serverORlocal)
-
 % function Sall = loadPSYdataLMSall(expType, subjName, stmType, dataFileNums, localHostName, serverORlocal)
 %
-% wrapper function for loadPSYdataLMS for seemlessly loading 
+% Wrapper function for loadPSYdataLMS for seemlessly loading 
 % multiple data files at the same time
 %
 % expType:       experiment type code
 %                'TRK'   -> tracking experiment
 %                'JND'   -> just-noticeable difference
 % subjName:      subject name
+% expName:       experimentName, here likely to be 'LS1', 'LS2', or 'LS3'
 % stmType:       stimulus type
 %                'CGB' -> compound Gabor
 % dataFileNums:  cell of data file numbers--MAKE SURE THESE LINE UP WITH

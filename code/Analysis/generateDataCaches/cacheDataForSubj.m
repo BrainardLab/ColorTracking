@@ -2,14 +2,13 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
 % Takes in a subject name and cell array of ecperiments names and ouputs a
 % singular cached form of the data.
 %
-% Syntax:
-%   [C, sampleBaseTheta] = generateIsorepsoneContour(params, targetLag, numSamples)
-%
 % Description: Takes in the subject ID and a cell array of experiment code
 %    names and saves out a cached version of the data which contains the
 %    contrast on L, the contrast on S, the Lags, and the unique color
 %    directions.
 %
+% This breaks with isBootstrap false because there aren't conditionals
+% around all the places there should be.
 %
 % Inputs:
 %    subjId            - Subject ID
@@ -28,7 +27,7 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
 
 % Examples that run this for our purposes
 %{
-  cacheDataForSubj('MAB', {  })
+    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20), 'isBootstrap', true, 'nBootIters', 5);
 %}
 
 %% Input Parser
@@ -42,7 +41,7 @@ p.addParameter('nBootIters',5,@isnumeric);
 p.addParameter('plotRawData',false,@islogical);
 p.parse(subjID,expNameCell,varargin{:});
 
-% Get subject code from ID
+%% Get subject code from ID
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
 elseif strcmp(subjID,'BMC')
@@ -51,7 +50,7 @@ elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
 end
 
-% Get prefs that point to directories
+%% Get prefs that point to directories
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder','tracking');
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder','tracking');

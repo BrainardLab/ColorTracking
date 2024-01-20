@@ -84,8 +84,8 @@ paramsCacheFolder     = fullfile(CNST_analysis,'dataCache','paramsCache');
 % Cached boostraps of the data go here.
 bootParamsCacheFolder = fullfile(CNST_analysis,'dataCache','bootParamsCache');
 
-% Raw data live here.
-rawDataDir = fullfile(dropboxPath,'CNSC_data','ColorTrackingTask');
+% Raw data live here.  These raw data are available from the authors.
+rawDataDir = fullfile(baseDir,'CNSC_data','ColorTrackingTask','PaperData');
 
 % Figures come out here.
 figureSavePath = fullfile(CNST_analysis, 'outputFigures');
@@ -93,7 +93,6 @@ figureSavePath = fullfile(CNST_analysis, 'outputFigures');
 % Set the actual preferences according to locations defined above.
 setpref(projectName,'paramsCacheFolder',paramsCacheFolder);
 setpref(projectName,'bootParamsCacheFolder',bootParamsCacheFolder);
-setpref(projectName,'crossValCacheFolder',crossValCacheFolder);
 setpref(projectName,'figureSavePath',figureSavePath);
 setpref(projectName,'CalDataFolder',CalFolder);
 setpref(projectName,'CalFolder',CalFolder);

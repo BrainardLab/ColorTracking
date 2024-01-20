@@ -1,4 +1,4 @@
-function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
+function [] =  generateTrackingCachedData(subjID, expNameCell, varargin)
 % Takes in a subject name and cell array of ecperiments names and ouputs a
 % singular cached form of the data.
 %
@@ -6,6 +6,11 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
 %    names and saves out a cached version of the data which contains the
 %    contrast on L, the contrast on S, the Lags, and the unique color
 %    directions.
+%
+%    Locations of raw and cached data are set by preferences in the
+%    'ColorTracking' group.  See config/ColorTrackingLocalHookTemplate.m.
+%
+%    Examples in the source code show usage.
 %
 % Inputs:
 %    subjId            - Subject ID
@@ -28,6 +33,8 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
     % fit of log Gaussian is at its parameter bounds.  I verified that you
     % don't get this warning when fitting the data, so it is only a feature
     % of the bootstrapped data.
+    %
+    % This takes a while.
     cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
     cacheDataForSubj('BMC',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
     cacheDataForSubj('KAS',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);

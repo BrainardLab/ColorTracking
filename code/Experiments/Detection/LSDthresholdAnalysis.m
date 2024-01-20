@@ -24,18 +24,32 @@ p.addParameter('bFitBoot',[],@isnumeric);
 p.addParameter('subjNum',[],@isnumeric);
 p.parse(S,varargin{:});
 
+% There was code here hard coded to a directory on Ben Chin's machine.
+% Replacing that with code that draws the directory from the project
+% preferences.
+% bootParamsCacheFolder = '/home/ben/Documents/ColorTracking';
+projectName = 'ColorTracking';
+bootParamsCacheFolder = fullfile(getpref(projectName,'bootParamsCacheFolder'),'detection');
+
+% Initialize struct for bootstrapped data
+rParamsBtstrpStruct = struct;
+
+% Two interval experiment
 nIntrvl = 2;
 
+% Get target angles
 targetContrastAngleUnq = unique(S.targetContrastAngle);
-
-nRepeats = 10;
-
 if exist('p.Results.tFitBoot','var') && exist('p.Results.sFitBoot','var') && exist('p.Results.bFitBoot','var')
     bIncomingBoots = true;
 else
     bIncomingBoots = false; 
 end
 
+% I think nRepeats is the number of times each fit is repeated,
+% so I'm guessing there is some sort of randomization for grid
+% on some search starting points.  Decided not to worry about
+% this.
+nRepeats = 10;
 for i = 1:length(targetContrastAngleUnq)
    ind = abs(S.targetContrastAngle-targetContrastAngleUnq(i))<0.01;
    for j = 1:nRepeats
@@ -63,6 +77,13 @@ tFitBoot = [];
 mFitBoot = [];
 
 if p.Results.nBoot>0
+    % Define file for bootstrap output, and delete the old version if it
+    % exists. Otherwise it will just keep appending to old versions in
+    % a way that won't be transparent.
+    bootFile = fullfile(bootParamsCacheFolder,['detectionBootsS' num2str(p.Results.subjNum) 'cache.mat']);
+    if (exist(bootFile,'file'))
+        delete(bootFile);
+    end
     for i = 1:p.Results.nBoot
         for j = 1:length(targetContrastAngleUnq)
            ind = abs(S.targetContrastAngle-targetContrastAngleUnq(j))<0.01;
@@ -89,27 +110,27 @@ if p.Results.nBoot>0
         end
         saveInterval = 10;
         if mod(i,saveInterval)==0
-            if isfile(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'])
+            if isfile(bootFile)
                 tFitBootCurrent = tFitBoot;
                 tFitBootNew = tFitBoot(:,(size(tFitBoot,2)-saveInterval+1):size(tFitBoot,2));
                 sFitBootCurrent = sFitBoot;
                 sFitBootNew = sFitBoot(:,(size(sFitBoot,2)-saveInterval+1):size(sFitBoot,2));
                 bFitBootCurrent = bFitBoot;
                 bFitBootNew = bFitBoot(:,(size(bFitBoot,2)-saveInterval+1):size(bFitBoot,2));                
-                load(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'],'tFitBoot','sFitBoot','bFitBoot');
+                load(bootFile,'tFitBoot','sFitBoot','bFitBoot');
                 tFitBootOld = tFitBoot;
                 tFitBoot = cat(2,tFitBootOld,tFitBootNew);
                 sFitBootOld = sFitBoot;
                 sFitBoot = cat(2,sFitBootOld,sFitBootNew);        
                 bFitBootOld = bFitBoot;
                 bFitBoot = cat(2,bFitBootOld,bFitBootNew);                
-                save(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'], ...
+                save(bootFile, ...
                      'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq');
                 tFitBoot = tFitBootCurrent;
                 sFitBoot = sFitBootCurrent;
                 bFitBoot = bFitBootCurrent;
             else
-                save(['/home/ben/Documents/ColorTracking/detectionBootsS' num2str(p.Results.subjNum) 'cache.mat'], ...
+                save(bootFile, ...
                      'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq');
             end
         end

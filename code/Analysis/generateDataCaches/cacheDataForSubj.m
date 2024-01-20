@@ -24,7 +24,13 @@ function [] =  cacheDataForSubj(subjID, expNameCell, varargin)
 
 % Examples that run this for our purposes
 %{
-    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20, 'isBootstrap', false, 'nBootIters', 5);
+    % There are some warning that apper if you bootstrap, noting that the
+    % fit of log Gaussian is at its parameter bounds.  I verified that you
+    % don't get this warning when fitting the data, so it is only a feature
+    % of the bootstrapped data.
+    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
+    cacheDataForSubj('BMC',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
+    cacheDataForSubj('KAS',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
 %}
 
 %% Input Parser
@@ -63,7 +69,8 @@ for ii = 1:length(expNameCell)
     theRuns = 1:p.Results.numRuns;
     Sall = loadPSYdataLMSall('TRK', subjID, expName, 'CGB', {theRuns}, 'jburge-hubel', 'local');
     
-    % get the specific experiment code
+    % Get the specific experiment code.  The third one differs by subject
+    % because we optimized the last few color directions for each subject.
     if strcmp(expName,'LS1')
         expCode = 'Experiment1-Pos';
     elseif strcmp(expName,'LS2')
@@ -79,15 +86,15 @@ for ii = 1:length(expNameCell)
     colorDirs = round(atand(cS(:,ii)./cL(:,ii)),2);
     uniqueColorDirs(:,ii) = unique(colorDirs,'stable');
     
-    
     for jj = 1:size(uniqueColorDirs,1)
         
         % 0 DEG IN SL PLANE
         ind = abs(atand(Sall.MaxContrastLMS(:,3)./Sall.MaxContrastLMS(:,1))-uniqueColorDirs(jj,ii))<0.001;
         
+        % Set up structure
         S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
-        % LMS ANALYSIS TO ESTIMATE LAGS
-        
+
+        % LMS ANALYSIS TO ESTIMATE LAGS, BOOTSTRAPPED OR NOT
         if p.Results.isBootstrap
             [~, ~, rParams(:,:,jj), ~, btstrpStruct(jj)] = LMSxcorrAnalysis(S,p.Results.fitMethod,'bPLOTfitsAndRaw',p.Results.plotRawData,'nBootstrapIter',p.Results.nBootIters);
         else
@@ -95,6 +102,7 @@ for ii = 1:length(expNameCell)
         end
     end
     
+    % Organize bootstrap info
     if p.Results.isBootstrap
         for kk = 1:length(btstrpStruct)
             rParamsBtstrp(:,:,:,kk) = btstrpStruct(kk).rParamBtstrp;
@@ -102,7 +110,7 @@ for ii = 1:length(expNameCell)
         rParamsBtstrpStruct(ii).rParamsBtstrp = rParamsBtstrp;
     end
    
-    % Calculate the lags
+    % Calculate the lags.  For the paper we used the log Gaussian fit.
     if strcmp(p.Results.fitMethod,'LGS')
         lags(:,:,ii) = flipud(squeeze(rParams(2,:,:)));
         if p.Results.isBootstrap
@@ -118,19 +126,18 @@ for ii = 1:length(expNameCell)
     
 end
 
-% Reshape the parameters
+%% Reshape the parameters
 lagsMat = reshape(lags,[size(lags,1) size(lags,2)*size(lags,3)]);
 if p.Results.isBootstrap
     meanLagBtstrpLagMat = reshape(meanLagBtstrp,[size(meanLagBtstrp,1) size(meanLagBtstrp,2)*size(meanLagBtstrp,3)]);
     sDevBtstrpLagMat    = reshape(sDevBtstrpLag,[size(sDevBtstrpLag,1) size(sDevBtstrpLag,2)*size(sDevBtstrpLag,3)]);
 end
 
-% create info struct for checks used in the dependant functions.
+% Create info struct for checks used in the dependant functions.
 infoParams.computeDate = date;
 infoParams.expNames = expNameCell;
 infoParams.numRuns  = p.Results.numRuns;
 infoParams.fitMethod  = p.Results.fitMethod;
-
 if p.Results.isBootstrap
     infoBootParams.computeDate = date;
     infoBootParams.expNames    = expNameCell;
@@ -138,7 +145,7 @@ if p.Results.isBootstrap
     infoBootParams.fitMethod   = p.Results.fitMethod;
 end
 
-%% save out the params and the bootstrap params
+%% Save out the params/summary data and the bootstrap params/summary data
 paramsCacheFileName     = fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']);
 save(paramsCacheFileName,'infoParams','lagsMat','MaxContrastLMS','cL','cS','uniqueColorDirs')
 

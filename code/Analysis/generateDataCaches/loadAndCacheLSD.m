@@ -12,6 +12,12 @@ function [] = loadAndCacheLSD(subjID)
 % The cached data is put into a filename
 % with pcCache as part of it, where pc is supposed to make
 % you think of percent correct.
+%
+% This didn't previously produce bootstrapped data, but I added
+% the 'nBoots',100 key/value pair to the call to LSDthresholdAnalysis
+% and fixed the hard coded directory there to respect the project
+% preference.  Also had to pass subjNum into that routine to get the
+% filename right.
 
 %{
     loadAndCacheLSD('MAB');
@@ -22,10 +28,13 @@ function [] = loadAndCacheLSD(subjID)
 % Get subject code
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
+    subjNum = 1;
 elseif strcmp(subjID,'BMC')
     subjCode = 'Subject2';
+    subjNum = 2;
 elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
+    subjNum = 3;
 end
 
 % Burge lab functions used to read and sort the data, etc.
@@ -42,7 +51,7 @@ cL = targetContrast.*cosd(anglesMat);
 % Burge lab functions used to do more stuff.  It looks like
 % our main purpose here is to get the percent correct data
 % out for each stimulus level.
-[tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,1,'bPLOTpsfs',1,'fitType','weibull','showPlot',false);
+[tFit,mFit,sFit,bFit,PCdta] = LSDthresholdAnalysis(S,1,'bPLOTpsfs',1,'fitType','weibull','showPlot',false,'nBoot',100,'subjNum',subjNum);
 pcData = flipud(PCdta);
 infoParams.computeDate = date;
 

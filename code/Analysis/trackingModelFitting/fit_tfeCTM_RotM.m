@@ -4,7 +4,7 @@
 clear; close all;
 
 %% Load the data  
-subjID = 'MAB';
+subjID = 'BMC';
 
 %% Get subject code
 if strcmp(subjID,'MAB')

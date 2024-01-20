@@ -67,7 +67,7 @@ end
 % SPECIAL CASE FOR BEN LAPTOP
 cmpInfo = psyComputerInfo;
 if (ispref('ColorTracking','dropboxPath'))
-    fdirRoot = fullfile(getpref('ColorTracking','dropboxPath'),'CNSC_data','ColorTrackingTask',prjCode);
+    fdirRoot = fullfile(getpref('ColorTracking','rawDataDir'),prjCode);
     fdir  = fullfile(fdirRoot,subjName); 
 elseif strcmp(cmpInfo.localHostName,'ben-Precision-7520')
     fdirRoot = ['/home/ben/Dropbox (Aguirre-Brainard Lab)/CNSC_data/ColorTrackingTask/' prjCode];

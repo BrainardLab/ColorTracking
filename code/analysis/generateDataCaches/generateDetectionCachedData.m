@@ -1,4 +1,4 @@
-function [] = loadAndCacheLSD(subjID)
+function [] = generateDetectionCachedData(subjID)
 %
 % This function is the top level call to read in and do
 % some massaging and initial fitting of th detection
@@ -20,9 +20,9 @@ function [] = loadAndCacheLSD(subjID)
 % filename right.
 
 %{
-    loadAndCacheLSD('MAB');
-    loadAndCacheLSD('BMC');
-    loadAndCacheLSD('KAS');
+    generateDetectionCachedData('MAB');
+    generateDetectionCachedData('BMC');
+    generateDetectionCachedData('KAS');
 %}
 
 % Get subject code

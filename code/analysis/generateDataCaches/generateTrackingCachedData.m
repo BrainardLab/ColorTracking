@@ -35,9 +35,9 @@ function [] =  generateTrackingCachedData(subjID, expNameCell, varargin)
     % of the bootstrapped data.
     %
     % This takes a while.
-    cacheDataForSubj('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
-    cacheDataForSubj('BMC',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
-    cacheDataForSubj('KAS',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
+    generateTrackingCachedData('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
+    generateTrackingCachedData('BMC',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
+    generateTrackingCachedData('KAS',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
 %}
 
 %% Input Parser

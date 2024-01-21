@@ -11,18 +11,25 @@ function fitDetectionCachedData(subjID)
 %% Close
 close all;
 
+%% Parameters
+doBootstrapFits = true;
+
 % Get subject code from subjID
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
+    subjNum = 1;
 elseif strcmp(subjID,'BMC')
     subjCode = 'Subject2';
+    subjNum = 2;
 elseif strcmp(subjID,'KAS')
     subjCode = 'Subject3';
+    subjNum = 3;
 end
 
 % Set up names and places
 projectName = 'ColorTracking';
 paramsCacheFolder = getpref(projectName,'paramsCacheFolder');
+bootParamsCacheFolder = fullfile(getpref(projectName,'bootParamsCacheFolder'),'detection');
 plotInfo.figSavePath = getpref(projectName,'figureSavePath');
 plotInfo.subjCode    = subjCode;
 
@@ -87,9 +94,50 @@ end
 [pcParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
+%% Bootstrapping
+if (doBootstrapFits)
+    % Load the cached bootstrapped data
+    bootFile = fullfile(bootParamsCacheFolder,['detectionBootsS' num2str(subjNum) 'cache.mat']);
+    bootData = load(bootFile);
+
+    % Set up basic bootstrap packet
+    theBootPacket = thePacket;
+
+    % Now do the fit for each bootstrap iteration
+    nBootstraps = size(bootData.tFitBoot,2);
+    for bb = 1:nBootstraps
+        % Stick the bootstrapped probability correct data into the
+        % bootstrapped packet. Unpacking this in the same way
+        % as the real data above get unpacked. The flipud is needed
+        % so that things make sense, and I think it was applied somewhere 
+        % when pcData were created. 
+        bootPcData = flipud(squeeze(bootData.PCdtaBoot(:,:,bb)));
+        theBootPacket.response.values = bootPcData(:)';
+
+        % Do the bootstrapped data fit
+        [pcParamsBoot{bb},fValBoot(bb),pcFromFitParamsBoot{bb}] = lsdOBJ.fitResponse(theBootPacket,'defaultParamsInfo',defaultParamsInfo,...
+            'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+
+        anglesBoot(bb) = pcParamsBoot{bb}.angle;
+        minAxisRatiosBoot(bb) = pcParamsBoot{bb}.minAxisRatio;
+        lambdasBoot(bb) = pcParamsBoot{bb}.lambda;
+        exponentsBoot(bb) = pcParamsBoot{bb}.exponent;
+    end
+end
+
 %% Print the params
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
 lsdOBJ.paramPrint(pcParams)
+
+%% Print boostrap info if we did it
+if (doBootstrapFits)
+    % Report on bootstrapped values.  Taking the standard deviation of the
+    % bootstrapped quantity gives us an estimate of the standard error of
+    % that quantity.
+    fprintf('Bootstrapped ellipse angle: %0.1f +/- %0.3f\n',mean(anglesBoot),std(anglesBoot));
+    fprintf('Bootstrapped min axis ratio: %0.1f +/- %0.3f\n',mean(minAxisRatiosBoot),std(minAxisRatiosBoot));
+end
+
 
 %% Make the figures
 %

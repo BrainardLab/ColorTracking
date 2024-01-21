@@ -1,4 +1,4 @@
-function [tcHndl] = plotIsoContLSD(paramsLSD, varargin)
+function [tcHndlCont,tcHndlNonlin] = plotIsoContLSD(paramsLSD, varargin)
 % Plot the normalized ellipse and non-linearity from the QCM param
 %
 % Syntax:
@@ -61,8 +61,7 @@ ellipsePoints = Minv*circlePoints;
 
 
 % Plot it
-tcHndl = figure;
-h1 = subplot(1,2,1); hold on
+tcHndlCont = figure; hold on
 
 % get current axes
 axh = gca;
@@ -132,8 +131,7 @@ exponent = paramsLSD.exponent;
 pcNL = @(m) 1-(1-0.5).*exp(-(m./lambda).^exponent);
 
 % Plot it
-h2 = subplot(1,2,2);
-hold on
+tcHndlNonlin = figure; hold on;
 
 if ~isempty(p.Results.thePacket)
 
@@ -194,7 +192,7 @@ if ~isempty(p.Results.thePacket)
         c.FontSize = 8;
 
     % resize figure to original size
-    set(h2, 'Position', originalSize);
+    set(tcHndlNonlin, 'Position', originalSize);
 
 end
 
@@ -264,20 +262,25 @@ xlim([0 xMax]);
 set(gcf, 'Color', 'white' );
 axis square
 
-
-
 % Save it!
-figureSizeInches = [6.5 3];
-% set(tcHndl, 'PaperUnits', 'inches');
-% set(tcHndl, 'PaperSize',figureSizeInches);
-tcHndl.Units  = 'inches';
-tcHndl.PaperUnits  = 'inches';
-tcHndl.PaperSize = figureSizeInches;
-tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+figureSizeInches = [3.5 3.5];
+tcHndlCont.Units  = 'inches';
+tcHndlCont.PaperUnits  = 'inches';
+tcHndlCont.PaperSize = figureSizeInches;
+tcHndlCont.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+tcHndlCont.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
 
-figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_Nonlin_LSD.pdf']);
-% Save it
-print(tcHndl, figNameTc, '-dpdf', '-r300');
+figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_LSD.pdf']);
+print(tcHndlCont, figNameTc, '-dpdf', '-r300');
+
+figureSizeInches = [3.5 3.5];
+tcHndlNonlin.Units  = 'inches';
+tcHndlNonlin.PaperUnits  = 'inches';
+tcHndlNonlin.PaperSize = figureSizeInches;
+tcHndlNonlin.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+tcHndlNonlin.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+
+figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Nonlin_LSD.pdf']);
+print(tcHndlNonlin, figNameTc, '-dpdf', '-r300');
 
 end

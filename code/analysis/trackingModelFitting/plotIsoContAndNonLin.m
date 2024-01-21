@@ -1,4 +1,4 @@
-function [tcHndl] = plotIsoContAndNonLin(paramsCTM, varargin)
+function [tcHndlCont,tcHndlNonlin] = plotIsoContAndNonLin(paramsCTM, varargin)
 % Plot the normalized ellipse and non-linearity from the QCM param
 %
 % Syntax:
@@ -66,8 +66,7 @@ else
 end
 
 % Plot it
-tcHndl = figure;
-h1 = subplot(1,2,1); hold on
+tcHndlCont = figure; hold on
 xlim([-p.Results.ellipseXLim p.Results.ellipseXLim])
 ylim([-p.Results.ellipseYLim p.Results.ellipseYLim]);
 
@@ -131,7 +130,6 @@ set(gca, ...
     'ActivePositionProperty', 'OuterPosition');
 axis square
 
-
 %% Non-linearity figure
 
 % Get the NR params
@@ -143,9 +141,7 @@ offset = paramsCTM.minLag;
 lagNL = @(c) amp .* exp(-1*c*scale) + offset;
 
 % Plot it
-h2 = subplot(1,2,2);
-hold on
-
+tcHndlNonlin = figure; hold on
 if ~isempty(p.Results.thePacket)
 
     thePacket = p.Results.thePacket;
@@ -166,8 +162,6 @@ if ~isempty(p.Results.thePacket)
     theResponseMat = reshape(theResponse,[nContrast,length(theDirs)]);
     % get the plot color RGB values
     cVals = thePacket.metaData.dirPlotColors;
-
-
 
     % plot each point with its associated color
     for ii = 1:size(eqContrastMat,2)
@@ -207,22 +201,20 @@ if ~isempty(p.Results.thePacket)
     c.FontSize = 6;
 
     % resize figure to original size
-    set(h2, 'Position', originalSize);
-
-
+    set(tcHndlNonlin, 'Position', originalSize);
 end
 
 %% Plot The Non-Linearity
-xMax = round(maxEqContrast*1.25,2)
+xMax = round(maxEqContrast*1.25,2);
 if isempty(xSampleBase)
     xSampleBase = 0:.05:xMax;
 end
+
 % Evaluate the NR at the xSampleBase Points
 nlVals = lagNL(xSampleBase);
-
 L1 = plot(xSampleBase,nlVals,'Color', elPlotColor, 'LineWidth', 1.5);%'LineStyle','--'
 
-% set the axes and figure labels
+% Set the axes and figure labels
 hTitle  = title ('Response Nonlinearlity');
 hXLabel = xlabel('Equivalent Contrast'  );
 hYLabel = ylabel('Response');
@@ -231,7 +223,7 @@ set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
 set([hXLabel, hYLabel,],'FontSize', 12);
 set( hTitle, 'FontSize', 10,'FontWeight' , 'normal');
 
-% add parameters to the plot
+% Add parameters to the plot
 if p.Results.dispParams
 
     % Text containing math set in LaTeX
@@ -257,14 +249,14 @@ if p.Results.dispParams
     set(theTextHandle,'FontSize', 12, 'Color', [0.3 0.3 0.3], 'BackgroundColor', [1 1 1]);
 end
 
-% get the x axis spacing and labels
+% Get the x axis spacing and labels
 nTicks = 4;
 autoTicksX = round(0:xMax./nTicks:xMax);
 for jj = 1:length(autoTicksX)
     tickNames{jj} = sprintf('%1.1f%',100*autoTicksX(jj));
 end
 
-% format plot
+% Format plot
 set(gca, ...
     'Box'         , 'off'     , ...
     'TickDir'     , 'out'     , ...
@@ -285,22 +277,26 @@ xlim([0 xMax]);
 set(gcf, 'Color', 'white' );
 axis square
 
-
-% Save it!
-figureSizeInches = [6.5 3];
-% set(tcHndl, 'PaperUnits', 'inches');
-% set(tcHndl, 'PaperSize',figureSizeInches);
-tcHndl.Units  = 'inches';
-tcHndl.PaperUnits  = 'inches';
-tcHndl.PaperSize = figureSizeInches;
-tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-tcHndl.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
-
-
+% Save figures
+figureSizeInches = [3.5 3.5];
+tcHndlCont.Units  = 'inches';
+tcHndlCont.PaperUnits  = 'inches';
+tcHndlCont.PaperSize = figureSizeInches;
+tcHndlCont.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+tcHndlCont.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
 if ~isempty(plotInfo)
-    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_Nonlin_CTM.pdf']);
-    % Save it
-    print(tcHndl, figNameTc, '-dpdf', '-r300');
+    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_CTM.pdf']);
+    print(tcHndlCont, figNameTc, '-dpdf', '-r300');
 end
 
+figureSizeInches = [3.5 3.5];
+tcHndlNonlin.Units  = 'inches';
+tcHndlNonlin.PaperUnits  = 'inches';
+tcHndlNonlin.PaperSize = figureSizeInches;
+tcHndlNonlin.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+tcHndlNonlin.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
+if ~isempty(plotInfo)
+    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Nonlin_CTM.pdf']);
+    print(tcHndlNonlin, figNameTc, '-dpdf', '-r300');
+end
 end

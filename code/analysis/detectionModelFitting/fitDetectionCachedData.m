@@ -1,10 +1,15 @@
+function fitDetectionCachedData(subjID)
 %%%%%%% Do the detection model for the 1 and 2 mech models %%%%%%%
 
-%% Close and clear
-clear; close all;
+% Run as here to analyze all subjects
+%{
+    fitDetectionCachedData('MAB');
+    fitDetectionCachedData('BMC');
+    fitDetectionCachedData('KAS');
+%}
 
-%% Load the data  
-subjID = 'MAB';
+%% Close
+close all;
 
 % Get subject code from subjID
 if strcmp(subjID,'MAB')
@@ -40,11 +45,11 @@ thePacket.response.timebase = timebase;
 thePacket.stimulus.values   = [cL(:),cS(:)]';
 thePacket.stimulus.timebase = timebase;
 
-% The Kernel 
+% The Kernel
 thePacket.kernel.values = [];
 thePacket.kernel.timebase = [];
 
-% The Meta Data 
+% The Meta Data
 thePacket.metaData.stimDirections = atand(cS(:)./cL(:));
 thePacket.metaData.stimContrasts  = vecnorm([cS(:),cL(:)]')';
 thePacket.metaData.dirPlotColors  = [230 172 178; ...
@@ -75,7 +80,7 @@ if strcmp(subjID,'MAB')
 elseif strcmp(subjID,'BMC')
     fitErrorScalar    = 10;
 elseif strcmp(subjID,'KAS')
-   fitErrorScalar    = 10;
+    fitErrorScalar    = 10;
 end
 
 % Fit
@@ -97,7 +102,7 @@ plot(pcFromFitParams.values,'r','LineWidth',2,'LineStyle','--');
 
 % Isoresponse contour and summary evaluation of fit to non-linearity
 plotIsoContLSD(pcParams,'thePacket',thePacket,'plotInfo',plotInfo, ...
-        'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25);
+    'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25);
 
 % Montage of psychometric functions
 uniqColorDirs = unique(thePacket.metaData.stimDirections)';
@@ -106,3 +111,4 @@ plotInfo.ylabel = 'Percent Correct'; plotInfo.figureSizeInches = [6 5];
 plotColors = thePacket.metaData.dirPlotColors;
 plotPsychometric(pcParams,pcData,matrixContrasts,uniqColorDirs,plotInfo,'plotColors',plotColors)
 
+end

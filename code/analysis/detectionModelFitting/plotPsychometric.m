@@ -43,6 +43,7 @@ legendLocation  = p.Results.legendLocation;
 sz = p.Results.sz;
 yLimVals = [min(pcData(:)) 1];
 nSmplPnts = p.Results.nSmplPnts;
+
 %% get a color map if none is provided
 if isempty(p.Results.plotColors)
     colorMapJet = jet;
@@ -105,7 +106,6 @@ for ii = 1:nColorDirPlots
     thePacket.stimulus.timebase = 1:length(cS);
     pcFromParamsFit = lsdOBJ.computeResponse(pcParams,thePacket.stimulus,thePacket.kernel);
 
-
     plot(cSmpleBase,pcFromParamsFit.values,'-', ...
         'MarkerEdgeColor',.3*currPlotColor,...
         'MarkerFaceColor',currPlotColor,...
@@ -146,12 +146,10 @@ for ii = 1:nColorDirPlots
         'ActivePositionProperty', 'OuterPosition');
     
     xticks(autoTicksX)
-
     for jj = 1:length(autoTicksX)
         tickNames{jj} = sprintf('%1.1f',100*autoTicksX(jj)); 
     end
     xticklabels(tickNames)
-
     set(gcf, 'Color', 'white' );
 
 
@@ -159,15 +157,9 @@ for ii = 1:nColorDirPlots
 
 
     %% Add labels
-
     hTitle  = title (sprintf('%2.2f^o',uniqueColorDirs(ii)));
-
-
     hXLabel = xlabel(plotInfo.xlabel);
-
-
     hYLabel = ylabel(plotInfo.ylabel);
-
 
     %% Add Legend
     set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');

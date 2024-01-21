@@ -125,13 +125,13 @@ if p.Results.nBoot>0
                 bFitBootOld = bFitBoot;
                 bFitBoot = cat(2,bFitBootOld,bFitBootNew);                
                 save(bootFile, ...
-                     'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq');
+                     'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq','PCdtaBoot','mFitBoot');
                 tFitBoot = tFitBootCurrent;
                 sFitBoot = sFitBootCurrent;
                 bFitBoot = bFitBootCurrent;
             else
                 save(bootFile, ...
-                     'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq');
+                     'tFitBoot','tFit','sFitBoot','sFit','bFitBoot','bFit','targetContrastAngleUnq','PCdtaBoot','mFitBoot');
             end
         end
     end

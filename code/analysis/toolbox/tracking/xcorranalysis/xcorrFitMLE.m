@@ -45,7 +45,7 @@ if sum(isnan(r))>0, error(['xcorrFitMLE: WARNING! trying to fit function to NaNs
 
 % We get warnings that UB is too tight when bootstrapping.
 % So, make it bigger.
-ubFactor = 2;
+ubFactor = 1.5;
 UB = ubFactor*UB;
 
 % MINIMIZATION OPTIONS

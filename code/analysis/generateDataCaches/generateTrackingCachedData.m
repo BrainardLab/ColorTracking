@@ -102,6 +102,7 @@ for ii = 1:length(expNameCell)
         S = structElementSelect(Sall,ind,size(Sall.tgtXmm,2));
 
         % LMS ANALYSIS TO ESTIMATE LAGS, BOOTSTRAPPED OR NOT
+        fprintf('Analyzing color direction %d of %d\n',jj,size(uniqueColorDirs,1));
         if p.Results.isBootstrap
             [~, ~, rParams(:,:,jj), ~, btstrpStruct(jj)] = LMSxcorrAnalysis(S,p.Results.fitMethod,'bPLOTfitsAndRaw',p.Results.plotRawData,'nBootstrapIter',p.Results.nBootIters);
         else

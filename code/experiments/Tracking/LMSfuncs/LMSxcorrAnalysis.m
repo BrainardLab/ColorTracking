@@ -91,8 +91,12 @@ for i = 1:size(colorAngleContrastUnq,1) % LOOP OVER UNIQUE CONDITIONS
         initType = 'RND';
         rhoXXstd = std(rAll,[],2);
         [rSmooth(:,i),rParam(:,i),tSecFit(:,i),negLL(:,i)] = xcorrFitMLE(rLagVal(:,i),r(:,i),rhoXXstd,rStdK,modelType,initType);
-        if p.Results.nBootstrapIter >0
+        if p.Results.nBootstrapIter > 0
+            fprintf('Bootstrapping lag fits\n');
             parfor jj = 1:p.Results.nBootstrapIter
+                if (rem(jj,5) == 0)
+                    fprintf('\tBootstrap iteration %d of %d\n',jj,p.Results.nBootstrapIter)
+                end
                 [rSmoothBtstrp(:,i,jj),rParamBtstrp(:,i,jj),tSecFitBtstrp(:,i,jj),negLLBtstrp(:,i,jj)] = xcorrFitMLE(rLagVal(:,i),rDSTB(:,jj,i),rhoXXstd,rStdK,modelType,initType);
             end
         end

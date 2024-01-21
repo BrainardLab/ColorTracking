@@ -135,7 +135,7 @@ if (doBootstrapFits)
     % bootstrapped quantity gives us an estimate of the standard error of
     % that quantity.
     fprintf('Bootstrapped ellipse angle: %0.1f +/- %0.3f\n',mean(anglesBoot),std(anglesBoot));
-    fprintf('Bootstrapped min axis ratio: %0.1f +/- %0.3f\n',mean(minAxisRatiosBoot),std(minAxisRatiosBoot));
+    fprintf('Bootstrapped min axis ratio: %0.2f +/- %0.3f\n',mean(minAxisRatiosBoot),std(minAxisRatiosBoot));
 end
 
 

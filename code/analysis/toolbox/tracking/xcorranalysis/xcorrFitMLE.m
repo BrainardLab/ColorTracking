@@ -43,6 +43,11 @@ if sum(isnan(r))>0, error(['xcorrFitMLE: WARNING! trying to fit function to NaNs
 % PARAMETER BOUNDS
 [LB,UB] = xcorrFitMLEparamBounds(modelType,rLagVal);
 
+% We get warnings that UB is too tight when bootstrapping.
+% So, make it bigger.
+ubFactor = 5;
+UB = ubFactor*UB;
+
 % MINIMIZATION OPTIONS
 minimizationRoutine = 'fmincon';
 opts = optimset(minimizationRoutine);
@@ -60,6 +65,7 @@ opts.TolCon         = 1e-6;
 % OPTIMIZE PARAMETERS %
 %%%%%%%%%%%%%%%%%%%%%%%
 % NUMBER OF REPEATS
+
 nRpt = 100;
 for i = 1:nRpt % LOOP OVER RANDOM STARTS (TO PROTECT AGAINST LOCAL OPTIMA)
     % INITIAL PARAMETERS

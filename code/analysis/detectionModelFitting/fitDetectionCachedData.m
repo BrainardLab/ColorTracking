@@ -125,6 +125,9 @@ if (doBootstrapFits)
     end
 end
 
+% Fix boot angles sign so that they are all consistent when averaged.
+anglesBoot(anglesBoot < 0) = anglesBoot(anglesBoot < 0) + 180;
+
 %% Print the params
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
 lsdOBJ.paramPrint(pcParams)

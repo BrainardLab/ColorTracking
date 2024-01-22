@@ -29,11 +29,6 @@ function [] =  generateTrackingCachedData(subjID, expNameCell, varargin)
 
 % Examples that run this for our purposes
 %{
-    % There are some warning that apper if you bootstrap, noting that the
-    % fit of log Gaussian is at its parameter bounds.  I verified that you
-    % don't get this warning when fitting the data, so it is only a feature
-    % of the bootstrapped data.
-    %
     % This takes a while.
     generateTrackingCachedData('MAB',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);
     generateTrackingCachedData('BMC',{'LS1','LS2','LS3'},'fitMethod','LGS','numRuns',20,'isBootstrap',true,'nBootIters',100);

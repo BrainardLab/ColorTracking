@@ -11,6 +11,10 @@ function fitTrackingCashedData(subjID)
 %% Close any open figures
 close all;
 
+%% Parameters
+doBootstrapFits = true;
+fitOneMechanism = false;
+
 %% Get subject code
 if strcmp(subjID,'MAB')
     subjCode = 'Subject1';
@@ -30,8 +34,7 @@ load(fullfile(paramsCacheFolder,'tracking',[subjCode '_paramsCache.mat']));
 
 %% Bootstrap info
 bootParamsCacheFolder = getpref(projectName,'bootParamsCacheFolder');
-load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
-[upperCI, lowerCI] = computeCiFromBootSruct(rParamsBtstrpStruct, 68);
+bootData = load(fullfile(bootParamsCacheFolder,'tracking',[subjCode '_bootParamsCache.mat']));
 
 %% Make the packet
 lagVec = lagsMat(:)';
@@ -74,8 +77,10 @@ thePacket.metaData.dirPlotColors  = [230 172 178; ...
 matrixContrasts = reshape(thePacket.metaData.stimContrasts,size(lagsMat));
 
 %% Make the fit one mechanism object
-theDimension= size(thePacket.stimulus.values, 1);
-ctmOBJmechOne = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 1 ,'fminconAlgorithm','active-set');
+if (fitOneMechanism)
+    theDimension= size(thePacket.stimulus.values, 1);
+    ctmOBJmechOne = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 1 ,'fminconAlgorithm','active-set');
+end
 
 %% Make the fit two mechanism object
 theDimension= size(thePacket.stimulus.values, 1);
@@ -86,34 +91,58 @@ defaultParamsInfo = [];
 fitErrorScalar    = 100000;
 
 % One mechanism
-[rotMOneMechParams,~,lagsFromFitOneMech] = ctmOBJmechOne.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-lagsOneMechMat = reshape(lagsFromFitOneMech.values,size(lagsMat));
+if (fitOneMechanism)
+    [rotMOneMechParams,~,lagsFromFitOneMech] = ctmOBJmechOne.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+        'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+    lagsOneMechMat = reshape(lagsFromFitOneMech.values,size(lagsMat));
+end
 
 % Two Mechanism
 [rotMTwoMechParams,fVal,lagsFromFitTwoMech] = ctmOBJmechTwo.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 lagsTwoMechMat = reshape(lagsFromFitTwoMech.values,size(lagsMat));
 
+%% Bootstrapping
+% if (doBootstrapFits)
+% 
+%     % Set up basic bootstrap packet
+%     theBootPacket = thePacket;
+% 
+%     % Now do the fit for each bootstrap iteration
+%     nBootstraps = size(bootData.tFitBoot,2);
+%     for bb = 1:nBootstraps
+%         % Stick the bootstrapped probability correct data into the
+%         % bootstrapped packet. Unpacking this in the same way
+%         % as the real data above get unpacked. The flipud is needed
+%         % so that things make sense, and I think it was applied somewhere 
+%         % when pcData were created. 
+%         bootPcData = flipud(squeeze(bootData.PCdtaBoot(:,:,bb)));
+%         theBootPacket.response.values = bootPcData(:)';
+% 
+%         % Do the bootstrapped data fit
+%         [pcParamsBoot{bb},fValBoot(bb),pcFromFitParamsBoot{bb}] = lsdOBJ.fitResponse(theBootPacket,'defaultParamsInfo',defaultParamsInfo,...
+%             'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+% 
+%         anglesBoot(bb) = pcParamsBoot{bb}.angle;
+%         minAxisRatiosBoot(bb) = pcParamsBoot{bb}.minAxisRatio;
+%         lambdasBoot(bb) = pcParamsBoot{bb}.lambda;
+%         exponentsBoot(bb) = pcParamsBoot{bb}.exponent;
+%     end
+% end
+
+
 %% Print the params
-fprintf('\ntfeCTM One Mechanism Parameters:\n');
-ctmOBJmechOne.paramPrint(rotMOneMechParams)
+if (fitOneMechanism)
+    fprintf('\ntfeCTM One Mechanism Parameters:\n');
+    ctmOBJmechOne.paramPrint(rotMOneMechParams)
+end
+
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
 ctmOBJmechTwo.paramPrint(rotMTwoMechParams)
-
-%% Do the isolag contours -- one mechanism 
-targetLags = [0.3,0.35,0.4,0.45,0.5];
-measuredDirections = uniqueColorDirs(:)';
-contourColors = [242,240,247;...
-203,201,226;...
-158,154,200;...
-117,107,177;...
-84,39,143]./255;
 
 %% Plots ellipse and summary fit plot 
 [tcHndlCont,tcHndlNonlin] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket,'plotInfo',plotInfo, ...
     'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25);
-
 
 %% Plot montage of lag vs contrast for each direction
 %
@@ -122,8 +151,22 @@ plotInfo.title  = 'Lag Vs. Contrast'; plotInfo.xlabel  = 'Contrast (%)';
 plotInfo.ylabel = 'Lag (s)'; plotInfo.figureSizeInches = [20 11];
 
 % Confidence interval info
-CIs.upper = abs(upperCI - meanLagBtstrpLagMat);
-CIs.lower = abs(meanLagBtstrpLagMat - lowerCI);
+%
+% Commented out code here does a confidence interval around the mean
+% bootstrapped value.  I replaced with stderr estimated as bootstrapped
+% standard deviation, around data mean.  Six of one, half a doze of the
+% other, but the latter is how I'm setting up to report errors on the
+% ellipse parameters from bootstrapping, so for consistency, doing it 
+% this way. You have to look very carefully at the figure to see any visual
+% difference between these two ways of doing it.
+%
+% [upperCI, lowerCI] = computeCiFromBootSruct(bootData.rParamsBtstrpStruct, 68);
+% CIs.upper = abs(upperCI - bootData.meanLagBtstrpLagMat);
+% CIs.lower = abs(bootData.meanLagBtstrpLagMat - lowerCI);
+upperCI = lagsMat + bootData.sDevBtstrpLagMat;
+lowerCI = lagsMat + bootData.sDevBtstrpLagMat;
+CIs.upper = abs(upperCI - lagsMat);
+CIs.lower = abs(lagsMat - lowerCI);
 
 % Customize directions and group into pairs for montaging
 if strcmp(subjID,'MAB')

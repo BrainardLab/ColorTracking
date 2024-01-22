@@ -1,4 +1,4 @@
-function fitTrackingCashedData(subjID)
+function fitTrackingCachedData(subjID)
 %%%%%%% Do the CTM fits for the 1 and 2 mech models %%%%%%%
 
 % Run as here to analyze all subjects
@@ -14,6 +14,12 @@ close all;
 %% Parameters
 doBootstrapFits = true;
 fitOneMechanism = false;
+doDiagnosticBootPlots = false;
+
+% Search with two different fmincon algorithms and take the best
+% % 'active-set' 'sqp' 'interior-point'
+theFminconAlgorithm0 = 'sqp'; 
+theFminconAlgorithm1 = 'active-set';
 
 %% Get subject code
 if strcmp(subjID,'MAB')
@@ -98,47 +104,146 @@ if (fitOneMechanism)
 end
 
 % Two Mechanism
-[rotMTwoMechParams,fVal,lagsFromFitTwoMech] = ctmOBJmechTwo.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
-    'initialParams',[], 'fitErrorScalar',fitErrorScalar);
+fprintf('Fitting actual data from multiple starting points\n');
+initialParamsMatrix = [ [75 03 1 0.3 0.15]' [90 0.02 0.5 0.4 0.15]'  [90 0.08 0.5 0.4 0.15]'  [45 0.02 0.5 0.4 0.15]'  [45 0.08 0.5 0.4 0.15]'  ...
+    [0 0.02 0.5 0.4 0.15]'  [0 0.08 0.5 0.4 0.15]'  ...
+    [-45 0.02 0.5 0.4 0.15]'  [-45 0.08 0.5 0.4 0.15]'  [-90 0.02 0.5 0.4 0.15]'  [-905 0.08 0.5 0.4 0.15]'];
+fVal = Inf;
+for ss = 1:size(initialParamsMatrix,2)
+    fprintf('\tStarting point %d of %d ...')
+    initialParamsStruct = ctmOBJmechTwo.vecToParams(initialParamsMatrix(:,ss));
+    [rotMTwoMechParams0,fVal0,lagsFromFitTwoMech0] = ctmOBJmechTwo.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+        'initialParams',initialParamsStruct, 'fitErrorScalar',fitErrorScalar,'fminconAlgorithm',theFminconAlgorithm0);
+    [rotMTwoMechParams1,fVal1,lagsFromFitTwoMech1] = ctmOBJmechTwo.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
+        'initialParams',initialParamsStruct, 'fitErrorScalar',fitErrorScalar,'fminconAlgorithm',theFminconAlgorithm1);
+    if (fVal0 < fVal1)
+        rotMTwoMechParamsTemp = rotMTwoMechParams0;
+        fValTemp = fVal0;
+        lagsFromFitTwoMechTemp = lagsFromFitTwoMech0;
+    else
+        rotMTwoMechParamsTemp = rotMTwoMechParams1;
+        fValTemp = fVal1;
+        lagsFromFitTwoMechTemp = lagsFromFitTwoMech1;
+    end
+
+    if (fValTemp < fVal)
+        fprintf('best so far.\n')
+        fVal = fValTemp;
+        rotMTwoMechParams = rotMTwoMechParamsTemp;
+        lagsFromFitTwoMech =  lagsFromFitTwoMechTemp;
+    else
+        fprintf('not as good as one already done.\n')
+    end
+end
+
+% Save out fit lags for plotting
 lagsTwoMechMat = reshape(lagsFromFitTwoMech.values,size(lagsMat));
 
-%% Bootstrapping
-% if (doBootstrapFits)
-% 
-%     % Set up basic bootstrap packet
-%     theBootPacket = thePacket;
-% 
-%     % Now do the fit for each bootstrap iteration
-%     nBootstraps = size(bootData.tFitBoot,2);
-%     for bb = 1:nBootstraps
-%         % Stick the bootstrapped probability correct data into the
-%         % bootstrapped packet. Unpacking this in the same way
-%         % as the real data above get unpacked. The flipud is needed
-%         % so that things make sense, and I think it was applied somewhere 
-%         % when pcData were created. 
-%         bootPcData = flipud(squeeze(bootData.PCdtaBoot(:,:,bb)));
-%         theBootPacket.response.values = bootPcData(:)';
-% 
-%         % Do the bootstrapped data fit
-%         [pcParamsBoot{bb},fValBoot(bb),pcFromFitParamsBoot{bb}] = lsdOBJ.fitResponse(theBootPacket,'defaultParamsInfo',defaultParamsInfo,...
-%             'initialParams',[], 'fitErrorScalar',fitErrorScalar);
-% 
-%         anglesBoot(bb) = pcParamsBoot{bb}.angle;
-%         minAxisRatiosBoot(bb) = pcParamsBoot{bb}.minAxisRatio;
-%         lambdasBoot(bb) = pcParamsBoot{bb}.lambda;
-%         exponentsBoot(bb) = pcParamsBoot{bb}.exponent;
-%     end
-% end
+% Bootstrapping
+if (doDiagnosticBootPlots)
+    bootDiagFigure = figure;
+end
+if (doBootstrapFits)
 
+    % Set up basic bootstrap packet
+    theBootPacket = thePacket;
+
+    % Now do the fit for each bootstrap iteration
+    nBootstraps = size(bootData.rParamsBtstrpStruct(1).rParamsBtstrp,3);
+    bootParamsStruct = bootData.rParamsBtstrpStruct;
+    for bb = 1:nBootstraps
+        lagsBtstrp = [];
+
+        % There is one bootstrap parameter structure for each of the three
+        % datasets.
+        for ss = 1:length(bootParamsStruct)
+            % Each row is for one parameter.
+            rParamsBtstrp = bootParamsStruct(ss).rParamsBtstrp;
+            lagsBtstrpTemp = flipud(squeeze(rParamsBtstrp(2,:,bb,:)));
+            lagsBtstrp = [lagsBtstrp lagsBtstrpTemp];
+        end
+
+        % Look at the measured lags and bootstrapped lags, just to make 
+        % sure we've decoded things rightif (doDiagnosticBootPlots)
+        if (doDiagnosticBootPlots)
+            figure(bootDiagFigure); clf; hold on;
+            plot(lagsMat(:),lagsBtstrp(:),'r+');
+            axis('square'); xlim([0.1 1]); ylim([0.1 1]);
+        end
+
+        % Stick the bootstrapped lags data into the
+        % bootstrapped packet. Unpacking this in the same way
+        % as the real data above get unpacked. The flipud is needed
+        % so that things make sense, and I think it was applied somewhere 
+        % when pcData were created. 
+        theBootPacket.response.values = lagsBtstrp(:)';
+
+        % Do the bootstrapped data fit.
+        %
+        % Fit with two different fmincon algorithms and take the best
+        fprintf('Fitting boostrap %d from multiple starting points\n',bb);
+        fValBoot(bb) = Inf;
+        for ss = 1:size(initialParamsMatrix,2)
+            fprintf('\tStarting point %d of %d ...')
+            initialParamsStruct = ctmOBJmechTwo.vecToParams(initialParamsMatrix(:,ss));
+
+            [rotMTwoMechParamsBoot0{bb},fValBoot0(bb),lagsFromFitTwoMechBoot0{bb}] = ctmOBJmechTwo.fitResponse(theBootPacket,'defaultParamsInfo',defaultParamsInfo,...
+                'initialParams',initialParamsStruct, 'fitErrorScalar',fitErrorScalar,'fminconAlgorithm',theFminconAlgorithm0);
+            [rotMTwoMechParamsBoot1{bb},fValBoot1(bb),lagsFromFitTwoMechBoot1{bb}] = ctmOBJmechTwo.fitResponse(theBootPacket,'defaultParamsInfo',defaultParamsInfo,...
+                'initialParams',initialParamsStruct, 'fitErrorScalar',fitErrorScalar,'fminconAlgorithm',theFminconAlgorithm1);
+            if (fValBoot0(bb) < fValBoot1(bb))
+                rotMTwoMechParamsBootTemp{bb} = rotMTwoMechParamsBoot0{bb};
+                fValBootTemp(bb) = fValBoot0(bb);
+                lagsFromFitTwoMechBootTemp{bb} = lagsFromFitTwoMechBoot0{bb};
+            else
+                rotMTwoMechParamsBootTemp{bb} = rotMTwoMechParamsBoot1{bb};
+                fValBootTemp(bb) = fValBoot1(bb);
+                lagsFromFitTwoMechBootTemp{bb} = lagsFromFitTwoMechBoot1{bb};
+            end
+
+            if (fValBootTemp(bb) < fValBoot(bb))
+                fprintf('best so far.\n')
+                rotMTwoMechParamsBoot{bb} = rotMTwoMechParamsBootTemp{bb};
+                fValBoot(bb) = fValBootTemp(bb);
+                lagsFromFitTwoMechBoot{bb} = lagsFromFitTwoMechBootTemp{bb};
+            else
+                fprintf('not as good as one already done.\n')
+            end
+        end
+    end
+end
+
+%% Pull out bootstrapped parameters from structure
+if (doBootstrapFits)
+    for bb = 1:nBootstraps
+        anglesBoot(bb) = rotMTwoMechParamsBoot{bb}.angle;
+        minAxisRatiosBoot(bb) = rotMTwoMechParamsBoot{bb}.minAxisRatio;
+        scalesBoot(bb) = rotMTwoMechParamsBoot{bb}.scale;
+        minLagsBoot(bb) = rotMTwoMechParamsBoot{bb}.minLag;
+        amplitudesBoot(bb) = rotMTwoMechParamsBoot{bb}.amplitude;
+    end
+
+    % Fix boot angles sign so that they are all consistent when averaged.
+    anglesBoot(anglesBoot < 0) = anglesBoot(anglesBoot < 0) + 180;
+end
 
 %% Print the params
 if (fitOneMechanism)
     fprintf('\ntfeCTM One Mechanism Parameters:\n');
-    ctmOBJmechOne.paramPrint(rotMOneMechParams)
+    ctmOBJmechOne.paramPrint(rotMOneMechParams);
 end
 
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
-ctmOBJmechTwo.paramPrint(rotMTwoMechParams)
+ctmOBJmechTwo.paramPrint(rotMTwoMechParams);
+
+% Print boostrap info if we did it
+if (doBootstrapFits)
+    % Report on bootstrapped values.  Taking the standard deviation of the
+    % bootstrapped quantity gives us an estimate of the standard error of
+    % that quantity.
+    fprintf('Bootstrapped ellipse angle: %0.1f +/- %0.3f\n',mean(anglesBoot),std(anglesBoot));
+    fprintf('Bootstrapped min axis ratio: %0.2f +/- %0.3f\n',mean(minAxisRatiosBoot),std(minAxisRatiosBoot));
+end
 
 %% Plots ellipse and summary fit plot 
 [tcHndlCont,tcHndlNonlin] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket,'plotInfo',plotInfo, ...

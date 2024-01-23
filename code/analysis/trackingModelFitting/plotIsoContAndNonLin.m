@@ -35,7 +35,7 @@ p.addParameter('plotInfo',[],@isstruct);
 p.addParameter('desiredEqContrast',[],@isvector);
 p.addParameter('ellipseXLim',1.25,@isnumeric);
 p.addParameter('ellipseYLim',1.25,@isnumeric);
-p.addParameter('saveFigure',true,@islogical)'
+p.addParameter('saveFigure',true,@islogical);
 p.parse(paramsCTM,varargin{:});
 
 % Pull stuff out of the results struct

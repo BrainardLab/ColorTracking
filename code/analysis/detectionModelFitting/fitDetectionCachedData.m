@@ -3,9 +3,7 @@ function fitDetectionCachedData(subjID)
 
 % Run as here to analyze all subjects
 %{
-    fitDetectionCachedData('MAB');
-    fitDetectionCachedData('BMC');
-    fitDetectionCachedData('KAS');
+    e
 %}
 
 %% Close
@@ -174,5 +172,7 @@ plotInfo.ylabel = 'Percent Correct'; plotInfo.figureSizeInches = [6 5];
 plotColors = thePacket.metaData.dirPlotColors;
 plotPsychometric(pcParams,pcData,matrixContrasts,uniqColorDirs,plotInfo,'plotColors',plotColors, ...
     'errorBarsSTD',bootstrapStdPc);
+
+% Establish delay between L and S contrast equated stimuli
 
 end

@@ -35,6 +35,7 @@ p.addParameter('plotInfo',[],@isstruct);
 p.addParameter('desiredEqContrast',[],@isvector);
 p.addParameter('ellipseXLim',1.25,@isnumeric);
 p.addParameter('ellipseYLim',1.25,@isnumeric);
+p.addParameter('saveFigure',true,@islogical)'
 p.parse(paramsCTM,varargin{:});
 
 % Pull stuff out of the results struct
@@ -278,25 +279,28 @@ set(gcf, 'Color', 'white' );
 axis square
 
 % Save figures
-figureSizeInches = [3.5 3.5];
-tcHndlCont.Units  = 'inches';
-tcHndlCont.PaperUnits  = 'inches';
-tcHndlCont.PaperSize = figureSizeInches;
-tcHndlCont.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-tcHndlCont.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
-if ~isempty(plotInfo)
-    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_CTM.pdf']);
-    print(tcHndlCont, figNameTc, '-dpdf', '-r300');
-end
+if (p.Results.saveFigure)
 
-figureSizeInches = [3.5 3.5];
-tcHndlNonlin.Units  = 'inches';
-tcHndlNonlin.PaperUnits  = 'inches';
-tcHndlNonlin.PaperSize = figureSizeInches;
-tcHndlNonlin.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-tcHndlNonlin.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
-if ~isempty(plotInfo)
-    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Nonlin_CTM.pdf']);
-    print(tcHndlNonlin, figNameTc, '-dpdf', '-r300');
+    figureSizeInches = [3.5 3.5];
+    tcHndlCont.Units  = 'inches';
+    tcHndlCont.PaperUnits  = 'inches';
+    tcHndlCont.PaperSize = figureSizeInches;
+    tcHndlCont.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+    tcHndlCont.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
+    if ~isempty(plotInfo)
+        figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_CTM.pdf']);
+        print(tcHndlCont, figNameTc, '-dpdf', '-r300');
+    end
+
+    figureSizeInches = [3.5 3.5];
+    tcHndlNonlin.Units  = 'inches';
+    tcHndlNonlin.PaperUnits  = 'inches';
+    tcHndlNonlin.PaperSize = figureSizeInches;
+    tcHndlNonlin.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+    tcHndlNonlin.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
+    if ~isempty(plotInfo)
+        figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Nonlin_CTM.pdf']);
+        print(tcHndlNonlin, figNameTc, '-dpdf', '-r300');
+    end
 end
 end

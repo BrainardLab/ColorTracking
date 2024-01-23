@@ -12,9 +12,10 @@ function fitTrackingCachedData(subjID)
 close all;
 
 %% Parameters
-doBootstrapFits = true;
+doBootstrapFits = false;
 fitOneMechanism = false;
 doDiagnosticBootPlots = false;
+saveFigures = false;
 verbose = false;
 
 % Search with two different fmincon algorithms and take the best
@@ -293,7 +294,7 @@ end
 
 %% Plots ellipse and summary fit plot 
 [tcHndlCont,tcHndlNonlin] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket,'plotInfo',plotInfo, ...
-    'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25);
+    'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25,'saveFigure',saveFigures);
 
 %% Plot montage of lag vs contrast for each direction
 %
@@ -332,6 +333,14 @@ end
 
 % Do the plot
 plotColors = thePacket.metaData.dirPlotColors;
-plotDirectionPairs(matrixContrasts,lagsMat,lagsTwoMechMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors','errorBarsCI',CIs,'yLimVals',yLimVals)
+plotDirectionPairs(matrixContrasts,lagsMat,lagsTwoMechMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors','errorBarsCI',CIs,'yLimVals',yLimVals, ...
+    'figSaveInfo',saveFigures);
+
+%% Find lag difference for L and S cone directions at equal contrast
+figure; clf; hold on;
+LDirIndex = 1;
+SDirIndex = 2;
+plot(matrixContrasts(:,LDirIndex),lagsTwoMechMat(:,LDirIndex),'r');
+plot(matrixContrasts(:,SDirIndex),lagsTwoMechMat(:,SDirIndex),'b');
 
 end

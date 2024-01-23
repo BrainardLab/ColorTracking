@@ -34,7 +34,7 @@ p.addParameter('errorBarsCI',[],@isstruct);
 p.addParameter('semiLog',true,@islogical);
 p.addParameter('sz',9,@isnumeric);
 p.addParameter('yLimVals',[0.2 0.8],@isnumeric);
-p.addParameter('figSaveInfo',true,@islogical);
+p.addParameter('saveFigure',true,@islogical);
 p.addParameter('legendLocation','northeast',@ischar);
 p.parse(matrixContrasts,lags,lagsFromFitMat, uniqueColorDirs,directionGroups, plotInfo, varargin{:});
 
@@ -173,15 +173,14 @@ end
 
 
 % Save it!
-figureSizeInches = plotInfo.figureSizeInches;
-% set(tcHndl, 'PaperUnits', 'inches');
-% set(tcHndl, 'PaperSize',figureSizeInches);
-tcHndl.Units  = 'inches';
-tcHndl.PaperUnits  = 'inches';
-tcHndl.PaperSize = figureSizeInches;
-tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
-
-figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_model_fit_allData_2mech.pdf']);
-print(tcHndl, figNameTc, '-dpdf', '-r300');
-exportgraphics(tcHndl,figNameTc)
+if (p.Results.saveFigure)
+    figureSizeInches = plotInfo.figureSizeInches;
+    tcHndl.Units  = 'inches';
+    tcHndl.PaperUnits  = 'inches';
+    tcHndl.PaperSize = figureSizeInches;
+    tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+    tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_model_fit_allData_2mech.pdf']);
+    print(tcHndl, figNameTc, '-dpdf', '-r300');
+    exportgraphics(tcHndl,figNameTc);
+end

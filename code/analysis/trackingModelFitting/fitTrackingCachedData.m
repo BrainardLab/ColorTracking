@@ -12,7 +12,10 @@ function fitTrackingCachedData(subjID)
 close all;
 
 %% Parameters
-doBootstrapFits = false;
+%
+% The bootstrap fitting is slow, and doesn't affect the figures.  So you
+% can set that to false if you're just fussing with figures.
+doBootstrapFits = true;
 fitOneMechanism = false;
 doDiagnosticBootPlots = false;
 saveFigures = true;
@@ -344,7 +347,7 @@ plotDirectionPairs(100*matrixContrasts,lagsMat,lagsTwoMechMat,uniqueColorDirs(:)
 % Set up to compute.  We use the fit parameter values and compute
 % for L and S cone isolating modulations of the same set of contrasts,
 % over a range of contrasts.
-lowContrast = 0.01;
+lowContrast = 0.05;
 highContrast = 0.9;
 nContrasts = 100;
 LConePacket = thePacket;
@@ -372,5 +375,36 @@ if (100*true)
 end
 xlabel('Contrast');
 ylabel('Lag (seconds')
+
+% Make plot of S lag versus L lag, over the contrast range
+figure; clf; hold on;
+plot(LConeLags.values,SConeLags.values,'k','LineWidth',5)
+axis('square');
+xlabel('L Cone Lag');
+ylabel('S Cone Lag');
+xlim([0.3 1]);
+ylim([0.3 1]);
+
+% Even better, plot S cone delay relative to L cones, as
+% a function of contrast
+tcHndl = figure; clf; hold on;
+plot(100*targetConeContrasts,SConeLags.values-LConeLags.values,'k','LineWidth',5);
+axis('square');
+xlabel('Contrast (%)');
+ylabel('S Cone Lag - L Cone Lag');
+xlim([0 100]);
+ylim([0 0.6]);
+
+if (saveFigures)
+    figureSizeInches = plotInfo.figureSizeInches;
+    tcHndl.Units  = 'inches';
+    tcHndl.PaperUnits  = 'inches';
+    tcHndl.PaperSize = figureSizeInches;
+    tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
+    tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_SlessLConeLag.pdf']);
+    print(tcHndl, figNameTc, '-dpdf', '-r300');
+    exportgraphics(tcHndl,figNameTc);
+end
 
 end

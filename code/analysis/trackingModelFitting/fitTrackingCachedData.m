@@ -15,6 +15,7 @@ close all;
 doBootstrapFits = true;
 fitOneMechanism = false;
 doDiagnosticBootPlots = false;
+verbose = false;
 
 % Search with two different fmincon algorithms and take the best
 % % 'active-set' 'sqp' 'interior-point'
@@ -93,24 +94,53 @@ theDimension= size(thePacket.stimulus.values, 1);
 ctmOBJmechTwo = tfeCTMRotM('verbosity','none','dimension',theDimension, 'numMechanism', 2 ,'fminconAlgorithm','active-set');
 
 %% Fit
+%
+% The fit error scalar is chosen by hand and seems to make
+% the fits work a little better.
 defaultParamsInfo = [];
 fitErrorScalar    = 100000;
 
 % One mechanism
+%
+% Not doing this in the end.  Should add grid search/algorithm logic from
+% below if we ever put it back.
 if (fitOneMechanism)
     [rotMOneMechParams,~,lagsFromFitOneMech] = ctmOBJmechOne.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
         'initialParams',[], 'fitErrorScalar',fitErrorScalar);
     lagsOneMechMat = reshape(lagsFromFitOneMech.values,size(lagsMat));
 end
 
-% Two Mechanism
+% Two mechanism fit.
+%
+% We do a grid search of starting parameters, as the fit can get stuck,
+% We also search with two different fmincon algorithms and take the better
+% of the two fits, for each choice of initial parameters.
 fprintf('Fitting actual data from multiple starting points\n');
-initialParamsMatrix = [ [75 03 1 0.3 0.15]' [90 0.02 0.5 0.4 0.15]'  [90 0.08 0.5 0.4 0.15]'  [45 0.02 0.5 0.4 0.15]'  [45 0.08 0.5 0.4 0.15]'  ...
-    [0 0.02 0.5 0.4 0.15]'  [0 0.08 0.5 0.4 0.15]'  ...
-    [-45 0.02 0.5 0.4 0.15]'  [-45 0.08 0.5 0.4 0.15]'  [-90 0.02 0.5 0.4 0.15]'  [-905 0.08 0.5 0.4 0.15]'];
+initialAngles = -95:10:95;
+initialRatios = linspace(0.01,0.09,3);
+initialParam3s = [0.5 1];
+initialParam4s = [0.4];
+initialParam5s = [0.15];
+initialParamsMatrix =  [];
+for ii1 = 1:length(initialAngles)
+    for ii2 = 1:length(initialRatios);
+        for ii3 = 1:length(initialParam3s);
+            for ii4 = 1:length(initialParam4s);
+                for ii5 = 1:length(initialParam5s)
+                    initialParamsMatrix = [initialParamsMatrix [initialAngles(ii1) initialRatios(ii2) initialParam3s(ii3) initialParam4s(ii4) initialParam5s(ii5)]'];
+                end
+            end
+        end
+    end
+end
+% initialParamsMatrix = [ [75 .03 1 0.3 0.15]' [90 0.02 0.5 0.4 0.15]'  [90 0.08 0.5 0.4 0.15]'  [45 0.02 0.5 0.4 0.15]'  [45 0.08 0.5 0.4 0.15]'  ...
+%     [0 0.02 0.5 0.4 0.15]'  [0 0.08 0.5 0.4 0.15]'  ...
+%     [-45 0.02 0.5 0.4 0.15]'  [-45 0.08 0.5 0.4 0.15]'  [-90 0.02 0.5 0.4 0.15]'  [-905 0.08 0.5 0.4 0.15]'];
 fVal = Inf;
 for ss = 1:size(initialParamsMatrix,2)
-    fprintf('\tStarting point %d of %d ...')
+    if (verbose)
+        fprintf('\tStarting point %d of %d ...');
+    end
     initialParamsStruct = ctmOBJmechTwo.vecToParams(initialParamsMatrix(:,ss));
     [rotMTwoMechParams0,fVal0,lagsFromFitTwoMech0] = ctmOBJmechTwo.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
         'initialParams',initialParamsStruct, 'fitErrorScalar',fitErrorScalar,'fminconAlgorithm',theFminconAlgorithm0);
@@ -127,12 +157,16 @@ for ss = 1:size(initialParamsMatrix,2)
     end
 
     if (fValTemp < fVal)
-        fprintf('best so far.\n')
+        if (verbose)
+            fprintf('best so far.\n');
+        end
         fVal = fValTemp;
         rotMTwoMechParams = rotMTwoMechParamsTemp;
         lagsFromFitTwoMech =  lagsFromFitTwoMechTemp;
     else
-        fprintf('not as good as one already done.\n')
+        if (verbose)
+            fprintf('not as good as one already done.\n');
+        end
     end
 end
 
@@ -181,10 +215,18 @@ if (doBootstrapFits)
         % Do the bootstrapped data fit.
         %
         % Fit with two different fmincon algorithms and take the best
-        fprintf('Fitting boostrap %d from multiple starting points\n',bb);
+        if (verbose)
+            fprintf('Fitting boostrap %d from multiple starting points\n',bb);
+        else
+            if (bb == 1)
+                fprintf('Fitting bootstrapped data\n');
+            end
+        end
         fValBoot(bb) = Inf;
         for ss = 1:size(initialParamsMatrix,2)
-            fprintf('\tStarting point %d of %d ...')
+            if (verbose)
+                fprintf('\tStarting point %d of %d ...');
+            end
             initialParamsStruct = ctmOBJmechTwo.vecToParams(initialParamsMatrix(:,ss));
 
             [rotMTwoMechParamsBoot0{bb},fValBoot0(bb),lagsFromFitTwoMechBoot0{bb}] = ctmOBJmechTwo.fitResponse(theBootPacket,'defaultParamsInfo',defaultParamsInfo,...
@@ -202,12 +244,16 @@ if (doBootstrapFits)
             end
 
             if (fValBootTemp(bb) < fValBoot(bb))
-                fprintf('best so far.\n')
+                if (verbose)
+                    fprintf('best so far.\n');
+                end
                 rotMTwoMechParamsBoot{bb} = rotMTwoMechParamsBootTemp{bb};
                 fValBoot(bb) = fValBootTemp(bb);
                 lagsFromFitTwoMechBoot{bb} = lagsFromFitTwoMechBootTemp{bb};
             else
-                fprintf('not as good as one already done.\n')
+                if (verbose)
+                    fprintf('not as good as one already done.\n');
+                end
             end
         end
     end

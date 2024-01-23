@@ -20,7 +20,7 @@ function [] = plotPsychometric(pcParams,pcData,matrixContrasts,uniqueColorDirs,p
 
 % MAB 06/20/21 -- started
 
-% Input Parser
+%% Input Parser
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('pcParams',@isstruct);
 p.addRequired('pcData',@ismatrix);
@@ -37,8 +37,7 @@ p.addParameter('nSmplPnts',50,@isnumeric);
 p.addParameter('legendLocation','northeast',@ischar);
 p.parse(pcParams,pcData,matrixContrasts, uniqueColorDirs, plotInfo, varargin{:});
 
-
-%% unpack the parser
+%% Unpack the parser
 legendLocation  = p.Results.legendLocation;
 sz = p.Results.sz;
 yLimVals = [min(pcData(:)) 1];
@@ -91,12 +90,7 @@ for ii = 1:nColorDirPlots
     subplot( numPlotRows,numPlotCols,ii)
 
     hold on;
-    if ~isempty(p.Results.errorBarsSTD)
-        e = errorbar(xAxisVals(:,jj),yAxisVals(:,jj),theErrorMat(:,jj),'o')
-    elseif ~isempty(p.Results.errorBarsCI);
-        e = errorbar(xAxisVals(:,jj),yAxisVals(:,jj),theErrorMat.lower(:,jj),theErrorMat.upper(:,jj),...
-            'o','LineWidth',2,'Color',currPlotColors(:,jj));
-    end
+    
 
     % Make the packet for current direction
     cSmpleBase = 0:max(xAxisVals)./nSmplPnts:max(xAxisVals);
@@ -105,6 +99,15 @@ for ii = 1:nColorDirPlots
     thePacket.stimulus.values = [cL;cS];
     thePacket.stimulus.timebase = 1:length(cS);
     pcFromParamsFit = lsdOBJ.computeResponse(pcParams,thePacket.stimulus,thePacket.kernel);
+
+    % This was broken and I fixed up the STD part.  I guessed at but did
+    % not test the right call for the CI part.
+    if ~isempty(p.Results.errorBarsSTD)
+        e = errorbar(xAxisVals,yAxisVals,theErrorMat(:,ii),'o','Color',currPlotColor);
+    elseif ~isempty(p.Results.errorBarsCI)
+        e = errorbar(xAxisVals,yAxisVals,theErrorMat.lower(:,ii),theErrorMat.upper(:,ii),...
+            'o','LineWidth',2,'Color',currPlotColor);
+    end
 
     plot(cSmpleBase,pcFromParamsFit.values,'-', ...
         'MarkerEdgeColor',.3*currPlotColor,...
@@ -120,12 +123,11 @@ for ii = 1:nColorDirPlots
         'LineWidth',1,...
         'MarkerSize',sz);
 
+    % Tidy plot
     axis square;
-
     if p.Results.semiLog
         set(gca,'Xscale','log');
     end
-
     ylim(yLimVals)
     xlim([0,max(xAxisVals.*1.15)])
 
@@ -152,10 +154,6 @@ for ii = 1:nColorDirPlots
     xticklabels(tickNames)
     set(gcf, 'Color', 'white' );
 
-
-    %% Format fonts
-
-
     %% Add labels
     hTitle  = title (sprintf('%2.2f^o',uniqueColorDirs(ii)));
     hXLabel = xlabel(plotInfo.xlabel);
@@ -165,23 +163,14 @@ for ii = 1:nColorDirPlots
     set([hTitle, hXLabel, hYLabel],'FontName', 'Helvetica');
     set([hXLabel, hYLabel,],'FontSize', 6);
     set( hTitle, 'FontSize', 6,'FontWeight' , 'normal');
-
-
 end
-
 
 % Save it!
 figureSizeInches = plotInfo.figureSizeInches;
-% set(tcHndl, 'PaperUnits', 'inches');
-% set(tcHndl, 'PaperSize',figureSizeInches);
 tcHndl.Units  = 'inches';
 tcHndl.PaperUnits  = 'inches';
 tcHndl.PaperSize = figureSizeInches;
-% tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-% tcHndl.InnerPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-
 figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_LSD_psychometric.pdf']);
-% Save it
 print(tcHndl, figNameTc, '-dpdf', '-r300');
 
 end

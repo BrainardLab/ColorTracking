@@ -13,6 +13,8 @@ close all;
 
 %% Parameters
 doBootstrapFits = true;
+doDiagnosticBootPlots = true;
+verbose = false;
 
 % Get subject code from subjID
 if strcmp(subjID,'MAB')
@@ -100,6 +102,17 @@ if (doBootstrapFits)
     bootFile = fullfile(bootParamsCacheFolder,['detectionBootsS' num2str(subjNum) 'cache.mat']);
     bootData = load(bootFile);
 
+    % Get mean and std of bootstrapped pcs, so we can put error
+    % bars on the psychometric function data points
+    bootstrapMeanPc = flipud(mean(bootData.PCdtaBoot(:,:,:),3));
+    bootstrapStdPc = flipud(std(bootData.PCdtaBoot(:,:,:),[],3));
+    if (doDiagnosticBootPlots)
+        figure; clf; hold on;
+        plot(pcData(:)',bootstrapMeanPc(:)','r+');
+        axis('square');
+        xlim([0.3 1]); ylim([0.3 1]);
+    end
+
     % Set up basic bootstrap packet
     theBootPacket = thePacket;
 
@@ -132,7 +145,7 @@ anglesBoot(anglesBoot < 0) = anglesBoot(anglesBoot < 0) + 180;
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');
 lsdOBJ.paramPrint(pcParams)
 
-%% Print boostrap info if we did it
+%% Print boostrap fit info if we did it
 if (doBootstrapFits)
     % Report on bootstrapped values.  Taking the standard deviation of the
     % bootstrapped quantity gives us an estimate of the standard error of
@@ -140,7 +153,6 @@ if (doBootstrapFits)
     fprintf('Bootstrapped ellipse angle: %0.1f +/- %0.3f\n',mean(anglesBoot),std(anglesBoot));
     fprintf('Bootstrapped min axis ratio: %0.2f +/- %0.3f\n',mean(minAxisRatiosBoot),std(minAxisRatiosBoot));
 end
-
 
 %% Make the figures
 %
@@ -160,6 +172,7 @@ uniqColorDirs = unique(thePacket.metaData.stimDirections)';
 plotInfo.xlabel  = 'Contrast (%)';
 plotInfo.ylabel = 'Percent Correct'; plotInfo.figureSizeInches = [6 5];
 plotColors = thePacket.metaData.dirPlotColors;
-plotPsychometric(pcParams,pcData,matrixContrasts,uniqColorDirs,plotInfo,'plotColors',plotColors)
+plotPsychometric(pcParams,pcData,matrixContrasts,uniqColorDirs,plotInfo,'plotColors',plotColors, ...
+    'errorBarsSTD',bootstrapStdPc);
 
 end

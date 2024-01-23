@@ -3,7 +3,9 @@ function fitDetectionCachedData(subjID)
 
 % Run as here to analyze all subjects
 %{
-    e
+    fitDetectionCachedData('MAB');
+    fitDetectionCachedData('BMC');
+    fitDetectionCachedData('KAS');
 %}
 
 %% Close

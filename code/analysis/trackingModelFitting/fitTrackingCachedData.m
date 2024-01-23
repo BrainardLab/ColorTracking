@@ -15,7 +15,7 @@ close all;
 doBootstrapFits = false;
 fitOneMechanism = false;
 doDiagnosticBootPlots = false;
-saveFigures = false;
+saveFigures = true;
 verbose = false;
 
 % Search with two different fmincon algorithms and take the best
@@ -333,14 +333,44 @@ end
 
 % Do the plot
 plotColors = thePacket.metaData.dirPlotColors;
-plotDirectionPairs(matrixContrasts,lagsMat,lagsTwoMechMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors','errorBarsCI',CIs,'yLimVals',yLimVals, ...
+plotDirectionPairs(100*matrixContrasts,lagsMat,lagsTwoMechMat,uniqueColorDirs(:), directionGroups, plotInfo,'plotColors',plotColors','errorBarsCI',CIs,'yLimVals',yLimVals, ...
     'figSaveInfo',saveFigures);
 
 %% Find lag difference for L and S cone directions at equal contrast
+%
+% Need to compute and plot/analyze model predictions for a larger
+% range of contrasts than we measured.
+%
+% Set up to compute.  We use the fit parameter values and compute
+% for L and S cone isolating modulations of the same set of contrasts,
+% over a range of contrasts.
+lowContrast = 0.01;
+highContrast = 0.9;
+nContrasts = 100;
+LConePacket = thePacket;
+SConePacket = thePacket;
+targetConeContrasts = linspace(lowContrast,highContrast,nContrasts);
+otherConeContrasts = zeros(size(targetConeContrasts));
+LConePacket.stimulus.values = [targetConeContrasts ; otherConeContrasts];
+LConePacket.stimulus.timebase = 1:length(targetConeContrasts);
+SConePacket.stimulus.values = [otherConeContrasts ; targetConeContrasts];
+SConePacket.stimulus.timebase = 1:length(targetConeContrasts);
+LConeLags = ctmOBJmechTwo.computeResponse(rotMTwoMechParams,LConePacket.stimulus);
+SConeLags = ctmOBJmechTwo.computeResponse(rotMTwoMechParams,SConePacket.stimulus);
+
+% Plot the model computed L and S cone lags on the same plot.  You can
+% add black lines to show the fits at the measured contrasts, as a check that we've
+% done everything right here.
 figure; clf; hold on;
 LDirIndex = 1;
 SDirIndex = 2;
-plot(matrixContrasts(:,LDirIndex),lagsTwoMechMat(:,LDirIndex),'r');
-plot(matrixContrasts(:,SDirIndex),lagsTwoMechMat(:,SDirIndex),'b');
+plot(100*targetConeContrasts,LConeLags.values,'r','LineWidth',5);
+plot(100*targetConeContrasts,SConeLags.values,'b','LineWidth',5);
+if (100*true)
+    plot(100*matrixContrasts(:,LDirIndex),lagsTwoMechMat(:,LDirIndex),'k','LineWidth',3);
+    plot(100*matrixContrasts(:,SDirIndex),lagsTwoMechMat(:,SDirIndex),'k','LineWidth',3);
+end
+xlabel('Contrast');
+ylabel('Lag (seconds')
 
 end

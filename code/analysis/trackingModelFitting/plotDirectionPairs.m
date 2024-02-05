@@ -35,7 +35,7 @@ p.addParameter('semiLog',true,@islogical);
 p.addParameter('sz',9,@isnumeric);
 p.addParameter('yLimVals',[0.2 0.8],@isnumeric);
 p.addParameter('saveFigure',true,@islogical);
-p.addParameter('legendLocation','northeast',@ischar);
+p.addParameter('legendLocation','northwest',@ischar);
 p.parse(matrixContrasts,lags,lagsFromFitMat, uniqueColorDirs,directionGroups, plotInfo, varargin{:});
 
 
@@ -73,7 +73,8 @@ nColorDirPlots = length(directionGroups);
 numPlotRows    = floor(sqrt(nColorDirPlots));
 numPlotCols    = ceil(nColorDirPlots./numPlotRows);
 
-tcHndl = figure;hold on
+tcHndl = figure; hold on
+set(gcf,'Position',[10 10 20*75 11*75]);
 
 % Break up direction into indivual subplots
 % the based on the directionGroups cell
@@ -124,7 +125,7 @@ for ii = 1:(nColorDirPlots)
     end
     
     ylim(yLimVals)
-    xlim([0,100])
+    xlim([1,100])
     autoTicksY = 0:.1:1;
     
     set(gca, ...
@@ -138,7 +139,7 @@ for ii = 1:(nColorDirPlots)
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
         'YTick'       , autoTicksY, ...
-        'XTick'       ,100*[0.03 0.1 0.3 1],...
+        'XTick'       ,100*[.01 0.03 0.1 0.3 1],...
         'LineWidth'   , 2         , ...
         'ActivePositionProperty', 'OuterPosition');
     

@@ -1,16 +1,15 @@
 function [] = plotPsychometric(pcParams,pcData,matrixContrasts,uniqueColorDirs,plotInfo,varargin)
-%% Take in lags and model fits and plot them is a series of subplots.
+%% Plot the psychometric functions in a montage
 %
 % Synopsis
 %   plotPsychometric(pcParams,pcData,MaxContrastLMS,rgbMatrixForPlotting,varargin)
 %
 % Description
-%  This function smooths function data with the burred mask seperatly in
-%  the left and right hemispere and combines the hemis.
+%   Plot the psychometric functions in a montage
 %
-% Inputs
-%  backgroundPrimaries:       Speficy primary values for background (vector).
-%  LMScontrastModulation:     Speficy LMS contrast vector (vector).
+% Inputs:
+%    Wouldn't it be nice if someone had described the input
+%    arguments?  See fitDetectionCachedData for how this is called.
 %
 % Key/val pairs
 %  -none
@@ -72,7 +71,8 @@ nColorDirPlots = size(pcData,2);
 numPlotRows    = floor(sqrt(nColorDirPlots));
 numPlotCols    = ceil(nColorDirPlots./numPlotRows);
 
-tcHndl = figure;hold on
+tcHndl = figure; hold on
+set(gcf,'Position',[100 100 plotInfo.figureSizeInches(1)*75 plotInfo.figureSizeInches(2)*75]);
 
 % create the cumulative Weibull function
 theDimension= 2;
@@ -88,9 +88,7 @@ for ii = 1:nColorDirPlots
     currPlotColor = plotColors(ii,:);
 
     subplot( numPlotRows,numPlotCols,ii)
-
     hold on;
-    
 
     % Make the packet for current direction
     cSmpleBase = 0:max(xAxisVals)./nSmplPnts:max(xAxisVals);

@@ -12,7 +12,7 @@ function fitDetectionCachedData(subjID)
 close all;
 
 %% Parameters
-doBootstrapFits = true;
+doBootstrapFits = false;
 doDiagnosticBootPlots = true;
 verbose = false;
 
@@ -96,23 +96,27 @@ end
 [pcParams,fVal,pcFromFitParams] = lsdOBJ.fitResponse(thePacket,'defaultParamsInfo',defaultParamsInfo,...
     'initialParams',[], 'fitErrorScalar',fitErrorScalar);
 
+%% Load the cached bootstrapped data
+%
+% We do this even when doBootstrapFits is false.  What setting
+% that to true does is also bootstrap the LSD model fits.
+bootFile = fullfile(bootParamsCacheFolder,['detectionBootsS' num2str(subjNum) 'cache.mat']);
+bootData = load(bootFile);
+
+% Get mean and std of bootstrapped pcs, so we can put error
+% bars on the psychometric function data points
+bootstrapMeanPc = flipud(mean(bootData.PCdtaBoot(:,:,:),3));
+bootstrapStdPc = flipud(std(bootData.PCdtaBoot(:,:,:),[],3));
+if (doDiagnosticBootPlots)
+    figure; clf; hold on;
+    plot(pcData(:)',bootstrapMeanPc(:)','r+');
+    axis('square');
+    xlim([0.3 1]); ylim([0.3 1]);
+end
+
 %% Bootstrapping
 if (doBootstrapFits)
-    % Load the cached bootstrapped data
-    bootFile = fullfile(bootParamsCacheFolder,['detectionBootsS' num2str(subjNum) 'cache.mat']);
-    bootData = load(bootFile);
-
-    % Get mean and std of bootstrapped pcs, so we can put error
-    % bars on the psychometric function data points
-    bootstrapMeanPc = flipud(mean(bootData.PCdtaBoot(:,:,:),3));
-    bootstrapStdPc = flipud(std(bootData.PCdtaBoot(:,:,:),[],3));
-    if (doDiagnosticBootPlots)
-        figure; clf; hold on;
-        plot(pcData(:)',bootstrapMeanPc(:)','r+');
-        axis('square');
-        xlim([0.3 1]); ylim([0.3 1]);
-    end
-
+    
     % Set up basic bootstrap packet
     theBootPacket = thePacket;
 
@@ -136,10 +140,10 @@ if (doBootstrapFits)
         lambdasBoot(bb) = pcParamsBoot{bb}.lambda;
         exponentsBoot(bb) = pcParamsBoot{bb}.exponent;
     end
-end
 
-% Fix boot angles sign so that they are all consistent when averaged.
-anglesBoot(anglesBoot < 0) = anglesBoot(anglesBoot < 0) + 180;
+    % Fix boot angles sign so that they are all consistent when averaged.
+    anglesBoot(anglesBoot < 0) = anglesBoot(anglesBoot < 0) + 180;
+end
 
 %% Print the params
 fprintf('\ntfeCTM Two Mechanism Parameters:\n');

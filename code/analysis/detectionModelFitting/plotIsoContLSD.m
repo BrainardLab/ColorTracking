@@ -115,7 +115,7 @@ set(gca, ...
     'YColor'      , [.3 .3 .3], ...
     'LineWidth'   , 1         , ...
     'ActivePositionProperty', 'OuterPosition');
-axis square
+%axis square
     % 'YTick'       , -.1:.05:.1    , ...
     % 'XTick'       , -.1:.05:.1    , ...
 xlim([-p.Results.ellipseXLim p.Results.ellipseXLim])
@@ -132,7 +132,8 @@ pcNL = @(m) 1-(1-0.5).*exp(-(m./lambda).^exponent);
 
 % Plot it
 tcHndlNonlin = figure; hold on;
-
+nonLinFigureSizeInches = [5 3.5];
+set(tcHndlNonlin,'Position',[10 10 round(nonLinFigureSizeInches(1)*200) round(nonLinFigureSizeInches(2)*200)]);
 if ~isempty(p.Results.thePacket)
 
     thePacket = p.Results.thePacket;
@@ -192,12 +193,13 @@ if ~isempty(p.Results.thePacket)
         c.FontSize = 8;
 
     % resize figure to original size
-    set(tcHndlNonlin, 'Position', originalSize);
+    %set(tcHndlNonlin, 'Position', originalSize);
 
 end
 
 %% Plot The Non-Linearity
-xMax = round(maxEqContrast*1.25,2);
+%xMax = round(maxEqContrast*1.25,2);
+xMax = 0.3;
 if isempty(xSampleBase)
     xSampleBase = 0:0.001:xMax;
 end
@@ -251,9 +253,9 @@ set(gca, ...
     'YGrid'       , 'on'      , ...
     'XColor'      , [.3 .3 .3], ...
     'YColor'      , [.3 .3 .3], ...
-    'YTick'       , .4:.2:1    , ...
-    'XTick'       , [0, 0.05, 0.1, 0.2, 0.5], ...
-    'XTickLabel'  , {'0%','5%','10%','20%','50%'}, ...
+    'YTick'       , .4:.1:1    , ...
+    'XTick'       , [0, 0.15, 0.3], ...
+    'XTickLabel'  , {'0%','15%','30%'}, ...
     'LineWidth'   , 1         , ...
     'ActivePositionProperty', 'OuterPosition',...
     'xscale','linear');
@@ -269,16 +271,14 @@ tcHndlCont.PaperUnits  = 'inches';
 tcHndlCont.PaperSize = figureSizeInches;
 tcHndlCont.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
 tcHndlCont.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
-
 figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Isocont_LSD.pdf']);
 print(tcHndlCont, figNameTc, '-dpdf', '-r300');
 
-figureSizeInches = [3.5 3.5];
 tcHndlNonlin.Units  = 'inches';
 tcHndlNonlin.PaperUnits  = 'inches';
-tcHndlNonlin.PaperSize = figureSizeInches;
-tcHndlNonlin.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-tcHndlNonlin.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+tcHndlNonlin.PaperSize = nonLinFigureSizeInches;
+tcHndlNonlin.OuterPosition = [0 0 nonLinFigureSizeInches(1) nonLinFigureSizeInches(2)];
+tcHndlNonlin.InnerPosition = [.5 .5 nonLinFigureSizeInches(1)-.5 nonLinFigureSizeInches(2)-.5];
 
 figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Nonlin_LSD.pdf']);
 print(tcHndlNonlin, figNameTc, '-dpdf', '-r300');

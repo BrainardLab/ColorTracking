@@ -143,6 +143,8 @@ lagNL = @(c) amp .* exp(-1*c*scale) + offset;
 
 % Plot it
 tcHndlNonlin = figure; hold on
+nonLinFigureSizeInches = [5 3.5];
+set(tcHndlNonlin,'Position',[10 10 round(nonLinFigureSizeInches(1)*200) round(nonLinFigureSizeInches(2)*200)]);
 if ~isempty(p.Results.thePacket)
 
     thePacket = p.Results.thePacket;
@@ -206,7 +208,8 @@ if ~isempty(p.Results.thePacket)
 end
 
 %% Plot The Non-Linearity
-xMax = round(maxEqContrast*1.25,2);
+%xMax = round(maxEqContrast*1.25,2);
+xMax = 10;
 if isempty(xSampleBase)
     xSampleBase = 0:.05:xMax;
 end
@@ -252,9 +255,10 @@ end
 
 % Get the x axis spacing and labels
 nTicks = 4;
-autoTicksX = round(0:xMax./nTicks:xMax);
+%autoTicksX = round(0:xMax./nTicks:xMax);
+autoTicksX = [0 5 10];
 for jj = 1:length(autoTicksX)
-    tickNames{jj} = sprintf('%1.1f%',100*autoTicksX(jj));
+    tickNames{jj} = sprintf('%1.0f%',100*autoTicksX(jj));
 end
 
 % Format plot
@@ -292,12 +296,11 @@ if (p.Results.saveFigure)
         print(tcHndlCont, figNameTc, '-dpdf', '-r300');
     end
 
-    figureSizeInches = [3.5 3.5];
     tcHndlNonlin.Units  = 'inches';
     tcHndlNonlin.PaperUnits  = 'inches';
-    tcHndlNonlin.PaperSize = figureSizeInches;
-    tcHndlNonlin.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-    tcHndlNonlin.InnerPosition = [.1 .1 figureSizeInches(1)-.1 figureSizeInches(2)-.1];
+    tcHndlNonlin.PaperSize = nonLinFigureSizeInches;
+    tcHndlNonlin.OuterPosition = [0 0 nonLinFigureSizeInches(1) nonLinFigureSizeInches(2)];
+    tcHndlNonlin.InnerPosition = [.1 .1 nonLinFigureSizeInches(1)-.1 nonLinFigureSizeInches(2)-.1];
     if ~isempty(plotInfo)
         figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_Nonlin_CTM.pdf']);
         print(tcHndlNonlin, figNameTc, '-dpdf', '-r300');

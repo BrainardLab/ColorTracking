@@ -74,7 +74,9 @@ numPlotRows    = floor(sqrt(nColorDirPlots));
 numPlotCols    = ceil(nColorDirPlots./numPlotRows);
 
 tcHndl = figure; hold on
-set(gcf,'Position',[10 10 20*75 11*75]);
+paperScaler = 100;
+innerOuterOffset = 1;
+set(gcf,'Position',[10 10 (plotInfo.figureSizeInches(1)-innerOuterOffset)*paperScaler (plotInfo.figureSizeInches(2)-innerOuterOffset)*paperScaler]);
 
 % Break up direction into indivual subplots
 % the based on the directionGroups cell
@@ -139,9 +141,11 @@ for ii = 1:(nColorDirPlots)
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
         'YTick'       , autoTicksY, ...
-        'XTick'       ,100*[.01 0.03 0.1 0.3 1],...
-        'LineWidth'   , 2         , ...
-        'ActivePositionProperty', 'OuterPosition');
+        'XTick'       ,100*[.01 0.03 0.1 0.3 1], ...
+        'LineWidth'   , 2 );  
+    
+        %  , ...
+        % 'ActivePositionProperty', 'OuterPosition');
     
     set(gcf, 'Color', 'white' );
     
@@ -175,12 +179,14 @@ end
 
 % Save it!
 if (p.Results.saveFigure)
+    figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_model_fit_allData_2mech.pdf']);
+    %saveas(tcHndl,figNameTc,'pdf');
     figureSizeInches = plotInfo.figureSizeInches;
     tcHndl.Units  = 'inches';
     tcHndl.PaperUnits  = 'inches';
     tcHndl.PaperSize = figureSizeInches;
     tcHndl.OuterPosition = [0 0 figureSizeInches(1) figureSizeInches(2)];
-    tcHndl.InnerPosition = [.5 .5 figureSizeInches(1)-.5 figureSizeInches(2)-.5];
+    tcHndl.InnerPosition = [innerOuterOffset innerOuterOffset figureSizeInches(1)-innerOuterOffset figureSizeInches(2)-innerOuterOffset];
     figNameTc =  fullfile(plotInfo.figSavePath,[plotInfo.subjCode, '_model_fit_allData_2mech.pdf']);
     print(tcHndl, figNameTc, '-dpdf', '-r300');
     exportgraphics(tcHndl,figNameTc);

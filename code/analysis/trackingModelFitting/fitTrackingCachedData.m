@@ -325,7 +325,8 @@ CIs.lower = abs(lagsMat - lowerCI);
 
 % Customize directions and group into pairs for montaging
 if strcmp(subjID,'MAB')
-    directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.6,88.6,87.6],[22.5,-1.4,-22.5]}; yLimVals = [0.2 0.9];
+    directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.6,88.6,87.6],[22.5,-1.4,-22.5]};
+    yLimVals = [0.2 0.9];
 elseif strcmp(subjID,'BMC')
     directionGroups = {[0,90],[75,-75],[45,-45],[78.75,-78.75],[82.5,-82.5],[86.2,-86.2],[89.1,88.1,87.1],[22.5,-0.9,-22.5]};
     yLimVals = [0.2 0.6];

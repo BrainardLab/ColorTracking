@@ -1,4 +1,8 @@
-%% plot the tITFs for a single color direction
+%% Plot the tITFs for a single color direction
+%
+% Run this to generate the sample tIRF estimation plots
+% from raw data.  You have to save by hand.
+
 % Set up the subj and exp
 subjID = 'BMC';
 expName = 'LS1';

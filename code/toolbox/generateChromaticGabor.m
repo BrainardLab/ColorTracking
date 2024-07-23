@@ -28,6 +28,7 @@ p.addRequired('backgroundPrimaries',@isvector);
 p.addRequired('LMScontrastModulation',@isvector);
 p.addParameter('rampOnOff',[1],@isvector);
 p.addParameter('addNoise',[0 0],@isvector);
+p.addParameter('dispWarning',false,@islogical);
 
 p.parse(calStructOBJ,contrastImage,backgroundExcitations,stimLMScontrast, varargin{:});
 
@@ -90,16 +91,18 @@ for ii = 1:length(p.Results.rampOnOff)
         noiseExcitations =backgroundExcitations.*noiseMat;
         stimExcitations(:,:,ii) = stimExcitations(:,:,ii) + noiseExcitations;
     end
-    
+
     % Check Dimensions
     assert(size(stimExcitations(:,:,ii),1) == 3, 'Cone excitations must have 3 rows');
 
     % Convert excitation to settings
     [stimSettings2D, badIndex] = SensorToSettings(calStructOBJ,stimExcitations(:,:,ii));
-
+    imgInfo.badIndex = badIndex;
     % check and warn for out of gamut pixles
-    if sum(badIndex) > 0
-        fprintf('\n <strong> WARNGING: </strong> %2.3f%% of pixels out of gamut.\n', 100*(sum(badIndex)./size(stimSettings2D,2)));
+    if p.Results.dispWarning
+        if sum(badIndex) > 0
+            fprintf('\n <strong> WARNGING: </strong> %2.3f%% of pixels out of gamut.\n', 100*(sum(badIndex)./size(stimSettings2D,2)));
+        end
     end
 
     % reshape to an mxnx3 image

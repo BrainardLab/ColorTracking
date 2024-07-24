@@ -27,7 +27,6 @@ SetGammaMethod(calStructOBJ,2);
 
 % load the stim settings ans max contrasts for angles -10:.25:110
 load cacheStimSettingAsanoBoot2.mat
-load cacheContrastAsanoBoot.mat
 
 %% Baseline fundamentals
 S = [380 5 81];
@@ -38,7 +37,7 @@ coneParams.indDiffParams;
 
 load T_cones_ss2
 %% Outer loop over Asano parameters
-theAngles = 80:.05:100;
+theAngles = 80:0.05:100;
 nAsanoBoots = 10000;
 
 for aa = 1:nAsanoBoots
@@ -99,9 +98,9 @@ for aa = 1:nAsanoBoots
          0 ,0,1];
 
     wContrasts = m*contrasts;
-    lumVec = vecnorm(wContrasts(1:2,:));
+    lumVec(aa,:) = vecnorm(wContrasts(1:2,:));
 
-    minLumAngle(aa) = theAngles(find(lumVec == min(lumVec)));
+    minLumAngle(aa) = theAngles(find(lumVec(aa,:) == min(lumVec(aa,:))));
 end
 
 %% Plot distribution of theta0's.  We'll look at that.
@@ -110,6 +109,37 @@ ylabel('Count')
 xlabel('Angle in LS Plane')
 title('Minimun Luminance Angle')
 set(gcf,'Color','w');
+
+%% Get error bars on stuff
+ciPercent = 68;
+upperCiVal = 100 - ((100 - ciPercent)/2);
+lowerCiVal = ((100 - ciPercent)/2);
+for pp = 1:size(lumVec,2)
+    errUpLwr(pp,:) = prctile(lumVec(:,pp),[upperCiVal lowerCiVal]);
+end
+
+
+%% Get nominal contrast
+%Standard initialization of calibration structure
+SetSensorColorSpace(calStructOBJ,T_cones_ss2,S_cones_ss2);
+   
+
+% Set the background
+backgroundPrimaries = [0.50 0.5 0.50]'; %SensorToSettings(calStructOBJ,backgroundLMS);
+backgroundLMS_hat = SettingsToSensor(calStructOBJ,PrimaryToSettings(calStructOBJ,backgroundPrimaries));
+
+comparisonLMSnom = SettingsToSensor(calStructOBJ,stimSettings);
+    
+backgroundLMSnom = repmat(backgroundLMS_hat,[1,size(comparisonLMS,2)]);
+
+nomContrast = ExcitationsToContrast(comparisonLMSnom,backgroundLMSnom);
+w = 2;
+m = [w,0,0;...
+     0,1,0;...
+     0,0,1];
+
+wContrastsNom = m*nomContrast;
+nominalLum = vecnorm(wContrastsNom);
 
 
 

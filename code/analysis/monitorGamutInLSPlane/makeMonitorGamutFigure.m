@@ -1,5 +1,8 @@
 % Make a figure showing our monitor gamut in the LS contrast plane
 
+% Initialize
+clear; close all;
+
 % Load typical calibration file from the experiment
 resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
@@ -25,44 +28,44 @@ if (NOAMBIENT)
     calObj.set('P_ambient',zeros(size(calObj.get('P_ambient'))));
 end
 
-%% Cone fundamentals and XYZ CMFs.
+% Cone fundamentals
 psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
 psiParamsStruct.coneParams.fieldSizeDegrees = 2;
 psiParamsStruct.coneParams.ageYears = 30;
 T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,Scolor);
-
 SetSensorColorSpace(calObj,T_cones,Scolor);
+
+% Compute the background
 bgPrimary = [0.5 0.5 0.5]';
-bgSettings = PrimaryToSettings(calObj,bgPrimary);
-D.bgd        = bgPrimary';
+bgCones = PrimaryToSensor(calObj,bgPrimary);
 
-% Gamma Correct
-D.correctedBgd = bgSettings';
+% Find maximum in gamut contrast for a set of color directions.  We
+% are not going to worry about device quantization since we used
+% high-bit depth hardware
+nAngles = 1000;
+theAngles = linspace(0,2*pi,nAngles);
+for aa = 1:nAngles
+    unitContrastDir = [cos(theAngles(aa)) 0 sin(theAngles(aa))]';
+    unitConesDir = unitContrastDir .* bgCones;
+    unitPrimaryDir = SensorToPrimary(calObj,unitConesDir + bgCones) - SensorToPrimary(calObj,bgCones);
 
-S.lookupTableSettings = [];
-for i = 1:length(targetContrastAngle)
-    [lookupTableSettings,badIndex] = makeLookUpTableForCC(calObj,targetContrast(i),targetContrastAngle(i),D.correctedBgd');
-    if any(badIndex ~= 0)
-        warning('WARNING: %2.2f is out of gamut\n',targetContrast(i));
-    end
-    S.lookupTableSettings(:,:,i) = lookupTableSettings';
+    [s,sPos,sNeg] = MaximizeGamutContrast(unitPrimaryDir,bgPrimary);
+    gamutPrimaryDir = s*unitPrimaryDir;
+
+    gamutCones = PrimaryToSensor(calObj,gamutPrimaryDir + bgPrimary);
+    gamutContrast(:,aa) = (gamutCones-bgCones) ./ bgCones;
+    vectorLengthContrast(aa) = norm(gamutContrast(:,aa));
 end
+%gamutContrast
 
-% MAKE INITIAL GAMMA TABLE
-lookupTableDesiredMonochromeContrastsCal = [linspace(-1,-2/256,256/2-1) 0 linspace(2/256,1,256/2)];
-lookupTableDesiredContrastCal = 1*[1;1;1]*lookupTableDesiredMonochromeContrastsCal;
-bgExcitations = SettingsToSensor(calObj,bgSettings);
-lookupTableDesiredExcitationsCal = ContrastToExcitation(lookupTableDesiredContrastCal,bgExcitations);
-[lookupTableSettingsInit, ~] = SensorToSettings(calObj,lookupTableDesiredExcitationsCal);
-S.lookupTableSettingsInit = lookupTableSettingsInit';
-
-% *** REPLACE THIS WHEN THE PROPER STIMULUS IS READY ***
-t = 1;
-stm = generateStimContrastProfile(S.imgSzXYdeg(t,:),S.smpPerDeg(t),S.frqCpdL(t),S.ortDeg(t),S.phsDegL(t),bandwidthOct2sigma(S.frqCpdL(t),S.BWoct(t)));
-stm = stm./2 + 0.5;
-stm = round(stm.*255);
-% *******
-
-S.stmLE = stm;
-S.stmRE = stm;
-
+% Make a plot of the gamut in the LS contrast plane
+figure; clf; hold on;
+%plot(100*gamutContrast(1,:),100*gamutContrast(3,:),'ko','MarkerSize',8);
+plot([-100 100],[0 0],'k:','LineWidth',0.5);
+plot([0 0],[-100 100],'k:','LineWidth',0.5);
+plot(100*gamutContrast(1,:),100*gamutContrast(3,:),'k','LineWidth',1);
+xlim([-100 100])
+ylim([-100 100]);
+axis('square');
+xlabel('L Cone Contrast (%)')
+ylabel('S Cone Contrast (%)');

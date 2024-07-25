@@ -7,14 +7,19 @@ clear; close all;
 figureDir = getpref('ColorTracking','figureSavePath');
 
 %% Load typical calibration file from the experiment
+% whichCalFile = 'ViewSonicG220fb_670.mat';
+whichCalFile = 'ViewSonicG220fb.mat';
+whichCalNumber = 1;
 resourcesDir =  getpref('ColorTracking','CalDataFolder');
-load(fullfile(resourcesDir,'ViewSonicG220fb_670.mat'),'cals');
-cal = cals{4};
+load(fullfile(resourcesDir,whichCalFile),'cals');
+cal = cals{whichCalNumber};
 
 %% Cone cal object
 calObjCones = ObjectToHandleCalOrCalStruct(cal);
 
-% Make this a 12-bit device as far as the calibration file goes
+% Make this a 12-bit device as far as the calibration file goes.
+%
+% HARDWARE FOR DETECTION WAS 14-BIT, BUT FOR TRACKING WAS LOWER.
 nDeviceBits = 12;
 nDeviceLevels = 2^nDeviceBits;
 CalibrateFitGamma(calObjCones, nDeviceLevels);
@@ -29,36 +34,53 @@ Scolor = calObjCones.get('S');
 
 % Zero out ambient?
 % [HOW WAS THIS SET FOR THE EXPERIMENT???]
-NOAMBIENT = true;
+NOAMBIENT = false;
 if (NOAMBIENT)
     calObjCones.set('P_ambient',zeros(size(calObjCones.get('P_ambient'))));
 end
 
-% Cone fundamentals. 
-psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
-psiParamsStruct.coneParams.fieldSizeDegrees = 2;
-psiParamsStruct.coneParams.ageYears = 30;
-T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,Scolor);
+% Cone fundamentals. Methods say cones were SS 2-deg. That is
+% what was loaded in the tracking code.  In the detection code,
+% it was ComputeObserverFundamentals with parameters below, which
+% are not quite T_cones_ss2.
+%
+% psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
+% psiParamsStruct.coneParams.fieldSizeDegrees = 2;
+% psiParamsStruct.coneParams.ageYears = 30;
+%T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,Scolor);
+% [WHICH CONES WERE REALLY USED? SUBJECT AGES WERE 28, 29, and 33]
+load T_cones_ss2
+T_cones = SplineCmf(S_cones_ss2,T_cones_ss2,Scolor);
 SetSensorColorSpace(calObjCones,T_cones,Scolor);
 
 %% XYZ cal object
 calObjXYZ = ObjectToHandleCalOrCalStruct(cal);
 
-% Make this a 12-bit device as far as the calibration file goes
-nDeviceBits = 12;
-nDeviceLevels = 2^nDeviceBits;
+% Get gamma correct
 CalibrateFitGamma(calObjXYZ, nDeviceLevels);
 SetGammaMethod(calObjXYZ,gammaMethod);
 if (NOAMBIENT)
     calObjXYZ.set('P_ambient',zeros(size(calObjCones.get('P_ambient'))));
 end
 
+%% Image scale factor
+% 
+% We report a nominal max contrast which is the contrast that would have been
+% shown had the 100% contrast Gabor image been in cosine phase.  But ours
+% were in sin phase.  The maximum value of the Gabor was 0.9221. We divide
+% our maximum gamut contrasts by this to get the real maximum contrast we
+% report.
+imageScaleFactor = 0.9221;
+
 % XYZ
-%
-load T_xyzCIEPhys2.mat
-T_xyz = 683*SplineCmf(S_xyzCIEPhys2,T_xyzCIEPhys2,Scolor);
-% load T_xyz1931.mat
-% T_xyz = 683*SplineCmf(S_xyz1931,T_xyz1931,Scolor);
+USE1931XYZ = true;
+if (USE1931XYZ)
+    load T_xyz1931.mat
+    T_xyz = 683*SplineCmf(S_xyz1931,T_xyz1931,Scolor);
+else
+    load T_xyzCIEPhys2.mat
+    T_xyz = 683*SplineCmf(S_xyzCIEPhys2,T_xyzCIEPhys2,Scolor);
+end
 SetSensorColorSpace(calObjXYZ,T_xyz,Scolor);
 
 %% Compute ambient
@@ -66,12 +88,22 @@ ambientCones = SettingsToSensor(calObjCones,[0 0 0]');
 ambientXYZ = SettingsToSensor(calObjXYZ,[0 0 0']');
 
 %% Compute the background, taking quantization into account
-bgPrimary = SettingsToPrimary(calObjCones,PrimaryToSettings(calObjCones,[0.5 0.5 0.5]'));
-bgCones = PrimaryToSensor(calObjCones,bgPrimary);
-bgXYZ = PrimaryToSensor(calObjXYZ,bgPrimary);
+%
+% The paper says the background was 30.75 cd/m2, x = 0.326, y = 0.372;
+SPECIFIEDBG = false;
+if (SPECIFIEDBG)
+    bgxyYTarget = [0.326, 0.372 30.75]';
+    bgXYZTarget = xyYToXYZ(bgxyYTarget);
+    bgPrimary = SettingsToPrimary(calObjXYZ,SensorToSettings(calObjXYZ,bgXYZTarget));
+    bgXYZ = PrimaryToSensor(calObjXYZ,bgPrimary);
+else
+    bgPrimary = SettingsToPrimary(calObjCones,PrimaryToSettings(calObjCones,[0.5 0.5 0.5]'));
+    bgXYZ = PrimaryToSensor(calObjXYZ,bgPrimary);
+end
 bgxyY = XYZToxyY(bgXYZ);
-fprintf('\nBackground x,y = %0.3f, %0.3f\n',bgxyY(1),bgxyY(2));
-fprintf('Background Y = %0.1f cd/m2, ambient %0.3f cd/m2\n\n',bgXYZ(2),ambientXYZ(2));
+bgCones = PrimaryToSensor(calObjCones,bgPrimary);
+fprintf('\nBackground x,y = %0.4f, %0.4f\n',bgxyY(1),bgxyY(2));
+fprintf('Background Y = %0.2f cd/m2, ambient %0.3f cd/m2\n\n',bgXYZ(2),ambientXYZ(2));
 
 %% Max contrast
 %
@@ -101,9 +133,14 @@ for aa = 1:nAngles
     if (any(gamutPrimaryDir+bgPrimary < -1e-3) | any(gamutPrimaryDir+bgPrimary > 1+1e-3))
         error('Somehow primaries got too far out of gamut\n');
     end
-    gamutDevPos = abs(gamutPrimaryDir+bgPrimary - 1);
-    gamutDevNeg = abs(gamutPrimaryDir+bgPrimary);
-    gamutDev = min([gamutDevPos gamutDevNeg]);
+    if (any(-gamutPrimaryDir+bgPrimary < -1e-3) | any(-gamutPrimaryDir+bgPrimary > 1+1e-3))
+        error('Somehow primaries got too far out of gamut\n');
+    end
+    gamutDevPos1 = abs(gamutPrimaryDir+bgPrimary - 1);
+    gamutDevNeg1 = abs(gamutPrimaryDir+bgPrimary);
+    gamutDevPos2 = abs(-gamutPrimaryDir+bgPrimary - 1);
+    gamutDevNeg2 = abs(-gamutPrimaryDir+bgPrimary);
+    gamutDev = min([gamutDevPos1 gamutDevNeg1 gamutDevPos2 gamutDevNeg2]);
     if (gamutDev > 1e-3)
         error('Did not get primaries close enough to gamut edge');
     end
@@ -118,8 +155,10 @@ for aa = 1:nAngles
 
     % Figure out the cone excitations for the settings we computed, and
     % then convert to contrast as our maximum contrast in this direction.
+    %
+    % Dividing by imageScaleFactor handles the sine phase of the Gabor
     gamutCones = SettingsToSensor(calObjCones,gamutSettings);
-    gamutContrast(:,aa) = (gamutCones-bgCones) ./ bgCones;
+    gamutContrast(:,aa) = ((gamutCones-bgCones) ./ bgCones)/imageScaleFactor;
     vectorLengthContrast(aa) = norm(gamutContrast(:,aa));
 end
 
@@ -139,13 +178,18 @@ ylabel('S Cone Contrast (%)');
 saveas(gcf,fullfile(figureDir,'MonitorGamutFigure.pdf'),'pdf')
 
 % This does the same computation for specific stimulus angles
-theSpecificAngles = [-75 -45 -22.5 0 22.5 45 75 90];
+theSpecificAngles = [0   90.0000   75.0000  -75.0000   45.0000  -45.0000   78.7500   82.5000   86.2000  -78.7500  -82.5000  -86.2000   89.6000   88.6000   87.6000   22.5000   -1.4000  -22.5000];
 for aa = 1:length(theSpecificAngles)
   
     % Convert from cone contrast to cone excitation direction.
     % Don't care about length here as that is handled by the contrast
     % maximization code below.
     unitContrastDir = [cosd(theSpecificAngles(aa)) 0 sind(theSpecificAngles(aa))]';
+
+    % Convert from cone contrast to cone excitation direction.
+    % Don't care about length here as that is handled by the contrast
+    % maximization code below.
+    unitConesDir = unitContrastDir .* bgCones;
 
     % Convert the direction to the desired direction in primary space.
     % Since this is desired, we do not go into settings here. Adding
@@ -154,14 +198,24 @@ for aa = 1:length(theSpecificAngles)
 
     % Find out how far we can go in the desired direction and scale the
     % unitPrimaryDir by that amount
-    [s,sPos,sNeg] = MaximizeGamutContrast(unitPrimaryDir,bgPrimary);
+    [s,sPos(aa),sNeg(aa)] = MaximizeGamutContrast(unitPrimaryDir,bgPrimary);
+    if (sPos(aa) < sNeg(aa))
+        gamutLimitSign(aa) = 1;
+    else
+        gamutLimitSign(aa) = -1;
+    end
     gamutPrimaryDir = s*unitPrimaryDir;
     if (any(gamutPrimaryDir+bgPrimary < -1e-3) | any(gamutPrimaryDir+bgPrimary > 1+1e-3))
         error('Somehow primaries got too far out of gamut\n');
     end
-    gamutDevPos = abs(gamutPrimaryDir+bgPrimary - 1);
-    gamutDevNeg = abs(gamutPrimaryDir+bgPrimary);
-    gamutDev = min([gamutDevPos gamutDevNeg]);
+    if (any(-gamutPrimaryDir+bgPrimary < -1e-3) | any(-gamutPrimaryDir+bgPrimary > 1+1e-3))
+        error('Somehow primaries got too far out of gamut\n');
+    end
+    gamutDevPos1 = abs(gamutPrimaryDir+bgPrimary - 1);
+    gamutDevNeg1 = abs(gamutPrimaryDir+bgPrimary);
+    gamutDevPos2 = abs(-gamutPrimaryDir+bgPrimary - 1);
+    gamutDevNeg2 = abs(-gamutPrimaryDir+bgPrimary);
+    gamutDev = min([gamutDevPos1 gamutDevNeg1 gamutDevPos2 gamutDevNeg2]);
     if (gamutDev > 1e-3)
         error('Did not get primaries close enough to gamut edge');
     end
@@ -176,10 +230,32 @@ for aa = 1:length(theSpecificAngles)
 
     % Figure out the cone excitations for the settings we computed, and
     % then convert to contrast as our maximum contrast in this direction.
+    %
+    % Dividing by imageScaleFactor handles the sine phase of the Gabor
     gamutCones = SettingsToSensor(calObjCones,gamutSettings);
-    specificGamutContrast(:,aa) = (gamutCones-bgCones) ./ bgCones;
+    specificGamutContrast(:,aa) = ((gamutCones-bgCones) ./ bgCones)/imageScaleFactor;
     specificVectorLengthContrast(aa) = norm(specificGamutContrast(:,aa));
     fprintf('Angle %0.1f, L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
         theSpecificAngles(aa),100*specificGamutContrast(1,aa),100*specificGamutContrast(2,aa),100*specificGamutContrast(3,aa), ...
         100*specificVectorLengthContrast(aa));
 end
+specificVectorLengthContrast
+
+% CF MAB data from Tracking
+%
+% uniqueColorDirs(:)'
+% 
+% ans =
+% 
+%          0   90.0000   75.0000  -75.0000   45.0000  -45.0000   78.7500   82.5000   86.2000  -78.7500  -82.5000  -86.2000   89.6000   88.6000   87.6000   22.5000   -1.4000  -22.5000
+% 
+% matrixContrasts(1,:)
+% 
+% ans =
+% 
+%     0.1800    0.8500    0.6500    0.7800    0.2500    0.2600    0.8300    0.8500    0.8500    0.8400    0.8400    0.8400    0.8500    0.8500    0.8500    0.1900    0.1800    0.1900
+% 
+% cals{1} - August 31 cal, used for tracking experiment
+% specificVectorLengthContrast =
+% 
+%     0.1863    0.8513    0.6556    0.7990    0.2569    0.2710    0.8438    0.8734    0.8605    0.8462    0.8442    0.8458    0.8521    0.8542    0.8567    0.1999    0.1865    0.2039

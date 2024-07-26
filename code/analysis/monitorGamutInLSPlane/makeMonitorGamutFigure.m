@@ -7,9 +7,21 @@ clear; close all;
 figureDir = getpref('ColorTracking','figureSavePath');
 
 %% Load typical calibration file from the experiment
-% whichCalFile = 'ViewSonicG220fb_670.mat';
-whichCalFile = 'ViewSonicG220fb.mat';
-whichCalNumber = 1;
+whichExperiment = 'detection';
+switch (whichExperiment)
+    case 'tracking'
+        whichCalFile = 'ViewSonicG220fb.mat';
+        whichCalNumber = 1;
+        nDeviceBits = 8;
+        whichCones = 'ss2';
+        NOAMBIENT = false;
+    case 'detection'
+        whichCalFile = 'ViewSonicG220fb_670.mat';
+        whichCalNumber = 1;
+        nDeviceBits = 12;
+        whichCones = 'asano';
+        NOAMBIENT = true;
+end
 resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,whichCalFile),'cals');
 cal = cals{whichCalNumber};
@@ -17,10 +29,7 @@ cal = cals{whichCalNumber};
 %% Cone cal object
 calObjCones = ObjectToHandleCalOrCalStruct(cal);
 
-% Make this a 12-bit device as far as the calibration file goes.
-%
-% HARDWARE FOR DETECTION WAS 14-BIT, BUT FOR TRACKING WAS LOWER.
-nDeviceBits = 12;
+% Make the bit depth correct as far as the calibration file goes.
 nDeviceLevels = 2^nDeviceBits;
 CalibrateFitGamma(calObjCones, nDeviceLevels);
 nPrimaries = calObjCones.get('nDevices');
@@ -33,8 +42,6 @@ SetGammaMethod(calObjCones,gammaMethod);
 Scolor = calObjCones.get('S');
 
 % Zero out ambient?
-% [HOW WAS THIS SET FOR THE EXPERIMENT???]
-NOAMBIENT = false;
 if (NOAMBIENT)
     calObjCones.set('P_ambient',zeros(size(calObjCones.get('P_ambient'))));
 end
@@ -43,14 +50,16 @@ end
 % what was loaded in the tracking code.  In the detection code,
 % it was ComputeObserverFundamentals with parameters below, which
 % are not quite T_cones_ss2.
-%
-% psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
-% psiParamsStruct.coneParams.fieldSizeDegrees = 2;
-% psiParamsStruct.coneParams.ageYears = 30;
-%T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,Scolor);
-% [WHICH CONES WERE REALLY USED? SUBJECT AGES WERE 28, 29, and 33]
-load T_cones_ss2
-T_cones = SplineCmf(S_cones_ss2,T_cones_ss2,Scolor);
+switch (whichCones)
+    case 'asano'
+        psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
+        psiParamsStruct.coneParams.fieldSizeDegrees = 2;
+        psiParamsStruct.coneParams.ageYears = 30;
+        T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,Scolor);
+    case 'ss2'
+        load T_cones_ss2
+        T_cones = SplineCmf(S_cones_ss2,T_cones_ss2,Scolor);
+end
 SetSensorColorSpace(calObjCones,T_cones,Scolor);
 
 %% XYZ cal object
@@ -67,10 +76,12 @@ end
 % 
 % We report a nominal max contrast which is the contrast that would have been
 % shown had the 100% contrast Gabor image been in cosine phase.  But ours
-% were in sin phase.  The maximum value of the Gabor was 0.9221. We divide
+% were in sin phase.  The maximum value of the Gabor was 0.9221 as we
+% found it by stepping through the tracking code, and 0.9608 as we found
+% it by looking at S.stmLE in the detection code saved data. We divide
 % our maximum gamut contrasts by this to get the real maximum contrast we
-% report.
-imageScaleFactor = 0.9221;
+% report. Not sure why there is a difference.
+imageScaleFactor = 0.9221; % 0.9221; 0.9608;
 
 % XYZ
 USE1931XYZ = true;
@@ -102,8 +113,21 @@ else
 end
 bgxyY = XYZToxyY(bgXYZ);
 bgCones = PrimaryToSensor(calObjCones,bgPrimary);
+
+% Print basic info and report on monitor
+fprintf('\nExperiment %s, calibration file %s, calibration number %d, calibration date %s\n', ...
+    whichExperiment,whichCalFile,whichCalNumber,calObjXYZ.cal.describe.date);
+fprintf('\nNOAMBIENT = %d, cone option %s\n',NOAMBIENT,whichCones);
 fprintf('\nBackground x,y = %0.4f, %0.4f\n',bgxyY(1),bgxyY(2));
-fprintf('Background Y = %0.2f cd/m2, ambient %0.3f cd/m2\n\n',bgXYZ(2),ambientXYZ(2));
+fprintf('Background Y = %0.2f cd/m2, ambient %0.3f cd/m2\n',bgXYZ(2),ambientXYZ(2));
+
+% Compute monitor primary xyY to try to understand what drifted
+primaryXYZ = PrimaryToSensor(calObjXYZ,[[1 0 0]' [0 1 0]' [0 0 1]']);
+primaryxyY = XYZToxyY(primaryXYZ);
+fprintf('\nRed primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY(1,1),primaryxyY(2,1),primaryxyY(3,1));
+fprintf('Green primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY(1,2),primaryxyY(2,2),primaryxyY(3,2));
+fprintf('Blue primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY(1,3),primaryxyY(2,3),primaryxyY(3,3));
+fprintf('\n');
 
 %% Max contrast
 %

@@ -71,7 +71,7 @@ end
 setpref(projectName,'dropboxPath',baseDir);
 
 % Calibration files for the experimental apparatus.
-CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTracking','calData');
+CalFolder = fullfile(getpref(projectName,'dropboxPath'),'CNST_materials','ColorTrackingTask','calData');
 
 % Summarized data and analysis output (mostly figures) go under the
 % analysis directory.  Specify it.

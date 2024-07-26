@@ -1,0 +1,1 @@
+function params = vecToParamsCombo(vec)

@@ -18,7 +18,7 @@ switch (whichExperiment)
     case 'detection'
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
-        nDeviceBits = 18;
+        nDeviceBits = 12;
         whichCones = 'asano';
         NOAMBIENT = true;
     case 'detectionRaw'
@@ -352,8 +352,10 @@ for aa = 1:length(theDetectionSpecificAngles)
     obtainedAngle1(aa) = atand(obtainedConeContrast1(3,aa)/obtainedConeContrast1(1,aa));
     obtainedVectorLength(aa) = norm(obtainedConeContrast(:,aa));
     obtainedVectorLength1(aa) = norm(obtainedConeContrast1(:,aa));
-    angleDeviation(aa) = obtainedAngle1(aa)-obtainedAngle(aa);
-    vectorLengthDeviation(aa) = obtainedVectorLength1(aa) - obtainedVectorLength(aa);
+    angleDeviation(aa) = obtainedAngle(aa)-theDetectionSpecificAngles(aa);
+    angleDeviation1(aa) = obtainedAngle1(aa)-theDetectionSpecificAngles(aa);
+    vectorLengthDeviation(aa) = obtainedVectorLength(aa) - theVectorLengthContrasts(aa);
+    vectorLengthDeviation1(aa) = obtainedVectorLength1(aa) - theVectorLengthContrasts(aa);
 
     % Figure out the cone excitations for the settings we computed, and
     % then convert to contrast as our maximum contrast in this direction.
@@ -369,7 +371,8 @@ for aa = 1:length(theDetectionSpecificAngles)
         100*obtainedConeContrast1(1,aa),100*obtainedConeContrast1(2,aa),100*obtainedConeContrast1(3,aa), ...
         obtainedAngle1(aa),100*obtainedVectorLength1(aa));
 end
-fprintf('\nMax abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation)),max(abs(vectorLengthDeviation)));
+fprintf('\n    Had ambient/cones used been right: Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation)),max(abs(vectorLengthDeviation)));
+fprintf('\n    What we actually got:              Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation1)),max(abs(vectorLengthDeviation1)));
 
 %% Gamut chromaticity plot for comparisons
 %

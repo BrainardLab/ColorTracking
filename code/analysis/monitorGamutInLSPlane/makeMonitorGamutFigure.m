@@ -18,7 +18,7 @@ switch (whichExperiment)
     case 'detection'
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
-        nDeviceBits = 12;
+        nDeviceBits = 18;
         whichCones = 'asano';
         NOAMBIENT = true;
     case 'detectionRaw'
@@ -41,15 +41,18 @@ nDeviceLevels = 2^nDeviceBits;
 CalibrateFitGamma(calObjCones, nDeviceLevels);
 nPrimaries = calObjCones.get('nDevices');
 
-% Can change gammaMethod to 1 for unquantized analysis
-gammaMethod = 2;
-SetGammaMethod(calObjCones,gammaMethod);
-SetGammaMethod(calObjCones1,gammaMethod);
+% Set gamma mode. A value of 2 was used in the experiment
+%   gammaMode == 0 - search table using linear interpolation via interp1.
+%   gammaMode == 1 - inverse table lookup.  Fast but less accurate.
+%   gammaMode == 2 - exhaustive search
+gammaMode = 2;
+SetGammaMethod(calObjCones,gammaMode);
+SetGammaMethod(calObjCones1,gammaMode);
 
 % Set wavelength support.
 Scolor = calObjCones.get('S');
 
-% Zero out ambient?
+% Zero out ambient?  We don't zero out the 1 version of the cal object.
 if (NOAMBIENT)
     calObjCones.set('P_ambient',zeros(size(calObjCones.get('P_ambient'))));
 end
@@ -82,8 +85,8 @@ calObjXYZ1 = ObjectToHandleCalOrCalStruct(cal);
 
 % Get gamma correct
 CalibrateFitGamma(calObjXYZ, nDeviceLevels);
-SetGammaMethod(calObjXYZ,gammaMethod);
-SetGammaMethod(calObjXYZ1,gammaMethod);
+SetGammaMethod(calObjXYZ,gammaMode);
+SetGammaMethod(calObjXYZ1,gammaMode);
 if (NOAMBIENT)
     calObjXYZ.set('P_ambient',zeros(size(calObjCones.get('P_ambient'))));
 end
@@ -96,10 +99,12 @@ end
 % found it by stepping through the tracking code, and 0.9608 as we found
 % it by looking at S.stmLE in the detection code saved data. We divide
 % our maximum gamut contrasts by this to get the real maximum contrast we
-% report. Not sure why there is a difference.
+% report. The difference is that the 0.9221 is the contrast number, while
+% the stimulus value represents excitations.  We care about contrast for
+% this purpose.
 imageScaleFactor = 0.9221; % 0.9221; 0.9608;
 
-% XYZ
+%% XYZ
 USE1931XYZ = true;
 if (USE1931XYZ)
     load T_xyz1931.mat
@@ -113,11 +118,17 @@ SetSensorColorSpace(calObjXYZ1,T_xyz,Scolor);
 
 %% Compute ambient
 ambientCones = SettingsToSensor(calObjCones,[0 0 0]');
+ambientCones1 = SettingsToSensor(calObjCones1,[0 0 0]');
 ambientXYZ = SettingsToSensor(calObjXYZ,[0 0 0']');
+ambientXYZ1 = SettingsToSensor(calObjXYZ1,[0 0 0']');
 
 %% Compute the background, taking quantization into account
 %
 % The paper says the background was 30.75 cd/m2, x = 0.326, y = 0.372;
+% But, it was alayws set via backround linear rgb = [0.5 0.5 0.5].  THe
+% xyY values correspond to specified value.
+%
+% The calculations here account for display quantization.
 SPECIFIEDBG = false;
 if (SPECIFIEDBG)
     bgxyYTarget = [0.326, 0.372 30.75]';
@@ -141,15 +152,23 @@ fprintf('\nExperiment %s, calibration file %s, calibration number %d, calibratio
 fprintf('\nNOAMBIENT = %d, cone option %s\n',NOAMBIENT,whichCones);
 fprintf('\nBackground x,y = %0.4f, %0.4f\n',bgxyY(1),bgxyY(2));
 fprintf('Background Y = %0.2f cd/m2, ambient %0.3f cd/m2\n',bgXYZ(2),ambientXYZ(2));
+fprintf('\nBackground with ambient x,y = %0.4f, %0.4f\n',bgxyY1(1),bgxyY1(2));
+fprintf('Background with ambient Y = %0.2f cd/m2, ambient %0.3f cd/m2\n',bgXYZ1(2),ambientXYZ1(2));
 
 % Compute monitor primary xyY to try to understand what drifted
 primaryXYZ = PrimaryToSensor(calObjXYZ,[[1 0 0]' [0 1 0]' [0 0 1]']);
 primaryxyY = XYZToxyY(primaryXYZ);
+primaryXYZ1 = PrimaryToSensor(calObjXYZ1,[[1 0 0]' [0 1 0]' [0 0 1]']);
+primaryxyY1 = XYZToxyY(primaryXYZ1);
 fprintf('\nRed primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY(1,1),primaryxyY(2,1),primaryxyY(3,1));
 fprintf('Green primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY(1,2),primaryxyY(2,2),primaryxyY(3,2));
 fprintf('Blue primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY(1,3),primaryxyY(2,3),primaryxyY(3,3));
+fprintf('With ambient: Red primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY1(1,1),primaryxyY1(2,1),primaryxyY1(3,1));
+fprintf('With ambient: Green primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY1(1,2),primaryxyY1(2,2),primaryxyY1(3,2));
+fprintf('With ambient: Blue primary xyY: %0.4f, %0.4f, %0.2f cd/m2\n',primaryxyY1(1,3),primaryxyY1(2,3),primaryxyY1(3,3));
 
-% Express background in terms for primaries
+% Express background spd in terms of primaries.  Not entirely clear this
+% means anything important.
 bgSpd = cal.processedData.P_ambient;
 bgWeights = cal.processedData.P_device\bgSpd;
 fprintf('\nAmbient linear rgb weights: %0.3f %0.3f %0.3f\n',bgWeights(1),bgWeights(2),bgWeights(3));
@@ -157,9 +176,11 @@ fprintf('\n');
 
 %% Max contrast
 %
-% Find maximum in gamut contrast for a set of color directions.  We
-% are not going to worry about device quantization since we used
-% high-bit depth hardware
+% Find maximum in gamut contrast for a set of color directions.
+% This calculation does not worry about quantization.  It is
+% done for the main case.  Because we care about this primarily
+% for the tracking experiment, since the experimental specification
+% matched what we intended for tha experiment.
 nAngles = 1000;
 theAngles = linspace(0,2*pi,nAngles);
 for aa = 1:nAngles
@@ -198,8 +219,8 @@ for aa = 1:nAngles
     % Get the settings that as closely as possible approximate what we
     % want.  One of these should be very close to 1 or 0, and none should
     % be less than 0 or more than 1.
-    gamutSettings = PrimaryToSettings(calObjCones,gamutPrimaryDir + bgPrimary);
-    if (any(gamutSettings < 0) | any(gamutSettings > 1))
+    [gamutSettings,badIndex] = PrimaryToSettings(calObjCones,gamutPrimaryDir + bgPrimary);
+    if (any(badIndex))
         error('Somehow settings got out of gamut\n');
     end
 
@@ -271,8 +292,8 @@ for aa = 1:length(theSpecificAngles)
     % Get the settings that as closely as possible approximate what we
     % want.  One of these should be very close to 1 or 0, and none should
     % be less than 0 or more than 1.
-    gamutSettings = PrimaryToSettings(calObjCones,gamutPrimaryDir + bgPrimary);
-    if (any(gamutSettings < 0) | any(gamutSettings > 1))
+    [gamutSettings,badIndex] = PrimaryToSettings(calObjCones,gamutPrimaryDir + bgPrimary);
+    if (any(badIndex))
         error('Somehow settings got out of gamut\n');
     end
 
@@ -287,13 +308,21 @@ for aa = 1:length(theSpecificAngles)
         theSpecificAngles(aa),100*specificGamutContrast(1,aa),100*specificGamutContrast(2,aa),100*specificGamutContrast(3,aa), ...
         100*specificVectorLengthContrast(aa));
 end
+
+% Look at these variables to get a table of max gamut contrasts in these
+% angular directions
 specificVectorLengthContrast;
-theDetectionSpecificAngles = [0   90.0000   75.0000  -75.0000   45.0000  -45.0000   78.7500   82.5000   86.2000  -78.7500  -82.5000  -86.2000   89.6000   88.6000   87.6000   22.5000   -1.4000  -22.5000];
+theSpecificAngles;
 clear theSpecficAngles
 
 %% Convert cone contrasts with respect to first calibration to second.
-theDetectionSpecificAngles = [-86.25 -82.5 -78.75 -75 -45 0 45 75 78.75 82.5 86.25 90];
-theVectorLengthContrasts =   [0.05   -0.03 0.02   -75 -45 0 45 75 78.75 82.5 86.25 90];
+%
+% Angles from paper Figure 5 labels, contrasts read off of those graphs
+% roughly by eye.  If we go to 16 bit depth, the match would have been very
+% good, had the detection calibration been used the way it should have
+% been.
+theDetectionSpecificAngles = [-86.25 -82.5 -78.75 -75   -45    0      45    75    78.75 82.5 86.25 90];
+theVectorLengthContrasts =   [ 0.05   0.03  0.02   0.017 0.005 0.003  0.004 0.015 0.02  0.03 0.04  0.05];
 for aa = 1:length(theDetectionSpecificAngles)
     fprintf('Angle %0.1f, vector length contrast %0.1f\n',theDetectionSpecificAngles(aa),100*theVectorLengthContrasts(aa));
 
@@ -319,48 +348,34 @@ for aa = 1:length(theDetectionSpecificAngles)
     obtainedCones1(:,aa) = SettingsToSensor(calObjCones1,theSettings);
     obtainedConeContrast(:,aa) = ((obtainedCones(:,aa)-bgCones) ./ bgCones);
     obtainedConeContrast1(:,aa) = ((obtainedCones1(:,aa)-bgCones1) ./ bgCones1);
+    obtainedAngle(aa) = atand(obtainedConeContrast(3,aa)/obtainedConeContrast(1,aa));
+    obtainedAngle1(aa) = atand(obtainedConeContrast1(3,aa)/obtainedConeContrast1(1,aa));
     obtainedVectorLength(aa) = norm(obtainedConeContrast(:,aa));
     obtainedVectorLength1(aa) = norm(obtainedConeContrast1(:,aa));
+    angleDeviation(aa) = obtainedAngle1(aa)-obtainedAngle(aa);
+    vectorLengthDeviation(aa) = obtainedVectorLength1(aa) - obtainedVectorLength(aa);
 
     % Figure out the cone excitations for the settings we computed, and
     % then convert to contrast as our maximum contrast in this direction.
     %
     % Dividing by imageScaleFactor handles the sine phase of the Gabor
-    fprintf('   Target contrasts:                   L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
+    fprintf('   Target contrasts:                   L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
         100*targetConeContrast(1,aa),100*targetConeContrast(2,aa),100*targetConeContrast(3,aa), ...
-        100*theVectorLengthContrasts(aa));
-    fprintf('   Had ambient/cones used been right:  L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
+        theDetectionSpecificAngles(aa),100*theVectorLengthContrasts(aa));
+    fprintf('   Had ambient/cones used been right:  L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
         100*obtainedConeContrast(1,aa),100*obtainedConeContrast(2,aa),100*obtainedConeContrast(3,aa), ...
-        100*obtainedVectorLength(aa));
-    fprintf('   What we actually got:               L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
+        obtainedAngle(aa),100*obtainedVectorLength(aa));
+    fprintf('   What we actually got:               L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
         100*obtainedConeContrast1(1,aa),100*obtainedConeContrast1(2,aa),100*obtainedConeContrast1(3,aa), ...
-        100*obtainedVectorLength1(aa));
+        obtainedAngle1(aa),100*obtainedVectorLength1(aa));
 end
+fprintf('\nMax abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation)),max(abs(vectorLengthDeviation)));
 
-
-% CF MAB data from Tracking
+%% Gamut chromaticity plot for comparisons
 %
-% uniqueColorDirs(:)'
-% 
-% ans =
-% 
-%          0   90.0000   75.0000  -75.0000   45.0000  -45.0000   78.7500   82.5000   86.2000  -78.7500  -82.5000  -86.2000   89.6000   88.6000   87.6000   22.5000   -1.4000  -22.5000
-% 
-% matrixContrasts(1,:)
-% 
-% ans =
-% 
-%     0.1800    0.8500    0.6500    0.7800    0.2500    0.2600    0.8300    0.8500    0.8500    0.8400    0.8400    0.8400    0.8500    0.8500    0.8500    0.1900    0.1800    0.1900
-% 
-% cals{1} - August 31 cal, used for tracking experiment
-% specificVectorLengthContrast =
-% 
-%     0.1863    0.8513    0.6556    0.7990    0.2569    0.2710    0.8438    0.8734    0.8605    0.8462    0.8442    0.8458    0.8521    0.8542    0.8567    0.1999    0.1865    0.2039
-
-%{
 % This code plots the chromaticities from the tracking experiment, the
 % detection experiment without the ambient zeroed, and some measurements we
-% by hand on 8/2/24.
+% by hand on 8/2/24.  Numbers here were entered by hand.
 
 % 'tracking'
 % Background x,y = 0.3258, 0.3722
@@ -423,4 +438,3 @@ plot(remeasureRed670_xy(1),remeasureRed670_xy(2),'^','Color',[0.8 0.2 0.2],'Mark
 xlabel('x chromaticity');
 ylabel('y chromaticity');
 xlim([0 1]); ylim([0 1]);
-%}

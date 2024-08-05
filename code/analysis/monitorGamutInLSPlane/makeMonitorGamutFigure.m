@@ -7,7 +7,7 @@ clear; %close all;
 figureDir = getpref('ColorTracking','figureSavePath');
 
 %% Load typical calibration file from the experiment
-whichExperiment = 'detectionRaw';
+whichExperiment = 'detection';
 switch (whichExperiment)
     case 'tracking'
         whichCalFile = 'ViewSonicG220fb.mat';
@@ -65,6 +65,7 @@ switch (whichCones)
         psiParamsStruct.coneParams.ageYears = 30;
         T_cones = ComputeObserverFundamentals(psiParamsStruct.coneParams,Scolor);
 
+        % We always define T_cones1 to be the ss2.
         load T_cones_ss2
         T_cones1 = SplineCmf(S_cones_ss2,T_cones_ss2,Scolor);
     case 'ss2'
@@ -122,13 +123,17 @@ if (SPECIFIEDBG)
     bgxyYTarget = [0.326, 0.372 30.75]';
     bgXYZTarget = xyYToXYZ(bgxyYTarget);
     bgPrimary = SettingsToPrimary(calObjXYZ,SensorToSettings(calObjXYZ,bgXYZTarget));
-    bgXYZ = PrimaryToSensor(calObjXYZ,bgPrimary);
+    bgPrimary1 = SettingsToPrimary(calObjXYZ1,SensorToSettings(calObjXYZ1,bgXYZTarget));
 else
     bgPrimary = SettingsToPrimary(calObjCones,PrimaryToSettings(calObjCones,[0.5 0.5 0.5]'));
-    bgXYZ = PrimaryToSensor(calObjXYZ,bgPrimary);
+    bgPrimary1 = SettingsToPrimary(calObjCones1,PrimaryToSettings(calObjCones1,[0.5 0.5 0.5]'));
 end
+bgXYZ = PrimaryToSensor(calObjXYZ,bgPrimary);
+bgXYZ1 = PrimaryToSensor(calObjXYZ1,bgPrimary1);
 bgxyY = XYZToxyY(bgXYZ);
+bgxyY1 = XYZToxyY(bgXYZ1);
 bgCones = PrimaryToSensor(calObjCones,bgPrimary);
+bgCones1 = PrimaryToSensor(calObjCones1,bgPrimary1);
 
 % Print basic info and report on monitor
 fprintf('\nExperiment %s, calibration file %s, calibration number %d, calibration date %s\n', ...
@@ -159,22 +164,22 @@ nAngles = 1000;
 theAngles = linspace(0,2*pi,nAngles);
 for aa = 1:nAngles
     % Get a unit contrast vector at the specified angle
-    unitContrastDir = [cos(theAngles(aa)) 0 sin(theAngles(aa))]';
+    targetContrastDir = [cos(theAngles(aa)) 0 sin(theAngles(aa))]';
 
     % Convert from cone contrast to cone excitation direction.
     % Don't care about length here as that is handled by the contrast
     % maximization code below.
-    unitConesDir = unitContrastDir .* bgCones;
+    theConesDir = targetContrastDir .* bgCones;
 
     % Convert the direction to the desired direction in primary space.
     % Since this is desired, we do not go into settings here. Adding
     % and subtracting the background handles the ambient correctly.
-    unitPrimaryDir = SensorToPrimary(calObjCones,unitConesDir + bgCones) - SensorToPrimary(calObjCones,bgCones);
+    thePrimaryDir = SensorToPrimary(calObjCones,theConesDir + bgCones) - SensorToPrimary(calObjCones,bgCones);
 
     % Find out how far we can go in the desired direction and scale the
     % unitPrimaryDir by that amount
-    [s,sPos,sNeg] = MaximizeGamutContrast(unitPrimaryDir,bgPrimary);
-    gamutPrimaryDir = s*unitPrimaryDir;
+    [s,sPos,sNeg] = MaximizeGamutContrast(thePrimaryDir,bgPrimary);
+    gamutPrimaryDir = s*thePrimaryDir;
     if (any(gamutPrimaryDir+bgPrimary < -1e-3) | any(gamutPrimaryDir+bgPrimary > 1+1e-3))
         error('Somehow primaries got too far out of gamut\n');
     end
@@ -207,8 +212,6 @@ for aa = 1:nAngles
     vectorLengthContrast(aa) = norm(gamutContrast(:,aa));
 end
 
-%gamutContrast
-
 % Make a plot of the gamut in the LS contrast plane
 figure; clf; hold on;
 %plot(100*gamutContrast(1,:),100*gamutContrast(3,:),'ko','MarkerSize',8);
@@ -229,27 +232,27 @@ for aa = 1:length(theSpecificAngles)
     % Convert from cone contrast to cone excitation direction.
     % Don't care about length here as that is handled by the contrast
     % maximization code below.
-    unitContrastDir = [cosd(theSpecificAngles(aa)) 0 sind(theSpecificAngles(aa))]';
+    targetContrastDir = [cosd(theSpecificAngles(aa)) 0 sind(theSpecificAngles(aa))]';
 
     % Convert from cone contrast to cone excitation direction.
     % Don't care about length here as that is handled by the contrast
     % maximization code below.
-    unitConesDir = unitContrastDir .* bgCones;
+    theConesDir = targetContrastDir .* bgCones;
 
     % Convert the direction to the desired direction in primary space.
     % Since this is desired, we do not go into settings here. Adding
     % and subtracting the background handles the ambient correctly.
-    unitPrimaryDir = SensorToPrimary(calObjCones,unitConesDir + bgCones) - SensorToPrimary(calObjCones,bgCones);
+    thePrimaryDir = SensorToPrimary(calObjCones,theConesDir + bgCones) - SensorToPrimary(calObjCones,bgCones);
 
     % Find out how far we can go in the desired direction and scale the
     % unitPrimaryDir by that amount
-    [s,sPos(aa),sNeg(aa)] = MaximizeGamutContrast(unitPrimaryDir,bgPrimary);
+    [s,sPos(aa),sNeg(aa)] = MaximizeGamutContrast(thePrimaryDir,bgPrimary);
     if (sPos(aa) < sNeg(aa))
         gamutLimitSign(aa) = 1;
     else
         gamutLimitSign(aa) = -1;
     end
-    gamutPrimaryDir = s*unitPrimaryDir;
+    gamutPrimaryDir = s*thePrimaryDir;
     if (any(gamutPrimaryDir+bgPrimary < -1e-3) | any(gamutPrimaryDir+bgPrimary > 1+1e-3))
         error('Somehow primaries got too far out of gamut\n');
     end
@@ -284,71 +287,38 @@ for aa = 1:length(theSpecificAngles)
         theSpecificAngles(aa),100*specificGamutContrast(1,aa),100*specificGamutContrast(2,aa),100*specificGamutContrast(3,aa), ...
         100*specificVectorLengthContrast(aa));
 end
-specificVectorLengthContrast
+specificVectorLengthContrast;
+theDetectionSpecificAngles = [0   90.0000   75.0000  -75.0000   45.0000  -45.0000   78.7500   82.5000   86.2000  -78.7500  -82.5000  -86.2000   89.6000   88.6000   87.6000   22.5000   -1.4000  -22.5000];
+clear theSpecficAngles
 
-%% Convert cone contrasts with respect to first calibration to second
-theSpecificAngles = [0   90.0000   75.0000  -75.0000   45.0000  -45.0000   78.7500   82.5000   86.2000  -78.7500  -82.5000  -86.2000   89.6000   88.6000   87.6000   22.5000   -1.4000  -22.5000];
-for aa = 1:length(theSpecificAngles)
-  
+%% Convert cone contrasts with respect to first calibration to second.
+theDetectionSpecificAngles = [-86.25 -82.5 -78.75 -75 -45 0 45 75 78.75 82.5 86.25 90];
+theVectorLengthContrasts =   [0.05   -0.03 0.02   -75 -45 0 45 75 78.75 82.5 86.25 90];
+for aa = 1:length(theDetectionSpecificAngles)
+    fprintf('Angle %0.1f, vector length contrast %0.1f\n',theDetectionSpecificAngles(aa),100*theVectorLengthContrasts(aa));
+
     % Convert from cone contrast to cone excitation direction.
     % Don't care about length here as that is handled by the contrast
     % maximization code below.
-    unitContrastDir = [cosd(theSpecificAngles(aa)) 0 sind(theSpecificAngles(aa))]';
+    targetContrastDir = [cosd(theDetectionSpecificAngles(aa)) 0 sind(theDetectionSpecificAngles(aa))]';
+    targetConeContrast(:,aa) = (theVectorLengthContrasts(aa)*targetContrastDir);
 
     % Convert from cone contrast to cone excitation direction.
     % Don't care about length here as that is handled by the contrast
     % maximization code below.
-    unitConesDir = unitContrastDir .* bgCones;
+    targetCones =  (targetConeContrast(:,aa).* bgCones) + bgCones;
 
-    % Convert the direction to the desired direction in primary space.
-    % Since this is desired, we do not go into settings here. Adding
-    % and subtracting the background handles the ambient correctly.
-    unitPrimaryDir = SensorToPrimary(calObjCones,unitConesDir + bgCones) - SensorToPrimary(calObjCones,bgCones);
-
-    % Find out how far we can go in the desired direction and scale the
-    % unitPrimaryDir by that amount
-    [s,sPos(aa),sNeg(aa)] = MaximizeGamutContrast(unitPrimaryDir,bgPrimary);
-    if (sPos(aa) < sNeg(aa))
-        gamutLimitSign(aa) = 1;
-    else
-        gamutLimitSign(aa) = -1;
-    end
-    gamutPrimaryDir = s*unitPrimaryDir;
-    if (any(gamutPrimaryDir+bgPrimary < -1e-3) | any(gamutPrimaryDir+bgPrimary > 1+1e-3))
-        error('Somehow primaries got too far out of gamut\n');
-    end
-    if (any(-gamutPrimaryDir+bgPrimary < -1e-3) | any(-gamutPrimaryDir+bgPrimary > 1+1e-3))
-        error('Somehow primaries got too far out of gamut\n');
-    end
-    gamutDevPos1 = abs(gamutPrimaryDir+bgPrimary - 1);
-    gamutDevNeg1 = abs(gamutPrimaryDir+bgPrimary);
-    gamutDevPos2 = abs(-gamutPrimaryDir+bgPrimary - 1);
-    gamutDevNeg2 = abs(-gamutPrimaryDir+bgPrimary);
-    gamutDev = min([gamutDevPos1 gamutDevNeg1 gamutDevPos2 gamutDevNeg2]);
-    if (gamutDev > 1e-3)
-        error('Did not get primaries close enough to gamut edge');
+    % Compute settings we would have used using first calibration
+    [theSettings,badIndex] = SensorToSettings(calObjCones,targetCones);
+    if (any(badIndex))
+        fprintf('   Out of gamut\n');
     end
 
-    % Get the settings that as closely as possible approximate what we
-    % want.  One of these should be very close to 1 or 0, and none should
-    % be less than 0 or more than 1.
-    gamutSettings = PrimaryToSettings(calObjCones,gamutPrimaryDir + bgPrimary);
-    if (any(gamutSettings < 0) | any(gamutSettings > 1))
-        error('Somehow settings got out of gamut\n');
-    end
-
-    % Convert a few contrasts at each angle through other cal
-    theContrast = 0.5;
-    theSettings = PrimaryToSettings(calObjCones,theContrast*gamutPrimaryDir + bgPrimary);
-    if (any(gamutSettings < 0) | any(gamutSettings > 1))
-        error('Somehow settings got out of gamut\n');
-    end
-
-    % Go back on second cal
+    % Go back to contrast with both calibrations
     obtainedCones(:,aa) = SettingsToSensor(calObjCones,theSettings);
     obtainedCones1(:,aa) = SettingsToSensor(calObjCones1,theSettings);
     obtainedConeContrast(:,aa) = ((obtainedCones(:,aa)-bgCones) ./ bgCones);
-    obtainedConeContrast1(:,aa) = ((obtainedCones1(:,aa)-bgCones) ./ bgCones);
+    obtainedConeContrast1(:,aa) = ((obtainedCones1(:,aa)-bgCones1) ./ bgCones1);
     obtainedVectorLength(aa) = norm(obtainedConeContrast(:,aa));
     obtainedVectorLength1(aa) = norm(obtainedConeContrast1(:,aa));
 
@@ -356,11 +326,13 @@ for aa = 1:length(theSpecificAngles)
     % then convert to contrast as our maximum contrast in this direction.
     %
     % Dividing by imageScaleFactor handles the sine phase of the Gabor
-    fprintf('Angle %0.1f\n',theSpecificAngles(aa));
-    fprintf('    Desired   L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
+    fprintf('   Target contrasts:                   L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
+        100*targetConeContrast(1,aa),100*targetConeContrast(2,aa),100*targetConeContrast(3,aa), ...
+        100*theVectorLengthContrasts(aa));
+    fprintf('   Had ambient/cones used been right:  L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
         100*obtainedConeContrast(1,aa),100*obtainedConeContrast(2,aa),100*obtainedConeContrast(3,aa), ...
         100*obtainedVectorLength(aa));
-    fprintf('    Obtained  L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
+    fprintf('   What we actually got:               L cone contrast %0.3f%%, M, %0.3f%%, S %0.3f%%, vector length %0.1f%%\n', ...
         100*obtainedConeContrast1(1,aa),100*obtainedConeContrast1(2,aa),100*obtainedConeContrast1(3,aa), ...
         100*obtainedVectorLength1(aa));
 end

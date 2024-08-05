@@ -1,13 +1,13 @@
 % Make a figure showing our monitor gamut in the LS contrast plane
 
 %% Initialize
-clear; %close all;
+clear; close all;
 
 %% Where to write figure
 figureDir = getpref('ColorTracking','figureSavePath');
 
 %% Load typical calibration file from the experiment
-whichExperiment = 'detection';
+whichExperiment = 'tracking';
 switch (whichExperiment)
     case 'tracking'
         whichCalFile = 'ViewSonicG220fb.mat';
@@ -39,6 +39,7 @@ calObjCones1 = ObjectToHandleCalOrCalStruct(cal);
 % Make the bit depth correct as far as the calibration file goes.
 nDeviceLevels = 2^nDeviceBits;
 CalibrateFitGamma(calObjCones, nDeviceLevels);
+CalibrateFitGamma(calObjCones1, nDeviceLevels);
 nPrimaries = calObjCones.get('nDevices');
 
 % Set gamma mode. A value of 2 was used in the experiment
@@ -77,7 +78,7 @@ switch (whichCones)
         T_cones1 = T_cones;
 end
 SetSensorColorSpace(calObjCones,T_cones,Scolor);
-SetSensorColorSpace(calObjCones1,T_cones,Scolor);
+SetSensorColorSpace(calObjCones1,T_cones1,Scolor);
 
 %% XYZ cal object
 calObjXYZ = ObjectToHandleCalOrCalStruct(cal);
@@ -85,6 +86,7 @@ calObjXYZ1 = ObjectToHandleCalOrCalStruct(cal);
 
 % Get gamma correct
 CalibrateFitGamma(calObjXYZ, nDeviceLevels);
+CalibrateFitGamma(calObjXYZ1, nDeviceLevels);
 SetGammaMethod(calObjXYZ,gammaMode);
 SetGammaMethod(calObjXYZ1,gammaMode);
 if (NOAMBIENT)
@@ -313,7 +315,6 @@ end
 % angular directions
 specificVectorLengthContrast;
 theSpecificAngles;
-clear theSpecficAngles
 
 %% Convert cone contrasts with respect to first calibration to second.
 %
@@ -321,58 +322,135 @@ clear theSpecficAngles
 % roughly by eye.  If we go to 16 bit depth, the match would have been very
 % good, had the detection calibration been used the way it should have
 % been.
-theDetectionSpecificAngles = [-86.25 -82.5 -78.75 -75   -45    0      45    75    78.75 82.5 86.25 90];
-theVectorLengthContrasts =   [ 0.05   0.03  0.02   0.017 0.005 0.003  0.004 0.015 0.02  0.03 0.04  0.05];
-for aa = 1:length(theDetectionSpecificAngles)
-    fprintf('Angle %0.1f, vector length contrast %0.1f\n',theDetectionSpecificAngles(aa),100*theVectorLengthContrasts(aa));
+%
+% Use this code to correct the detection stimuli for further analysis
+subjID = 'MAB';
+switch (whichExperiment)
+    case 'tracking'
+        contrastLim = 1.0;
+        contrastDevLim = 0.06;
+        angleDevLim = 4;
+        expNameCell = { 'Experiment1-Pos' 'Experiment2-Pos' ['Experiment3-' subjID '-Pos']};
+        expContrastLMS = [];
+        for ii = 1:length(expNameCell)
+            expContrastLMS = [expContrastLMS ; LMSstimulusContrast('experiment',expNameCell{ii})];
+        end
+        for ii = 1:size(expContrastLMS,1)
+            targetAngle(ii) = atand(expContrastLMS(ii,2),expContrastLMS(ii,1));
+            targetContrast(ii) = norm([expContrastLMS(ii,1) expContrastLMS(ii,2)]);
+        end
 
-    % Convert from cone contrast to cone excitation direction.
-    % Don't care about length here as that is handled by the contrast
-    % maximization code below.
-    targetContrastDir = [cosd(theDetectionSpecificAngles(aa)) 0 sind(theDetectionSpecificAngles(aa))]';
-    targetConeContrast(:,aa) = (theVectorLengthContrasts(aa)*targetContrastDir);
+        targetAngleRaw = theSpecificAngles;
+        targetContrast = specificVectorLengthContrast;
+    case {'detection', 'detectionRaw'};
+        % Options are 'MAB', 'BMC', 'KAS'
+        contrastLim = 0.3;
+        contrastDevLim = 0.015;
+        angleDevLim = 2;
 
-    % Convert from cone contrast to cone excitation direction.
-    % Don't care about length here as that is handled by the contrast
-    % maximization code below.
-    targetCones =  (targetConeContrast(:,aa).* bgCones) + bgCones;
-
-    % Compute settings we would have used using first calibration
-    [theSettings,badIndex] = SensorToSettings(calObjCones,targetCones);
-    if (any(badIndex))
-        fprintf('   Out of gamut\n');
-    end
-
-    % Go back to contrast with both calibrations
-    obtainedCones(:,aa) = SettingsToSensor(calObjCones,theSettings);
-    obtainedCones1(:,aa) = SettingsToSensor(calObjCones1,theSettings);
-    obtainedConeContrast(:,aa) = ((obtainedCones(:,aa)-bgCones) ./ bgCones);
-    obtainedConeContrast1(:,aa) = ((obtainedCones1(:,aa)-bgCones1) ./ bgCones1);
-    obtainedAngle(aa) = atand(obtainedConeContrast(3,aa)/obtainedConeContrast(1,aa));
-    obtainedAngle1(aa) = atand(obtainedConeContrast1(3,aa)/obtainedConeContrast1(1,aa));
-    obtainedVectorLength(aa) = norm(obtainedConeContrast(:,aa));
-    obtainedVectorLength1(aa) = norm(obtainedConeContrast1(:,aa));
-    angleDeviation(aa) = obtainedAngle(aa)-theDetectionSpecificAngles(aa);
-    angleDeviation1(aa) = obtainedAngle1(aa)-theDetectionSpecificAngles(aa);
-    vectorLengthDeviation(aa) = obtainedVectorLength(aa) - theVectorLengthContrasts(aa);
-    vectorLengthDeviation1(aa) = obtainedVectorLength1(aa) - theVectorLengthContrasts(aa);
-
-    % Figure out the cone excitations for the settings we computed, and
-    % then convert to contrast as our maximum contrast in this direction.
-    %
-    % Dividing by imageScaleFactor handles the sine phase of the Gabor
-    fprintf('   Target contrasts:                   L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
-        100*targetConeContrast(1,aa),100*targetConeContrast(2,aa),100*targetConeContrast(3,aa), ...
-        theDetectionSpecificAngles(aa),100*theVectorLengthContrasts(aa));
-    fprintf('   Had ambient/cones used been right:  L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
-        100*obtainedConeContrast(1,aa),100*obtainedConeContrast(2,aa),100*obtainedConeContrast(3,aa), ...
-        obtainedAngle(aa),100*obtainedVectorLength(aa));
-    fprintf('   What we actually got:               L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
-        100*obtainedConeContrast1(1,aa),100*obtainedConeContrast1(2,aa),100*obtainedConeContrast1(3,aa), ...
-        obtainedAngle1(aa),100*obtainedVectorLength1(aa));
+        [targetContrast,targetAngleRaw] = getContrastLSD(subjID,'combined');
+        targetAngleRaw = targetAngleRaw';
 end
-fprintf('\n    Had ambient/cones used been right: Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation)),max(abs(vectorLengthDeviation)));
-fprintf('\n    What we actually got:              Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation1)),max(abs(vectorLengthDeviation1)));
+for cc = 1:size(targetContrast,1)
+    targetAngle(cc,:) = targetAngleRaw;
+    for aa = 1:length(targetAngleRaw)
+        fprintf('Angle %0.1f, vector length contrast %0.1f\n',targetAngle(cc,aa),100*targetContrast(cc,aa));
+
+        % Convert from cone contrast to cone excitation direction.
+        % Don't care about length here as that is handled by the contrast
+        % maximization code below.
+        targetContrastDir = [cosd(targetAngle(cc,aa)) 0 sind(targetAngle(cc,aa))]';
+        targetConeContrast(:,cc,aa) = (targetContrast(cc,aa)*targetContrastDir);
+
+        % Convert from cone contrast to cone excitation direction.
+        % Don't care about length here as that is handled by the contrast
+        % maximization code below.
+        targetCones =  (targetConeContrast(:,cc,aa).* bgCones) + bgCones;
+
+        % Compute settings we would have used using first calibration
+        [theSettings,badIndex] = SensorToSettings(calObjCones,targetCones);
+        if (any(badIndex))
+            fprintf('   Out of gamut\n');
+        end
+
+        % Go back to contrast with both calibrations
+        obtainedCones(:,cc,aa) = SettingsToSensor(calObjCones,theSettings);
+        obtainedCones1(:,cc,aa) = SettingsToSensor(calObjCones1,theSettings);
+        obtainedConeContrast(:,cc,aa) = ((obtainedCones(:,cc,aa)-bgCones) ./ bgCones);
+        obtainedConeContrast1(:,cc,aa) = ((obtainedCones1(:,cc,aa)-bgCones1) ./ bgCones1);
+
+        % Need to deal with angle flipping which can happen for small
+        % contrasts.
+        obtainedAngle(cc,aa) = atand(obtainedConeContrast(3,cc,aa)/obtainedConeContrast(1,cc,aa));
+        if (targetAngle(cc,aa) > 0 && obtainedAngle(cc,aa) < 0)
+            obtainedAngle(cc,aa) = obtainedAngle(cc,aa) + 180;
+        end
+        if (targetAngle(cc,aa) < 0 && obtainedAngle(cc,aa) > 0)
+            obtainedAngle(cc,aa) = obtainedAngle(cc,aa) - 180;
+        end
+        obtainedAngle1(cc,aa) = atand(obtainedConeContrast1(3,cc,aa)/obtainedConeContrast1(1,cc,aa));
+        if (targetAngle(cc,aa) > 0 && obtainedAngle1(cc,aa) < 0)
+            obtainedAngle1(cc,aa) = obtainedAngle1(cc,aa) + 180;
+        end
+        if (targetAngle(cc,aa) < 0 && obtainedAngle1(cc,aa) > 0)
+            obtainedAngle1(cc,aa) = obtainedAngle1(cc,aa) - 180;
+        end
+        obtainedContrast(cc,aa) = norm(obtainedConeContrast(:,cc,aa));
+        obtainedContrast1(cc,aa) = norm(obtainedConeContrast1(:,cc,aa));
+        angleDeviation(cc,aa) = obtainedAngle(cc,aa)-targetAngle(cc,aa);
+        angleDeviation1(cc,aa) = obtainedAngle1(cc,aa)-targetAngle(cc,aa);
+        contrastDeviation(cc,aa) = obtainedContrast(cc,aa) - targetContrast(cc,aa);
+        contrastDeviation1(cc,aa) = obtainedContrast1(cc,aa) - targetContrast(cc,aa);
+
+        % Figure out the cone excitations for the settings we computed, and
+        % then convert to contrast as our maximum contrast in this direction.
+        %
+        % Dividing by imageScaleFactor handles the sine phase of the Gabor
+        fprintf('   Target contrasts:                   L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
+            100*targetConeContrast(1,cc,aa),100*targetConeContrast(2,cc,aa),100*targetConeContrast(3,cc,aa), ...
+            targetAngle(cc,aa),100*targetContrast(cc,aa));
+        fprintf('   Had ambient/cones used been right:  L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
+            100*obtainedConeContrast(1,cc,aa),100*obtainedConeContrast(2,cc,aa),100*obtainedConeContrast(3,cc,aa), ...
+            obtainedAngle(cc,aa),100*obtainedContrast(cc,aa));
+        fprintf('   What we actually got:               L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
+            100*obtainedConeContrast1(1,cc,aa),100*obtainedConeContrast1(2,cc,aa),100*obtainedConeContrast1(3,cc,aa), ...
+            obtainedAngle1(cc,aa),100*obtainedContrast1(aa));
+    end
+end
+
+% Compute values to use
+targetAngleToUse = mean(obtainedAngle1,1);
+targetContrastToUse = obtainedContrast1;
+figure; clf; hold on;
+subplot(2,2,1); hold on;
+plot(targetAngleRaw,targetAngleToUse,'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-100 100],[-100 100],'k');
+xlim([-100 100]); ylim([-100 100]);
+axis('square');
+xlabel('Target Angle (deg)'); ylabel('Obtained Angle (deg)');
+subplot(2,2,2); hold on;
+plot(100*targetContrast(:),100*targetContrastToUse(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([0 100*contrastLim],[0 100*contrastLim],'k');
+xlim([0 100*contrastLim]); ylim([0 100*contrastLim]);
+axis('square');
+xlabel('Target Contrast (%)'); ylabel('Obtained Contrast (%)');
+subplot(2,2,3); hold on;
+plot(targetAngleRaw,targetAngleToUse-targetAngleRaw,'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-100 100],[0 0],'k');
+xlim([-100 100]); ylim([-angleDevLim angleDevLim]);
+axis('square');
+xlabel('Target Angle (deg)'); ylabel('Obtained Angle Deviation (deg)');
+subplot(2,2,4); hold on;
+plot(100*targetContrast(:),100*targetContrastToUse(:)-100*targetContrast(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([0 100*contrastLim],[0 0],'k');
+xlim([0 100*contrastLim]); ylim([100*-contrastDevLim 100*contrastDevLim]);
+axis('square');
+xlabel('Target Contrast (%)'); ylabel('Obtained Contrast Deviation (%)');
+
+% The angular deviations start to lose meaning as the contrast gets very
+% small
+fprintf('\n    Had ambient/cones used been right: Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation(:))),max(abs(contrastDeviation(:))));
+fprintf('\n    What we actually got:              Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation1(:))),max(abs(contrastDeviation1(:))));
 
 %% Gamut chromaticity plot for comparisons
 %

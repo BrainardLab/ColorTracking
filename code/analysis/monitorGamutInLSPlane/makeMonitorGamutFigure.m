@@ -13,7 +13,7 @@ switch (whichExperiment)
         % Was used with 1024 levels, but hardware is 8-bit.
         whichCalFile = 'ViewSonicG220fb.mat';
         whichCalNumber = 1;
-        nDeviceBits = 8;
+        nDeviceBits = 10;
         whichCones = 'ss2';
         NOAMBIENT = false;
     case 'detection'
@@ -329,7 +329,7 @@ subjID = 'MAB';
 switch (whichExperiment)
     case 'tracking'
         contrastLim = 1.0;
-        contrastDevLim = 0.06;
+        contrastDevLim = 0.02;
         angleDevLim = 4;
         expNameCell = { 'Experiment1-Pos' 'Experiment2-Pos' ['Experiment3-' subjID '-Pos']};
         expContrastLMS = [];
@@ -350,8 +350,8 @@ switch (whichExperiment)
         end
     case {'detection', 'detectionRaw'}
         % Options are 'MAB', 'BMC', 'KAS'
-        contrastLim = 0.3;
-        contrastDevLim = 0.015;
+        contrastLim = 1.0;
+        contrastDevLim = 0.02;
         angleDevLim = 2;
 
         [targetContrast,targetAngleRaw] = getContrastLSD(subjID,'combined');
@@ -366,15 +366,15 @@ for cc = 1:size(targetContrast,1)
         % Don't care about length here as that is handled by the contrast
         % maximization code below.
         targetContrastDir = [cosd(targetAngle(cc,aa)) 0 sind(targetAngle(cc,aa))]';
-        targetConeContrast(:,cc,aa) = (imageScaleFactor*targetContrast(cc,aa)*targetContrastDir);
+        targetConeContrast(:,cc,aa) = (targetContrast(cc,aa)*targetContrastDir);
 
         % Convert from cone contrast to cone excitation direction.
         % Don't care about length here as that is handled by the contrast
         % maximization code below.
-        targetCones =  (targetConeContrast(:,cc,aa).* bgCones) + bgCones;
+        targetConeExcitations =  (imageScaleFactor*targetConeContrast(:,cc,aa).* bgCones) + bgCones;
 
         % Compute settings we would have used using first calibration
-        [theSettings,badIndex] = SensorToSettings(calObjCones,targetCones);
+        [theSettings,badIndex] = SensorToSettings(calObjCones,targetConeExcitations);
         if (any(badIndex))
             fprintf('   Out of gamut\n');
         end
@@ -407,8 +407,16 @@ for cc = 1:size(targetContrast,1)
         angleDeviation1(cc,aa) = obtainedAngle1(cc,aa)-targetAngle(cc,aa);
         contrastDeviation(cc,aa) = obtainedContrast(cc,aa) - targetContrast(cc,aa);
         contrastDeviation1(cc,aa) = obtainedContrast1(cc,aa) - targetContrast(cc,aa);
-        MConeDeviation(cc,aa) = obtainedConeContrast(2,cc,aa);
-        MConeDeviation1(cc,aa) = obtainedConeContrast1(2,cc,aa);
+        
+        LConeTargetContrast(cc,aa) = targetConeContrast(1,cc,aa);
+        LConeContrast1(cc,aa) = obtainedConeContrast1(1,cc,aa);
+        LConeContrastDeviation1(cc,aa) = obtainedConeContrast1(1,cc,aa)-targetConeContrast(1,cc,aa);
+        MConeTargetContrast(cc,aa) = targetConeContrast(2,cc,aa);
+        MConeContrast1(cc,aa) = obtainedConeContrast1(2,cc,aa);
+        MConeContrastDeviation1(cc,aa) = obtainedConeContrast1(2,cc,aa)-targetConeContrast(2,cc,aa);
+        SConeTargetContrast(cc,aa) = targetConeContrast(3,cc,aa);
+        SConeContrast1(cc,aa) = obtainedConeContrast1(3,cc,aa);
+        SConeContrastDeviation1(cc,aa) = obtainedConeContrast1(3,cc,aa)-targetConeContrast(3,cc,aa);
 
         % Report out
         fprintf('   Target contrasts:                   L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
@@ -429,39 +437,70 @@ targetContrastToUse = obtainedContrast1;
 
 % Diagnostic plots
 figure; clf; 
-set(gcf,'Position',[10 10 800 1200]);
-subplot(3,2,1); hold on;
+set(gcf,'Position',[10 10 1500 1200]);
+subplot(3,4,1); hold on;
 plot(targetAngleRaw,targetAngleToUse,'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([-100 100],[-100 100],'k');
 xlim([-100 100]); ylim([-100 100]);
 axis('square');
 xlabel('Target Angle (deg)'); ylabel('Obtained Angle (deg)');
 title([whichExperiment ' ' subjID ' Bits ' num2str(nDeviceBits)]);
-subplot(3,2,2); hold on;
+subplot(3,4,2); hold on;
 plot(100*targetContrast(:),100*targetContrastToUse(:),'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([0 100*contrastLim],[0 100*contrastLim],'k');
 xlim([0 100*contrastLim]); ylim([0 100*contrastLim]);
 axis('square');
 xlabel('Target Contrast (%)'); ylabel('Obtained Contrast (%)');
-subplot(3,2,3); hold on;
+subplot(3,4,5); hold on;
 plot(targetAngleRaw,targetAngleToUse-targetAngleRaw,'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([-100 100],[0 0],'k');
 xlim([-100 100]); ylim([-angleDevLim angleDevLim]);
 axis('square');
 xlabel('Target Angle (deg)'); ylabel('Obtained Angle Deviation (deg)');
-subplot(3,2,4); hold on;
+subplot(3,4,6); hold on;
 plot(100*targetContrast(:),100*targetContrastToUse(:)-100*targetContrast(:),'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([0 100*contrastLim],[0 0],'k');
 xlim([0 100*contrastLim]); ylim([100*-contrastDevLim 100*contrastDevLim]);
 axis('square');
 xlabel('Target Contrast (%)'); ylabel('Obtained Contrast Deviation (%)');
 
-subplot(3,2,5); hold on;
-plot(100*targetContrast(:),100*MConeDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([0 100*contrastLim],[0 0],'k');
-xlim([0 100*contrastLim]); ylim([100*-contrastDevLim 100*contrastDevLim]);
+subplot(3,4,3); hold on;
+plot(100*LConeTargetContrast(:),100*LConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-5 20],[-5 20],'k');
+xlim([-5 20]); ylim([-5 20]);
 axis('square');
-xlabel('Target Contrast (%)'); ylabel('M Cone Contrast (%)');
+xlabel('L Cone Target Contrast (%)'); ylabel('L Cone Contrast(%)');
+subplot(3,4,7); hold on;
+plot(100*MConeTargetContrast(:),100*MConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-5 5],[-2 2],'k');
+xlim([-5 5]); ylim([-2 2]);
+axis('square');
+xlabel('M Cone Target Contrast (%)'); ylabel('M Cone Contrast (%)');
+subplot(3,4,11); hold on;
+plot(100*SConeTargetContrast(:),100*SConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-90 90],[-90 90],'k');
+xlim([-90 90]); ylim([-90 90]);
+axis('square');
+xlabel('SCone Target Contrast (%)'); ylabel('S Cone Contrast(%)');
+
+subplot(3,4,4); hold on;
+plot(100*LConeTargetContrast(:),100*LConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([0 20],[0 0],'k');
+xlim([0 20]); ylim([-2 2]);
+axis('square');
+xlabel('L Cone Target Contrast (%)'); ylabel('L Cone Contrast Deviation (%)');
+subplot(3,4,8); hold on;
+plot(100*MConeTargetContrast(:),100*MConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-5 5],[0 0],'k');
+xlim([-5 5]); ylim([-2 2]);
+axis('square');
+xlabel('M Cone Target Contrast (%)'); ylabel('M Cone Contrast Deviation (%)');
+subplot(3,4,12); hold on;
+plot(100*SConeTargetContrast(:),100*SConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-90 90],[0 0],'k');
+xlim([-90 90]); ylim([-2 2]);
+axis('square');
+xlabel('S Cone Target Contrast (%)'); ylabel('S Cone Contrast Deviation (%)');
 
 % The angular deviations start to lose meaning as the contrast gets very
 % small

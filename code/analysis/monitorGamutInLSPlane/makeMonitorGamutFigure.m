@@ -10,12 +10,14 @@ figureDir = getpref('ColorTracking','figureSavePath');
 whichExperiment = 'tracking';
 switch (whichExperiment)
     case 'tracking'
+        % Was used with 1024 levels, but hardware is 8-bit.
         whichCalFile = 'ViewSonicG220fb.mat';
         whichCalNumber = 1;
-        nDeviceBits = 10;
+        nDeviceBits = 8;
         whichCones = 'ss2';
         NOAMBIENT = false;
     case 'detection'
+        % Was done with 12-bit.
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
         nDeviceBits = 12;

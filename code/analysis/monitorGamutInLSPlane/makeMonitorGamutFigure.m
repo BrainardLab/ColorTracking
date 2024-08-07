@@ -12,7 +12,7 @@ switch (whichExperiment)
     case 'tracking'
         whichCalFile = 'ViewSonicG220fb.mat';
         whichCalNumber = 1;
-        nDeviceBits = 8;
+        nDeviceBits = 10;
         whichCones = 'ss2';
         NOAMBIENT = false;
     case 'detection'
@@ -237,7 +237,6 @@ end
 
 % Make a plot of the gamut in the LS contrast plane
 figure; clf; hold on;
-%plot(100*gamutContrast(1,:),100*gamutContrast(3,:),'ko','MarkerSize',8);
 plot([-100 100],[0 0],'k:','LineWidth',0.5);
 plot([0 0],[-100 100],'k:','LineWidth',0.5);
 plot(100*gamutContrast(1,:),100*gamutContrast(3,:),'k','LineWidth',2);
@@ -336,13 +335,18 @@ switch (whichExperiment)
             expContrastLMS = [expContrastLMS ; LMSstimulusContrast('experiment',expNameCell{ii})];
         end
         for ii = 1:size(expContrastLMS,1)
-            targetAngle(ii) = atand(expContrastLMS(ii,2),expContrastLMS(ii,1));
-            targetContrast(ii) = norm([expContrastLMS(ii,1) expContrastLMS(ii,2)]);
+            targetAnglesFromFunction(ii) = round(atand(expContrastLMS(ii,3)/expContrastLMS(ii,1)),2);
+            targetContrastsFromFunction(ii) = norm([expContrastLMS(ii,1) expContrastLMS(ii,3)]);
         end
 
-        targetAngleRaw = theSpecificAngles;
-        targetContrast = specificVectorLengthContrast;
-    case {'detection', 'detectionRaw'};
+        % Get unique angles, dealing with 180 degree symmetry.
+        targetAngleRaw = unique(targetAnglesFromFunction);
+
+        for aa = 1:length(targetAngleRaw)
+            index = find(targetAnglesFromFunction == targetAngleRaw(aa));
+            targetContrast(:,aa) = targetContrastsFromFunction(index);
+        end
+    case {'detection', 'detectionRaw'}
         % Options are 'MAB', 'BMC', 'KAS'
         contrastLim = 0.3;
         contrastDevLim = 0.015;
@@ -360,7 +364,7 @@ for cc = 1:size(targetContrast,1)
         % Don't care about length here as that is handled by the contrast
         % maximization code below.
         targetContrastDir = [cosd(targetAngle(cc,aa)) 0 sind(targetAngle(cc,aa))]';
-        targetConeContrast(:,cc,aa) = (targetContrast(cc,aa)*targetContrastDir);
+        targetConeContrast(:,cc,aa) = (imageScaleFactor*targetContrast(cc,aa)*targetContrastDir);
 
         % Convert from cone contrast to cone excitation direction.
         % Don't care about length here as that is handled by the contrast
@@ -376,19 +380,19 @@ for cc = 1:size(targetContrast,1)
         % Go back to contrast with both calibrations
         obtainedCones(:,cc,aa) = SettingsToSensor(calObjCones,theSettings);
         obtainedCones1(:,cc,aa) = SettingsToSensor(calObjCones1,theSettings);
-        obtainedConeContrast(:,cc,aa) = ((obtainedCones(:,cc,aa)-bgCones) ./ bgCones);
-        obtainedConeContrast1(:,cc,aa) = ((obtainedCones1(:,cc,aa)-bgCones1) ./ bgCones1);
+        obtainedConeContrast(:,cc,aa) = ((obtainedCones(:,cc,aa)-bgCones) ./ bgCones)/imageScaleFactor;
+        obtainedConeContrast1(:,cc,aa) = ((obtainedCones1(:,cc,aa)-bgCones1) ./ bgCones1)/imageScaleFactor;
 
         % Need to deal with angle flipping which can happen for small
         % contrasts.
-        obtainedAngle(cc,aa) = atand(obtainedConeContrast(3,cc,aa)/obtainedConeContrast(1,cc,aa));
+        obtainedAngle(cc,aa) = round(atand(obtainedConeContrast(3,cc,aa)/obtainedConeContrast(1,cc,aa)),2);
         if (targetAngle(cc,aa) > 0 && obtainedAngle(cc,aa) < 0)
             obtainedAngle(cc,aa) = obtainedAngle(cc,aa) + 180;
         end
         if (targetAngle(cc,aa) < 0 && obtainedAngle(cc,aa) > 0)
             obtainedAngle(cc,aa) = obtainedAngle(cc,aa) - 180;
         end
-        obtainedAngle1(cc,aa) = atand(obtainedConeContrast1(3,cc,aa)/obtainedConeContrast1(1,cc,aa));
+        obtainedAngle1(cc,aa) = round(atand(obtainedConeContrast1(3,cc,aa)/obtainedConeContrast1(1,cc,aa)),2);
         if (targetAngle(cc,aa) > 0 && obtainedAngle1(cc,aa) < 0)
             obtainedAngle1(cc,aa) = obtainedAngle1(cc,aa) + 180;
         end
@@ -401,11 +405,10 @@ for cc = 1:size(targetContrast,1)
         angleDeviation1(cc,aa) = obtainedAngle1(cc,aa)-targetAngle(cc,aa);
         contrastDeviation(cc,aa) = obtainedContrast(cc,aa) - targetContrast(cc,aa);
         contrastDeviation1(cc,aa) = obtainedContrast1(cc,aa) - targetContrast(cc,aa);
+        MConeDeviation(cc,aa) = obtainedConeContrast(2,cc,aa);
+        MConeDeviation1(cc,aa) = obtainedConeContrast1(2,cc,aa);
 
-        % Figure out the cone excitations for the settings we computed, and
-        % then convert to contrast as our maximum contrast in this direction.
-        %
-        % Dividing by imageScaleFactor handles the sine phase of the Gabor
+        % Report out
         fprintf('   Target contrasts:                   L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
             100*targetConeContrast(1,cc,aa),100*targetConeContrast(2,cc,aa),100*targetConeContrast(3,cc,aa), ...
             targetAngle(cc,aa),100*targetContrast(cc,aa));
@@ -421,31 +424,42 @@ end
 % Compute values to use
 targetAngleToUse = mean(obtainedAngle1,1);
 targetContrastToUse = obtainedContrast1;
-figure; clf; hold on;
-subplot(2,2,1); hold on;
+
+% Diagnostic plots
+figure; clf; 
+set(gcf,'Position',[10 10 800 1200]);
+subplot(3,2,1); hold on;
 plot(targetAngleRaw,targetAngleToUse,'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([-100 100],[-100 100],'k');
 xlim([-100 100]); ylim([-100 100]);
 axis('square');
 xlabel('Target Angle (deg)'); ylabel('Obtained Angle (deg)');
-subplot(2,2,2); hold on;
+title([whichExperiment ' ' subjID ' Bits ' num2str(nDeviceBits)]);
+subplot(3,2,2); hold on;
 plot(100*targetContrast(:),100*targetContrastToUse(:),'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([0 100*contrastLim],[0 100*contrastLim],'k');
 xlim([0 100*contrastLim]); ylim([0 100*contrastLim]);
 axis('square');
 xlabel('Target Contrast (%)'); ylabel('Obtained Contrast (%)');
-subplot(2,2,3); hold on;
+subplot(3,2,3); hold on;
 plot(targetAngleRaw,targetAngleToUse-targetAngleRaw,'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([-100 100],[0 0],'k');
 xlim([-100 100]); ylim([-angleDevLim angleDevLim]);
 axis('square');
 xlabel('Target Angle (deg)'); ylabel('Obtained Angle Deviation (deg)');
-subplot(2,2,4); hold on;
+subplot(3,2,4); hold on;
 plot(100*targetContrast(:),100*targetContrastToUse(:)-100*targetContrast(:),'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([0 100*contrastLim],[0 0],'k');
 xlim([0 100*contrastLim]); ylim([100*-contrastDevLim 100*contrastDevLim]);
 axis('square');
 xlabel('Target Contrast (%)'); ylabel('Obtained Contrast Deviation (%)');
+
+subplot(3,2,5); hold on;
+plot(100*targetContrast(:),100*MConeDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([0 100*contrastLim],[0 0],'k');
+xlim([0 100*contrastLim]); ylim([100*-contrastDevLim 100*contrastDevLim]);
+axis('square');
+xlabel('Target Contrast (%)'); ylabel('M Cone Contrast (%)');
 
 % The angular deviations start to lose meaning as the contrast gets very
 % small

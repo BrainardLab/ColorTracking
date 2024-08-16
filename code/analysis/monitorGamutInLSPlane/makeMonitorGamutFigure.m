@@ -5,6 +5,9 @@ clear; close all;
 
 %% Where to write figure
 figureDir = getpref('ColorTracking','figureSavePath');
+if (~exist(figureDir,'dir'))
+    mkdir(figureDir);
+end
 
 %% Load typical calibration file from the experiment
 whichExperiment = 'tracking';
@@ -13,7 +16,7 @@ switch (whichExperiment)
         % Was used with 1024 levels, but hardware is 8-bit.
         whichCalFile = 'ViewSonicG220fb.mat';
         whichCalNumber = 1;
-        nDeviceBits = 10;
+        nDeviceBits = 8;
         whichCones = 'ss2';
         NOAMBIENT = false;
     case 'detection'
@@ -247,7 +250,7 @@ ylim([-100 100]);
 axis('square');
 xlabel('L Cone Contrast (%)')
 ylabel('S Cone Contrast (%)');
-saveas(gcf,fullfile(figureDir,'MonitorGamutFigure.pdf'),'pdf')
+saveas(gcf,fullfile(figureDir,sprintf('MonitorGamutFigure_%s.pdf',whichExperiment)),'pdf');
 
 % This does the same computation for specific stimulus angles
 theSpecificAngles = [0   90.0000   75.0000  -75.0000   45.0000  -45.0000   78.7500   82.5000   86.2000  -78.7500  -82.5000  -86.2000   89.6000   88.6000   87.6000   22.5000   -1.4000  -22.5000];
@@ -319,17 +322,23 @@ theSpecificAngles;
 
 %% Convert cone contrasts with respect to first calibration to second.
 %
-% Angles from paper Figure 5 labels, contrasts read off of those graphs
-% roughly by eye.  If we go to 16 bit depth, the match would have been very
-% good, had the detection calibration been used the way it should have
-% been.
+% Use this code to correct the stimuli for further analysis.  The tracking
+% contrasts were fine although subject to quantization.  We just have to
+% live with the quantization, in part because we don't know the exact
+% location of the quantization steps in the hardwared used to drive the
+% monitor in that experiment and in part because we can't really do
+% anything about quantization splatter into the M cone plane beyone
+% acknowledge it.
 %
-% Use this code to correct the detection stimuli for further analysis
-subjID = 'MAB';
+% These analyses are for the peak of the Gabor in the image; the actual
+% contrasts vary across the image but we just summarize them with the max.
+%
+%  Subject ID options are 'MAB', 'BMC', 'KAS'
+subjID = 'KAS';
 switch (whichExperiment)
     case 'tracking'
-        contrastLim = 1.0;
-        contrastDevLim = 0.02;
+        contrastPlotLim = 1.0;
+        contrastDevPlotLim = 0.02;
         angleDevLim = 4;
         expNameCell = { 'Experiment1-Pos' 'Experiment2-Pos' ['Experiment3-' subjID '-Pos']};
         expContrastLMS = [];
@@ -349,9 +358,8 @@ switch (whichExperiment)
             targetContrast(:,aa) = targetContrastsFromFunction(index);
         end
     case {'detection', 'detectionRaw'}
-        % Options are 'MAB', 'BMC', 'KAS'
-        contrastLim = 1.0;
-        contrastDevLim = 0.02;
+        contrastPlotLim = 1.0;
+        contrastDevPlotLim = 0.02;
         angleDevLim = 2;
 
         [targetContrast,targetAngleRaw] = getContrastLSD(subjID,'combined');
@@ -363,14 +371,13 @@ for cc = 1:size(targetContrast,1)
         fprintf('Angle %0.1f, vector length contrast %0.1f\n',targetAngle(cc,aa),100*targetContrast(cc,aa));
 
         % Convert from cone contrast to cone excitation direction.
-        % Don't care about length here as that is handled by the contrast
-        % maximization code below.
         targetContrastDir = [cosd(targetAngle(cc,aa)) 0 sind(targetAngle(cc,aa))]';
         targetConeContrast(:,cc,aa) = (targetContrast(cc,aa)*targetContrastDir);
 
-        % Convert from cone contrast to cone excitation direction.
-        % Don't care about length here as that is handled by the contrast
-        % maximization code below.
+        % Convert from cone contrast to cone excitation direction.  The
+        % multiplication by imageScaleFactor handles the fact that the
+        % maximum contrast value in the displayed sine phase Gabor is not 1
+        % but rather a smaller number.
         targetConeExcitations =  (imageScaleFactor*targetConeContrast(:,cc,aa).* bgCones) + bgCones;
 
         % Compute settings we would have used using first calibration
@@ -385,8 +392,10 @@ for cc = 1:size(targetContrast,1)
         obtainedConeContrast(:,cc,aa) = ((obtainedCones(:,cc,aa)-bgCones) ./ bgCones)/imageScaleFactor;
         obtainedConeContrast1(:,cc,aa) = ((obtainedCones1(:,cc,aa)-bgCones1) ./ bgCones1)/imageScaleFactor;
 
-        % Need to deal with angle flipping which can happen for small
-        % contrasts.
+        % Need to deal with angle sign flipping which can happen for small
+        % contrasts. This is OK because we run both plus and minus angle
+        % in the experiments (I think) so keeping them all the same sign
+        % for analysis purposes is OK and really the only thing we can do.
         obtainedAngle(cc,aa) = round(atand(obtainedConeContrast(3,cc,aa)/obtainedConeContrast(1,cc,aa)),2);
         if (targetAngle(cc,aa) > 0 && obtainedAngle(cc,aa) < 0)
             obtainedAngle(cc,aa) = obtainedAngle(cc,aa) + 180;
@@ -432,8 +441,13 @@ for cc = 1:size(targetContrast,1)
 end
 
 % Compute values to use
+meanObtainedAngle = mean(obtainedAngle,1);
+meanObtainedAngle1 = mean(obtainedAngle1,1);
+meanAngleDeviation = meanObtainedAngle-targetAngle;
+meanAngleDeviation1 = meanObtainedAngle1-targetAngle;
 targetAngleToUse = mean(obtainedAngle1,1);
 targetContrastToUse = obtainedContrast1;
+maxTargetContrastToUse = max(targetContrastToUse,[],1);
 
 % Diagnostic plots
 figure; clf; 
@@ -447,8 +461,8 @@ xlabel('Target Angle (deg)'); ylabel('Obtained Angle (deg)');
 title([whichExperiment ' ' subjID ' Bits ' num2str(nDeviceBits)]);
 subplot(3,4,2); hold on;
 plot(100*targetContrast(:),100*targetContrastToUse(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([0 100*contrastLim],[0 100*contrastLim],'k');
-xlim([0 100*contrastLim]); ylim([0 100*contrastLim]);
+plot([0 100*contrastPlotLim],[0 100*contrastPlotLim],'k');
+xlim([0 100*contrastPlotLim]); ylim([0 100*contrastPlotLim]);
 axis('square');
 xlabel('Target Contrast (%)'); ylabel('Obtained Contrast (%)');
 subplot(3,4,5); hold on;
@@ -459,8 +473,8 @@ axis('square');
 xlabel('Target Angle (deg)'); ylabel('Obtained Angle Deviation (deg)');
 subplot(3,4,6); hold on;
 plot(100*targetContrast(:),100*targetContrastToUse(:)-100*targetContrast(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([0 100*contrastLim],[0 0],'k');
-xlim([0 100*contrastLim]); ylim([100*-contrastDevLim 100*contrastDevLim]);
+plot([0 100*contrastPlotLim],[0 0],'k');
+xlim([0 100*contrastPlotLim]); ylim([100*-contrastDevPlotLim 100*contrastDevPlotLim]);
 axis('square');
 xlabel('Target Contrast (%)'); ylabel('Obtained Contrast Deviation (%)');
 
@@ -504,8 +518,8 @@ xlabel('S Cone Target Contrast (%)'); ylabel('S Cone Contrast Deviation (%)');
 
 % The angular deviations start to lose meaning as the contrast gets very
 % small
-fprintf('\n    Had ambient/cones used been right: Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation(:))),max(abs(contrastDeviation(:))));
-fprintf('\n    What we actually got:              Max abs angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(angleDeviation1(:))),max(abs(contrastDeviation1(:))));
+fprintf('\n    Had ambient/cones used been right: Max abs mean angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(meanAngleDeviation(:))),max(abs(contrastDeviation(:))));
+fprintf('\n    What we actually got:              Max abs mean angle deviation %0.4f, max abs vector length deviation %0.4f\n',max(abs(meanAngleDeviation1(:))),max(abs(contrastDeviation1(:))));
 
 %% Gamut chromaticity plot for comparisons
 %

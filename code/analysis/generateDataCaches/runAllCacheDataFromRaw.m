@@ -1,6 +1,7 @@
 % Produce all the cached data from the raw data files  
 
-% Detection
+% Detection.  Check that the setting of CORRECTED flag in
+% getContrastLSD is as you want it.
 generateDetectionCachedData('MAB');
 generateDetectionCachedData('BMC');
 generateDetectionCachedData('KAS');

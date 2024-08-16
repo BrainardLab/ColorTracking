@@ -20,6 +20,8 @@ function [] = generateDetectionCachedData(subjID)
 % filename right.
 
 %{
+    % Check that the setting of CORRECTED in getContrastLSD is as you want
+    it.
     generateDetectionCachedData('MAB');
     generateDetectionCachedData('BMC');
     generateDetectionCachedData('KAS');

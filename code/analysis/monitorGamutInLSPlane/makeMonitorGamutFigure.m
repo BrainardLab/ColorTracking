@@ -10,7 +10,7 @@ if (~exist(figureDir,'dir'))
 end
 
 %% Load typical calibration file from the experiment
-whichExperiment = 'tracking';
+whichExperiment = 'detection';
 switch (whichExperiment)
     case 'tracking'
         % Was used with 1024 levels, but hardware is 8-bit.
@@ -23,7 +23,7 @@ switch (whichExperiment)
         % Was done with 12-bit.
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
-        nDeviceBits = 12;
+        nDeviceBits = 20;
         whichCones = 'asano';
         NOAMBIENT = true;
     case 'detectionRaw'
@@ -362,7 +362,10 @@ switch (whichExperiment)
         contrastDevPlotLim = 0.02;
         angleDevLim = 2;
 
-        [targetContrast,targetAngleRaw] = getContrastLSD(subjID,'combined');
+        % Don't want corrected data here, because we are going to figure
+        % out how to correct it.
+        CORRECTED = false;
+        [targetContrast,targetAngleRaw] = getContrastLSD(subjID,'combined',CORRECTED);
         targetAngleRaw = targetAngleRaw';
 end
 for cc = 1:size(targetContrast,1)

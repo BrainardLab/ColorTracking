@@ -1,11 +1,17 @@
-function [targetContrast,targetAngles] = getContrastLSD(subjName,expName)
+function [targetContrast,targetAngles,targetContrastOrig,targetAnglesOrig,CORRECTED] = getContrastLSD(subjName,expName,CORRECTED)
+
+% Correct for stimulus specification goof?
+if (nargin < 3 | isempty(CORRECTED))
+    CORRECTED = false;
+end
 
 % Corrected set to true returns stimulus values corrected for ambient light
 % and back to T_cones_ss2, but no correction for display quantization.  See
 % makeMonitorGamutFigure.  We ran that by hand with nBits = 20 for each
 % subject and copied over the resulting mean stimuus angles and maximum
 % contrasts.
-CORRECTED = true;
+targetContrastOrig = [];
+targetAnglesOrig = [];
 
 nContrasts = 6;
 if strcmp(subjName,'BMC')
@@ -24,10 +30,11 @@ if strcmp(subjName,'BMC')
             error('Need to tabulate corrected stimulus values for Exp2');
         end
     elseif strcmp(expName,'combined')
-        if (~CORRECTED)
-            targetAngles = [-86.25, -82.5,-78.75, -75, -45,0, 45, 75, 78.75, 82.5, 86.25, 90]';
-            maxContrasts = [0.10, 0.07, 0.05, 0.04, 0.0125 ,0.01 ,0.0125, 0.04,0.05, 0.07, 0.10, 0.09]';
-        else
+        targetAngles = [-86.25, -82.5,-78.75, -75, -45,0, 45, 75, 78.75, 82.5, 86.25, 90]';
+        maxContrasts = [0.10, 0.07, 0.05, 0.04, 0.0125 ,0.01 ,0.0125, 0.04,0.05, 0.07, 0.10, 0.09]';
+        targetAnglesOrig = targetAngles;
+        maxContrastsOrig = maxContrasts;
+        if (CORRECTED)
             targetAngles = [ -86.1700  -82.3600  -78.5600  -74.7600  -44.5500   -0.0083   44.5633   74.7983   78.6000   82.4083   86.2100   90.0200];
             maxContrasts = [0.0968    0.0678    0.0484    0.0388    0.0122    0.0098    0.0122    0.0388    0.0484    0.0678    0.0968    0.0871];
         end
@@ -50,10 +57,11 @@ elseif strcmp(subjName,'MAB')
             error('Need to tabulate corrected stimulus values for Exp1');
         end
     elseif strcmp(expName,'combined')
-        if (~CORRECTED)
-            targetAngles   = [-86.25, -82.5,-78.75, -75,   -45,    0,    45,   75, 78.75, 82.5, 86.25, 90]';
-            maxContrasts= [0.14,    0.10, 0.09, 0.06, 0.025, 0.0175, 0.02, 0.07, 0.07, 0.10, 0.18, 0.18]';
-        else
+        targetAngles   = [-86.25, -82.5,-78.75, -75,   -45,    0,    45,   75, 78.75, 82.5, 86.25, 90]';
+        maxContrasts= [0.14,    0.10, 0.09, 0.06, 0.025, 0.0175, 0.02, 0.07, 0.07, 0.10, 0.18, 0.18]';
+        targetAnglesOrig = targetAngles;
+        maxContrastsOrig = maxContrasts;
+        if (CORRECTED)
             targetAngles = [-86.1700  -82.3600  -78.5600  -74.7617  -44.5533   -0.0233   44.5600   74.8000   78.6000   82.4083   86.2100   90.0200];
             maxContrasts = [0.1356    0.0969    0.0872    0.0582    0.0244    0.0172    0.0195    0.0678    0.0678    0.0968    0.1743    0.1743];
         end
@@ -71,17 +79,28 @@ elseif strcmp(subjName,'KAS')
     elseif strcmp(expName,'Exp2')
         if (~CORRECTED)
             targetAngles   = [-86.25, -82.5,-78.75, 78.75, 82.5, 86.25];
-            maxContrasts= [0.10, 0.08, 0.055, 0.055, 0.08, 0.10]';
+            maxContrasts   = [0.10, 0.08, 0.055, 0.055, 0.08, 0.10]';
         else
             error('Need to tabulate corrected stimulus values for Exp2');
         end
     elseif strcmp(expName,'combined')
-        if (~CORRECTED)
-            targetAngles   = [-86.25, -82.5,-78.75,  -75,   -45,    0,    45,   75, 78.75, 82.5, 86.25,  90]';
-            maxContrasts= [0.10,    0.08, 0.055, 0.06, 0.015, 0.01, 0.015, 0.04, 0.055, 0.08, 0.10, 0.09]';
-        else
+        targetAngles   = [-86.25, -82.5,-78.75,  -75,   -45,    0,    45,   75, 78.75, 82.5, 86.25,  90]';
+
+        % Whe we analyze the actual data files, the 90 deg max contrast
+        % comes back as 0.15, not 0.09.  Curiously, it is hard coded as
+        % 0.10 in the epxerimental progrma ExpLMSdetectionWrapper.m.
+        %maxContrasts = [0.10,    0.08, 0.055, 0.06, 0.015, 0.01, 0.015, 0.04, 0.055, 0.08, 0.10, 0.09]';
+        maxContrasts = [0.10,    0.08, 0.055, 0.04, 0.015, 0.01, 0.015, 0.04, 0.055, 0.08, 0.10, 0.15]';
+        targetAnglesOrig = targetAngles;
+        maxContrastsOrig = maxContrasts;
+        if (CORRECTED)
             targetAngles = [-86.1700  -82.3600  -78.5600  -74.7617  -44.5567   -0.0083   44.5617   74.7983   78.6017   82.4083   86.2100   90.0200];
-            maxContrasts = [0.0968    0.0775    0.0533    0.0582    0.0146    0.0098    0.0146    0.0388    0.0533    0.0775    0.0968    0.0871];
+
+            % The corrected contrasts here that are commented out
+            % correspond to the maxContrasts above that are commented out,
+            % for the same reason.
+            %maxContrasts = [0.0968    0.0775    0.0533    0.0582    0.0146    0.0098    0.0146    0.0388    0.0533    0.0775    0.0968    0.0871];
+            maxContrasts = [0.0968    0.0775    0.0533    0.0388    0.0146    0.0098    0.0146    0.0388    0.0533    0.0775    0.0968    0.1452];
         end 
     else
         error('Exp. code not known')
@@ -90,9 +109,12 @@ else
     error('Subject not known')
 end
 
-targetContrast= zeros(nContrasts,length(maxContrasts));
+targetContrast = zeros(nContrasts,length(maxContrasts));
 
 for ii = 1:length(maxContrasts)
     targetContrast(:,ii) = linspace(maxContrasts(ii)/nContrasts,maxContrasts(ii),nContrasts);
+    if (CORRECTED)
+        targetContrastOrig(:,ii) = linspace(maxContrastsOrig(ii)/nContrasts,maxContrastsOrig(ii),nContrasts);
+    end
 end
 

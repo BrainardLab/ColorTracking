@@ -23,7 +23,7 @@ switch (whichExperiment)
         % Was done with 12-bit.
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
-        nDeviceBits = 20;
+        nDeviceBits = 12;
         whichCones = 'asano';
         NOAMBIENT = true;
     case 'detectionRaw'

@@ -334,7 +334,7 @@ theSpecificAngles;
 % contrasts vary across the image but we just summarize them with the max.
 %
 %  Subject ID options are 'MAB', 'BMC', 'KAS'
-subjID = 'MAB';
+subjID = 'KAS';
 switch (whichExperiment)
     case 'tracking'
         contrastPlotLim = 1.0;

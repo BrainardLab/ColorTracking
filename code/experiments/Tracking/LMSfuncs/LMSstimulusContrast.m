@@ -109,7 +109,7 @@ switch p.Results.experiment
         [dir3] = generateStimContrasts(0,87.6, expspace(.85,.16,6));
         % 22.5 degree
         [dir4] = generateStimContrasts(0,22.5, expspace(.19,.03,6));
-        % -0.9 degree
+        % -1.4 degree
         [dir5] = generateStimContrasts(0,-1.4, expspace(.18,.03,6));
         % -22.5 degree
         [dir6] = generateStimContrasts(0,-22.5,expspace(.19,.03,6));
@@ -124,7 +124,7 @@ switch p.Results.experiment
         [dir3] = -1.* generateStimContrasts(0,87.6, expspace(.85,.16,6));
         % 22.5 degree
         [dir4] = -1.* generateStimContrasts(0,22.5, expspace(.19,.03,6));
-        % -0.9 degree
+        % -1.4 degree
         [dir5] = -1.* generateStimContrasts(0,-1.4, expspace(.18,.03,6));
         % -22.5 degree
         [dir6] = -1.* generateStimContrasts(0,-22.5,expspace(.19,.03,6));

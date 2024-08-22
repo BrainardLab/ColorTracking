@@ -61,8 +61,10 @@ thePacket.kernel.timebase = [];
 % The Meta Data
 %
 % Because of the correction, 90.2 shows up as -89.98, and that mucks up
-% other things.  Fix here by forcing it back to 90.2.
-thePacket.metaData.stimDirections = atand(cS(:)./cL(:));
+% other things.  Fix here by forcing it back to 90.2.  There is also
+% some weird numerical non-uniqueness, which we fix by rounding to two
+% decimal places.
+thePacket.metaData.stimDirections = round(atand(cS(:)./cL(:)),2);
 thePacket.metaData.stimDirections(thePacket.metaData.stimDirections < -89.5) = ...
     thePacket.metaData.stimDirections(thePacket.metaData.stimDirections < -89.5) + 180;
 

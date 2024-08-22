@@ -10,7 +10,7 @@ if (~exist(figureDir,'dir'))
 end
 
 %% Load typical calibration file from the experiment
-whichExperiment = 'detection';
+whichExperiment = 'tracking';
 switch (whichExperiment)
     case 'tracking'
         % Was used with 1024 levels, but hardware is 8-bit.
@@ -23,7 +23,7 @@ switch (whichExperiment)
         % Was done with 12-bit.
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
-        nDeviceBits = 20;
+        nDeviceBits = 12;
         whichCones = 'asano';
         NOAMBIENT = true;
     case 'detectionRaw'
@@ -334,7 +334,7 @@ theSpecificAngles;
 % contrasts vary across the image but we just summarize them with the max.
 %
 %  Subject ID options are 'MAB', 'BMC', 'KAS'
-subjID = 'KAS';
+subjID = 'MAB';
 switch (whichExperiment)
     case 'tracking'
         contrastPlotLim = 1.0;
@@ -456,9 +456,18 @@ meanObtainedAngle = mean(obtainedAngle,1);
 meanObtainedAngle1 = mean(obtainedAngle1,1);
 meanAngleDeviation = meanObtainedAngle-targetAngle;
 meanAngleDeviation1 = meanObtainedAngle1-targetAngle;
-targetAngleToUse = mean(obtainedAngle1,1);
-targetContrastToUse = obtainedContrast1;
+
+switch (whichExperiment)
+    case 'tracking'
+        targetAngleToUse = targetAngle(1,:);
+        targetContrastToUse = targetContrast;
+    case {'detection' 'detectionRaw'}
+        targetAngleToUse = mean(obtainedAngle1,1);
+        targetContrastToUse = obtainedContrast1;
+end
 maxTargetContrastToUse = max(targetContrastToUse,[],1);
+minTargetContrastToUse = min(targetContrastToUse,[],1);
+[targetAngleToUse ; maxTargetContrastToUse ; minTargetContrastToUse]
 
 % Diagnostic plots
 figure; clf; 

@@ -154,7 +154,7 @@ if (doBootstrapFits)
 end
 
 %% Print the params
-fprintf('\ntfeCTM Two Mechanism Parameters:\n');
+fprintf('\ntfeLSD Two Mechanism Parameters:\n');
 lsdOBJ.paramPrint(pcParams)
 
 %% Print boostrap fit info if we did it

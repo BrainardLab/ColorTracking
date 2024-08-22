@@ -12,7 +12,7 @@ function fitDetectionCachedData(subjID)
 close all;
 
 %% Parameters
-doBootstrapFits = false;
+doBootstrapFits = true;
 doDiagnosticBootPlots = true;
 verbose = false;
 

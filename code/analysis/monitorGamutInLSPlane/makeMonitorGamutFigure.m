@@ -23,7 +23,7 @@ switch (whichExperiment)
         % Was done with 12-bit.
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
-        nDeviceBits = 12;
+        nDeviceBits = 20;
         whichCones = 'asano';
         NOAMBIENT = true;
     case 'detectionRaw'
@@ -334,7 +334,7 @@ theSpecificAngles;
 % contrasts vary across the image but we just summarize them with the max.
 %
 %  Subject ID options are 'MAB', 'BMC', 'KAS'
-subjID = 'KAS';
+subjID = 'MAB';
 switch (whichExperiment)
     case 'tracking'
         contrastPlotLim = 1.0;
@@ -413,8 +413,16 @@ for cc = 1:size(targetContrast,1)
         if (targetAngle(cc,aa) < 0 && obtainedAngle1(cc,aa) > 0)
             obtainedAngle1(cc,aa) = obtainedAngle1(cc,aa) - 180;
         end
+
+        % The obtained values in obtainedContrast1 include M cone splatter.
+        % Can also restrict this to just LS plane, but for the correction
+        % we decided to apply, the M cone splatter is neglible (less than
+        % 0.01% for the cases I checked by hand - MAB max contrasts for no
+        % quantization) so leaving it this way.
+        % Not entirely clear what the in principle right was is.
         obtainedContrast(cc,aa) = norm(obtainedConeContrast(:,cc,aa));
         obtainedContrast1(cc,aa) = norm(obtainedConeContrast1(:,cc,aa));
+        obtainedContrast1LSOnly(cc,aa) = norm(obtainedConeContrast1([1 3],cc,aa));
         angleDeviation(cc,aa) = obtainedAngle(cc,aa)-targetAngle(cc,aa);
         angleDeviation1(cc,aa) = obtainedAngle1(cc,aa)-targetAngle(cc,aa);
         contrastDeviation(cc,aa) = obtainedContrast(cc,aa) - targetContrast(cc,aa);
@@ -431,15 +439,15 @@ for cc = 1:size(targetContrast,1)
         SConeContrastDeviation1(cc,aa) = obtainedConeContrast1(3,cc,aa)-targetConeContrast(3,cc,aa);
 
         % Report out
-        fprintf('   Target contrasts:                   L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
+        fprintf('   Target contrasts:                   L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.3f, vector length %0.2f%%\n', ...
             100*targetConeContrast(1,cc,aa),100*targetConeContrast(2,cc,aa),100*targetConeContrast(3,cc,aa), ...
             targetAngle(cc,aa),100*targetContrast(cc,aa));
-        fprintf('   Had ambient/cones used been right:  L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
+        fprintf('   Had ambient/cones used been right:  L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.3f, vector length %0.2f%%\n', ...
             100*obtainedConeContrast(1,cc,aa),100*obtainedConeContrast(2,cc,aa),100*obtainedConeContrast(3,cc,aa), ...
             obtainedAngle(cc,aa),100*obtainedContrast(cc,aa));
-        fprintf('   What we actually got:               L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.1f, vector length %0.1f%%\n', ...
+        fprintf('   What we actually got:               L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.3f, vector length %0.2f%%, vector length LS only %0.2f%%\n', ...
             100*obtainedConeContrast1(1,cc,aa),100*obtainedConeContrast1(2,cc,aa),100*obtainedConeContrast1(3,cc,aa), ...
-            obtainedAngle1(cc,aa),100*obtainedContrast1(aa));
+            obtainedAngle1(cc,aa),100*obtainedContrast1(cc,aa),100*obtainedContrast1LSOnly(cc,aa));
     end
 end
 

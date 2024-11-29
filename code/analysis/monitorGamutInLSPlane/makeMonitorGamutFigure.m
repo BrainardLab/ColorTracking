@@ -82,6 +82,14 @@ switch (whichCones)
         T_cones = SplineCmf(S_cones_ss2,T_cones_ss2,Scolor);
         T_cones1 = T_cones;
 end
+
+% Explore other T_cones1
+psiParamsStruct1.coneParams = DefaultConeParams('cie_asano');
+psiParamsStruct1.coneParams.fieldSizeDegrees = 3;
+psiParamsStruct1.coneParams.ageYears = 32;
+T_cones1 = ComputeObserverFundamentals(psiParamsStruct1.coneParams,Scolor);
+
+% Set the sensor color spaces
 SetSensorColorSpace(calObjCones,T_cones,Scolor);
 SetSensorColorSpace(calObjCones1,T_cones1,Scolor);
 

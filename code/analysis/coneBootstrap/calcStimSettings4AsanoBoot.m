@@ -1,4 +1,4 @@
-function [stimSettings,theContrast] = calcStimSettings4AsanoBoot(calStructOBJ,S_cones,T_cones,theAngle,nMonitorBits)
+function [stimSettings,maxContrast] = calcStimSettings4AsanoBoot(calStructOBJ,S_cones,T_cones,theAngle,nMonitorBits,maxContrast)
 % calcStimSettings4AsanoBoot
 %
 % Calculates the nominal settings for the the stimuli 
@@ -17,14 +17,13 @@ backgroundLMS_hat = SettingsToSensor(calStructOBJ,PrimaryToSettings(calStructOBJ
 backgroundPrimaries_hat = SensorToPrimary(calStructOBJ,backgroundLMS_hat);
 
 %% Create a chromatic modulation 
-theContrast = 1;
-LMScontrastModulation1 = generateStimContrasts(0,theAngle,theContrast)';
+LMScontrastModulation1 = generateStimContrasts(0,theAngle,maxContrast)';
 imgInfo.badIndex = 1;
 while imgInfo.badIndex > 0 
     [stimSettings1,stimExcitations,imgInfo] = generateChromaticGabor(calStructOBJ,1,backgroundLMS_hat,LMScontrastModulation1);
     if imgInfo.badIndex > 0 
-        theContrast = theContrast - 0.005;
-        LMScontrastModulation1 = generateStimContrasts(0,theAngle,theContrast)';
+        maxContrast = maxContrast - 0.005;
+        LMScontrastModulation1 = generateStimContrasts(0,theAngle,maxContrast)';
     end
 end
 

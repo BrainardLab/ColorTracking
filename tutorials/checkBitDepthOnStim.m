@@ -25,11 +25,8 @@ thePacket.response.timebase = timebase;
 % The stimulus
 thePacket.stimulus.values   = [cL,cS]';
 thePacket.stimulus.timebase = timebase;
-
-
 thePacket.kernel.values = [];
 thePacket.kernel.timebase = [];
-
 thePacket.metaData.stimDirections = atand(cS./cL);
 thePacket.metaData.stimContrasts  = vecnorm([cS,cL]')';
 

@@ -10,8 +10,19 @@ if (~exist(figureDir,'dir'))
 end
 
 %% Load typical calibration file from the experiment
-whichExperiment = 'tracking';
+whichExperiment = 'detectionIntended';
 switch (whichExperiment)
+    case 'tracking16'
+        % Was used with 1024 levels, but hardware is 8-bit.
+        whichCalFile = 'ViewSonicG220fb.mat';
+        whichCalNumber = 1;
+        nDeviceBits = 16;
+        whichCones = 'ss2';
+        NOAMBIENT = false;
+        contrastDevLim = 5e-2;
+        contrastLim = 100;
+        smallContrastLim = 25;
+        angleDevLim = 1;
     case 'tracking'
         % Was used with 1024 levels, but hardware is 8-bit.
         whichCalFile = 'ViewSonicG220fb.mat';
@@ -19,19 +30,31 @@ switch (whichExperiment)
         nDeviceBits = 8;
         whichCones = 'ss2';
         NOAMBIENT = false;
-    case 'detection'
+        contrastDevLim = 2;
+        contrastLim = 100;
+        smallContrastLim = 25;
+        angleDevLim = 4;
+    case 'detectionAsRun'
         % Was done with 12-bit.
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
         nDeviceBits = 12;
         whichCones = 'asano';
         NOAMBIENT = true;
-    case 'detectionRaw'
+        contrastDevLim = 10e-2;
+        contrastLim = 100;
+        smallContrastLim = 25;
+        angleDevLim = 1;
+    case 'detectionIntended'
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
         nDeviceBits = 12;
         whichCones = 'ss2';
         NOAMBIENT = false;
+        contrastDevLim = 10e-2;
+        contrastLim = 100;
+        smallContrastLim = 25;
+        angleDevLim = 1;
 end
 resourcesDir =  getpref('ColorTracking','CalDataFolder');
 load(fullfile(resourcesDir,whichCalFile),'cals');
@@ -85,7 +108,7 @@ end
 
 % Explore other T_cones1
 psiParamsStruct1.coneParams = DefaultConeParams('cie_asano');
-psiParamsStruct1.coneParams.fieldSizeDegrees = 3;
+psiParamsStruct1.coneParams.fieldSizeDegrees = 2;
 psiParamsStruct1.coneParams.ageYears = 32;
 T_cones1 = ComputeObserverFundamentals(psiParamsStruct1.coneParams,Scolor);
 
@@ -323,8 +346,7 @@ for aa = 1:length(theSpecificAngles)
         100*specificVectorLengthContrast(aa));
 end
 
-% Look at these variables to get a table of max gamut contrasts in these
-% angular directions
+%% Look at these variables to get a table of max gamut contrasts in these angular directions
 specificVectorLengthContrast;
 theSpecificAngles;
 
@@ -344,10 +366,7 @@ theSpecificAngles;
 %  Subject ID options are 'MAB', 'BMC', 'KAS'
 subjID = 'MAB';
 switch (whichExperiment)
-    case 'tracking'
-        contrastPlotLim = 1.0;
-        contrastDevPlotLim = 0.02;
-        angleDevLim = 4;
+    case {'tracking', 'tracking16'}
         expNameCell = { 'Experiment1-Pos' 'Experiment2-Pos' ['Experiment3-' subjID '-Pos']};
         expContrastLMS = [];
         for ii = 1:length(expNameCell)
@@ -365,8 +384,8 @@ switch (whichExperiment)
             index = find(targetAnglesFromFunction == targetAngleRaw(aa));
             targetContrast(:,aa) = targetContrastsFromFunction(index);
         end
-    case {'detection', 'detectionRaw'}
-        contrastPlotLim = 1.0;
+    case {'detectionAsRun', 'detectionIntended'}
+        contrastLim = 1.0;
         contrastDevPlotLim = 0.02;
         angleDevLim = 2;
 
@@ -376,6 +395,7 @@ switch (whichExperiment)
         [targetContrast,targetAngleRaw] = getContrastLSD(subjID,'combined',CORRECTED);
         targetAngleRaw = targetAngleRaw';
 end
+
 for cc = 1:size(targetContrast,1)
     targetAngle(cc,:) = targetAngleRaw;
     for aa = 1:length(targetAngleRaw)
@@ -389,10 +409,10 @@ for cc = 1:size(targetContrast,1)
         % multiplication by imageScaleFactor handles the fact that the
         % maximum contrast value in the displayed sine phase Gabor is not 1
         % but rather a smaller number.
-        targetConeExcitations =  (imageScaleFactor*targetConeContrast(:,cc,aa).* bgCones) + bgCones;
+        targetConeExcitations(:,cc,aa) =  (imageScaleFactor*targetConeContrast(:,cc,aa).* bgCones) + bgCones;
 
         % Compute settings we would have used using first calibration
-        [theSettings,badIndex] = SensorToSettings(calObjCones,targetConeExcitations);
+        [theSettings,badIndex] = SensorToSettings(calObjCones,targetConeExcitations(:,cc,aa));
         if (any(badIndex))
             fprintf('   Out of gamut\n');
         end
@@ -402,6 +422,25 @@ for cc = 1:size(targetContrast,1)
         obtainedCones1(:,cc,aa) = SettingsToSensor(calObjCones1,theSettings);
         obtainedConeContrast(:,cc,aa) = ((obtainedCones(:,cc,aa)-bgCones) ./ bgCones)/imageScaleFactor;
         obtainedConeContrast1(:,cc,aa) = ((obtainedCones1(:,cc,aa)-bgCones1) ./ bgCones1)/imageScaleFactor;
+
+        % Post-recetporal contrasts
+        targetLuminance(cc,aa) = 2*targetConeExcitations(1,cc,aa) + targetConeExcitations(2,cc,aa);
+        targetLuminanceBg(cc,aa) = 2*bgCones(1) + bgCones(2);
+        targetLuminanceContrast(cc,aa) = (targetLuminance(cc,aa)-targetLuminanceBg(cc,aa)) / targetLuminanceBg(cc,aa);
+        targetLminusMContrast(cc,aa) = targetConeContrast(1,cc,aa) -  targetConeContrast(2,cc,aa);
+        targetLplusMContrast(cc,aa) = targetConeContrast(1,cc,aa) +  targetConeContrast(2,cc,aa);
+
+        obtainedLuminance(cc,aa) = 2*obtainedCones(1,cc,aa) + obtainedCones(2,cc,aa);
+        obtainedLuminanceBg(cc,aa) = 2*bgCones(1) + bgCones(2);
+        obtainedLuminanceContrast(cc,aa) = (obtainedLuminance(cc,aa)-obtainedLuminanceBg(cc,aa)) / obtainedLuminanceBg(cc,aa);
+        obtainedLminusMContrast(cc,aa) = obtainedConeContrast(1,cc,aa) - obtainedConeContrast(2,cc,aa);
+        obtainedLplusMContrast(cc,aa) = obtainedConeContrast(1,cc,aa) + obtainedConeContrast(2,cc,aa);
+
+        obtainedLuminance1(cc,aa) = 2*obtainedCones1(1,cc,aa) + obtainedCones1(2,cc,aa);
+        obtainedLuminanceBg1(cc,aa) = 2*bgCones1(1) + bgCones1(2);
+        obtainedLuminanceContrast1(cc,aa) = (obtainedLuminance1(cc,aa)-obtainedLuminanceBg1(cc,aa)) / obtainedLuminanceBg1(cc,aa);
+        obtainedLminusMContrast1(cc,aa) = obtainedConeContrast1(1,cc,aa) - obtainedConeContrast1(2,cc,aa);
+        obtainedLplusMContrast1(cc,aa) = obtainedConeContrast1(1,cc,aa) + obtainedConeContrast1(2,cc,aa);
 
         % Need to deal with angle sign flipping which can happen for small
         % contrasts. This is OK because we run both plus and minus angle
@@ -421,7 +460,7 @@ for cc = 1:size(targetContrast,1)
         if (targetAngle(cc,aa) < 0 && obtainedAngle1(cc,aa) > 0)
             obtainedAngle1(cc,aa) = obtainedAngle1(cc,aa) - 180;
         end
-
+    
         % The obtained values in obtainedContrast1 include M cone splatter.
         % Can also restrict this to just LS plane, but for the correction
         % we decided to apply, the M cone splatter is neglible (less than
@@ -456,6 +495,10 @@ for cc = 1:size(targetContrast,1)
         fprintf('   What we actually got:               L cone contrast %7.3f%%, M, %7.3f%%, S %7.3f%%, angle %7.3f, vector length %0.2f%%, vector length LS only %0.2f%%\n', ...
             100*obtainedConeContrast1(1,cc,aa),100*obtainedConeContrast1(2,cc,aa),100*obtainedConeContrast1(3,cc,aa), ...
             obtainedAngle1(cc,aa),100*obtainedContrast1(cc,aa),100*obtainedContrast1LSOnly(cc,aa));
+
+        % if (targetAngle(cc,aa) == 90)
+        %     disp 90 %fprintf('Angle is 90 deg, L cone target contrast %0.5f, obtained %0.5f\n',LConeTargetContrast(cc,aa),LConeContrast1(cc,aa));
+        % end
     end
 end
 
@@ -466,10 +509,10 @@ meanAngleDeviation = meanObtainedAngle-targetAngle;
 meanAngleDeviation1 = meanObtainedAngle1-targetAngle;
 
 switch (whichExperiment)
-    case 'tracking'
+    case {'tracking' 'tracking16'}
         targetAngleToUse = targetAngle(1,:);
         targetContrastToUse = targetContrast;
-    case {'detection' 'detectionRaw'}
+    case {'detectionAsRun' 'detectionIntended'}
         targetAngleToUse = mean(obtainedAngle1,1);
         targetContrastToUse = obtainedContrast1;
 end
@@ -479,70 +522,233 @@ minTargetContrastToUse = min(targetContrastToUse,[],1);
 
 % Diagnostic plots
 figure; clf; 
-set(gcf,'Position',[10 10 1500 1200]);
-subplot(3,4,1); hold on;
+set(gcf,'Position',[10 10 1200 2000]);
+nPlotRows = 7;
+nPlotCols = 5;
+nextSubplot = 1;
+
+% Row 1: Target and obtained angles/contrast
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
 plot(targetAngleRaw,targetAngleToUse,'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([-100 100],[-100 100],'k');
-xlim([-100 100]); ylim([-100 100]);
+xlim([-100 100]);
+ylim([-100 100]);
 axis('square');
 xlabel('Target Angle (deg)'); ylabel('Obtained Angle (deg)');
 title([whichExperiment ' ' subjID ' Bits ' num2str(nDeviceBits)]);
-subplot(3,4,2); hold on;
-plot(100*targetContrast(:),100*targetContrastToUse(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([0 100*contrastPlotLim],[0 100*contrastPlotLim],'k');
-xlim([0 100*contrastPlotLim]); ylim([0 100*contrastPlotLim]);
-axis('square');
-xlabel('Target Contrast (%)'); ylabel('Obtained Contrast (%)');
-subplot(3,4,5); hold on;
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
 plot(targetAngleRaw,targetAngleToUse-targetAngleRaw,'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([-100 100],[0 0],'k');
-xlim([-100 100]); ylim([-angleDevLim angleDevLim]);
+xlim([-100 100]);
+ylim([-angleDevLim angleDevLim]);
 axis('square');
 xlabel('Target Angle (deg)'); ylabel('Obtained Angle Deviation (deg)');
-subplot(3,4,6); hold on;
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*targetContrast(:),100*targetContrastToUse(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([0 contrastLim],[0 contrastLim],'k');
+xlim([0 contrastLim]);
+ylim([0 contrastLim]);
+axis('square');
+xlabel('Target Contrast (%)'); ylabel('Obtained Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
 plot(100*targetContrast(:),100*targetContrastToUse(:)-100*targetContrast(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([0 100*contrastPlotLim],[0 0],'k');
-xlim([0 100*contrastPlotLim]); ylim([100*-contrastDevPlotLim 100*contrastDevPlotLim]);
+plot([0 contrastLim],[0 0],'k');
+xlim([0 contrastLim]);
+ylim([-contrastDevLim contrastDevLim]);
 axis('square');
 xlabel('Target Contrast (%)'); ylabel('Obtained Contrast Deviation (%)');
 
-subplot(3,4,3); hold on;
+% Advance to next row
+nextSubplot = nextSubplot + 1;
+
+% Row 2: L cone contrast
+index = find(abs(targetAngle) > 80 & abs(targetAngle) < 100);
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(targetAngle(:),100*LConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+xlim([-100 100]);
+ylim([-smallContrastLim/5 smallContrastLim]);
+axis('square');
+xlabel('Target Angle (deg)'); ylabel('L Cone Contrast(%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
 plot(100*LConeTargetContrast(:),100*LConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([-5 20],[-5 20],'k');
-xlim([-5 20]); ylim([-5 20]);
+plot([-smallContrastLim/5 smallContrastLim],[-smallContrastLim/5 smallContrastLim],'k');
+xlim([-smallContrastLim/5 smallContrastLim]);
+ylim([-smallContrastLim/5 smallContrastLim]);
 axis('square');
 xlabel('L Cone Target Contrast (%)'); ylabel('L Cone Contrast(%)');
-subplot(3,4,7); hold on;
-plot(100*MConeTargetContrast(:),100*MConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([-5 5],[-2 2],'k');
-xlim([-5 5]); ylim([-2 2]);
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*LConeTargetContrast(:),100*LConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot(100*LConeTargetContrast(index),100*LConeContrastDeviation1(index),'ko','MarkerFaceColor','k','MarkerSize',10);
+plot([-smallContrastLim/5 smallContrastLim],[0 0],'k');
+xlim([-smallContrastLim/5 smallContrastLim]);
+ylim([-contrastDevLim contrastDevLim]);
 axis('square');
-xlabel('M Cone Target Contrast (%)'); ylabel('M Cone Contrast (%)');
-subplot(3,4,11); hold on;
+xlabel('L Cone Target Contrast (%)'); ylabel('L Cone Contrast Deviation (%)');
+
+% Advance to next row
+nextSubplot = nextSubplot + 1;
+nextSubplot = nextSubplot + 1;
+
+% Row 3: M cone contrast
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(targetAngle(:),100*MConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+xlim([-100 100]);
+ylim([-smallContrastLim/5 smallContrastLim]);
+axis('square');
+xlabel('Target Angle (deg)'); ylabel('M Cone Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*LConeTargetContrast(:),100*MConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-smallContrastLim/5 smallContrastLim],[-smallContrastLim/5 smallContrastLim],'k');
+xlim([-smallContrastLim/5 smallContrastLim]);
+ylim([-smallContrastLim/5 smallContrastLim]);
+axis('square');
+xlabel('L Cone Target Contrast (%)'); ylabel('M Cone Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*LConeTargetContrast(:),100*MConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot(100*LConeTargetContrast(index),100*MConeContrastDeviation1(index),'ko','MarkerFaceColor','k','MarkerSize',10);
+plot([-smallContrastLim/5 smallContrastLim],[0 0],'k');
+xlim([-smallContrastLim/5 smallContrastLim]);
+ylim([-contrastDevLim contrastDevLim]);
+axis('square');
+xlabel('L Cone Target Contrast (%)'); ylabel('M Cone Contrast Deviation (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*LConeContrastDeviation1(:),100*MConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-contrastDevLim contrastDevLim],[-contrastDevLim contrastDevLim],'k');
+ylim([-contrastDevLim contrastDevLim])
+ylim([-contrastDevLim contrastDevLim]);
+axis('square');
+xlabel('L Cone Contrast Deviation (%)'); ylabel('M Cone Contrast Deviation (%)');
+
+% Advance to next row
+nextSubplot = nextSubplot + 1;
+
+% Row 4: S cones
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
 plot(100*SConeTargetContrast(:),100*SConeContrast1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
 plot([-90 90],[-90 90],'k');
-xlim([-90 90]); ylim([-90 90]);
+xlim([-90 90]);
+ylim([-90 90]);
 axis('square');
 xlabel('SCone Target Contrast (%)'); ylabel('S Cone Contrast(%)');
 
-subplot(3,4,4); hold on;
-plot(100*LConeTargetContrast(:),100*LConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([0 20],[0 0],'k');
-xlim([0 20]); ylim([-2 2]);
-axis('square');
-xlabel('L Cone Target Contrast (%)'); ylabel('L Cone Contrast Deviation (%)');
-subplot(3,4,8); hold on;
-plot(100*MConeTargetContrast(:),100*MConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
-plot([-5 5],[0 0],'k');
-xlim([-5 5]); ylim([-2 2]);
-axis('square');
-xlabel('M Cone Target Contrast (%)'); ylabel('M Cone Contrast Deviation (%)');
-subplot(3,4,12); hold on;
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
 plot(100*SConeTargetContrast(:),100*SConeContrastDeviation1(:),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot(100*SConeTargetContrast(index),100*SConeContrastDeviation1(index),'ko','MarkerFaceColor','k','MarkerSize',10);
 plot([-90 90],[0 0],'k');
-xlim([-90 90]); ylim([-2 2]);
+xlim([-90 90]);
+ylim([-contrastDevLim contrastDevLim]);
 axis('square');
 xlabel('S Cone Target Contrast (%)'); ylabel('S Cone Contrast Deviation (%)');
+
+% Advance to next ro
+nextSubplot = nextSubplot + 1;
+nextSubplot = nextSubplot + 1;
+nextSubplot = nextSubplot + 1;
+
+% Row 5: Luminance
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(targetAngle(:),100*(targetLuminanceContrast(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-100 100],[0 0],'k');
+xlim([-100 100]);
+ylim([-smallContrastLim smallContrastLim]);
+axis('square');
+xlabel('Target Angle'); ylabel('Target Luminance Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*targetLuminanceContrast(:),100*(obtainedLuminanceContrast1(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-smallContrastLim smallContrastLim],[-smallContrastLim smallContrastLim],'k');
+xlim([-smallContrastLim smallContrastLim]);
+ylim([-smallContrastLim smallContrastLim]);
+axis('square');
+xlabel('Target Luminance Contrast (%)'); ylabel('Obtained Luminance Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*targetLuminanceContrast(:),100*(obtainedLuminanceContrast1(:)-targetLuminanceContrast(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot(100*targetLuminanceContrast(index),100*(obtainedLuminanceContrast1(index)-targetLuminanceContrast(index)),'ko','MarkerFaceColor','k','MarkerSize',10);
+plot([-smallContrastLim/5 smallContrastLim],[0 0],'k');
+plot([-smallContrastLim smallContrastLim],[-0.5 -0.5],'k:');
+plot([-smallContrastLim smallContrastLim],[0.5 0.5],'k:');
+plot([-smallContrastLim smallContrastLim],[-1 -1],'k:');
+plot([-smallContrastLim smallContrastLim],[1 1],'k:');
+xlim([-smallContrastLim/5 smallContrastLim]);
+ylim([-smallContrastLim/5 smallContrastLim]);
+ylim([-contrastDevLim contrastDevLim]);
+axis('square');
+xlabel('Target Luminance Contrast (%)'); ylabel('Luminance Contrast Deviation (%)');
+
+% Advance to next row
+nextSubplot = nextSubplot + 1;
+nextSubplot = nextSubplot + 1;
+
+% Row 6: L+M
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(targetAngle(:),100*(targetLplusMContrast(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+xlim([-100 100]);
+ylim([-smallContrastLim smallContrastLim]);
+axis('square');
+xlabel('Target Angle'); ylabel('Target L+M Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*targetLplusMContrast(:),100*(targetLplusMContrast(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-smallContrastLim smallContrastLim],[-smallContrastLim smallContrastLim],'k');
+xlim([-smallContrastLim smallContrastLim]);
+ylim([-smallContrastLim smallContrastLim]);
+axis('square');
+xlabel('Target L+M Contrast (%)'); ylabel('L+M Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*targetLplusMContrast(:),100*(obtainedLplusMContrast1(:)-targetLplusMContrast(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot(100*targetLplusMContrast(index),100*(obtainedLplusMContrast1(index)-targetLplusMContrast(index)),'ko','MarkerFaceColor','k','MarkerSize',10);
+plot([-smallContrastLim smallContrastLim],[0 0],'k');
+plot([-smallContrastLim smallContrastLim],[-0.5 -0.5],'k:');
+plot([-smallContrastLim smallContrastLim],[0.5 0.5],'k:');
+plot([-smallContrastLim smallContrastLim],[-1 -1],'k:');
+plot([-smallContrastLim smallContrastLim],[1 1],'k:');
+xlim([-smallContrastLim smallContrastLim]);
+ylim([-contrastDevLim contrastDevLim]);
+axis('square');
+xlabel('Target L+M Contrast (%)'); ylabel('L+M Contrast Deviation (%)');
+
+% Advance to next row
+nextSubplot = nextSubplot + 1;
+nextSubplot = nextSubplot + 1;
+
+% Row 7: L-M
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(targetAngle(:),100*(targetLminusMContrast(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+xlim([-100 100]);
+ylim([-smallContrastLim smallContrastLim]);
+axis('square');
+xlabel('Target Angle'); ylabel('Target L-M Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*targetLminusMContrast(:),100*(obtainedLminusMContrast1(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot([-smallContrastLim smallContrastLim],[-smallContrastLim smallContrastLim],'k');
+xlim([-smallContrastLim smallContrastLim]);
+ylim([-smallContrastLim smallContrastLim]);
+axis('square');
+xlabel('Target L-M Contrast (%)'); ylabel('L-M Contrast (%)');
+
+subplot(nPlotRows,nPlotCols,nextSubplot); hold on; nextSubplot = nextSubplot + 1;
+plot(100*targetLminusMContrast(:),100*(obtainedLminusMContrast1(:)-targetLminusMContrast(:)),'ro','MarkerFaceColor','r','MarkerSize',10);
+plot(100*targetLminusMContrast(index),100*(obtainedLminusMContrast1(index)-targetLminusMContrast(index)),'ko','MarkerFaceColor','k','MarkerSize',10);
+plot([-smallContrastLim smallContrastLim],[0 0],'k');
+plot([-smallContrastLim smallContrastLim],[-0.5 -0.5],'k:');
+plot([-smallContrastLim smallContrastLim],[0.5 0.5],'k:');
+plot([-smallContrastLim smallContrastLim],[-1 -1],'k:');
+plot([-smallContrastLim smallContrastLim],[1 1],'k:');
+xlim([-smallContrastLim smallContrastLim]);
+ylim([-contrastDevLim contrastDevLim]);
+axis('square');
+xlabel('Target L-M Contrast (%)'); ylabel('L-M Contrast Deviation (%)');
 
 % The angular deviations start to lose meaning as the contrast gets very
 % small
@@ -568,7 +774,7 @@ trackingBlue_xy = [0.1600 0.0805]';
 trackingBg_xy = [0.3258, 0.3722]';
 trackingAmbientWeights = [0.014 0.010 0.022];
 
-% 'detectionRaw'
+% 'detectionIntended'
 % 
 % These are from the first of the detection calibrations, but the fourth
 % does not differ much.

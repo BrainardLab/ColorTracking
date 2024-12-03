@@ -36,7 +36,7 @@ settingsData = load(fullfile(cacheFileDir,'cacheStimSettingAsanoBoot.mat'));
 S = [380 5 81];
 coneParams = DefaultConeParams('cie_asano');
 coneParams.ageYears = 32;
-coneParams.fieldSizeDegrees = 2;
+coneParams.fieldSizeDegrees = 4;
 
 % Load ss2 fundamentals
 load T_cones_ss2

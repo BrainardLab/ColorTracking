@@ -36,15 +36,15 @@ settingsData = load(fullfile(cacheFileDir,'cacheStimSettingAsanoBoot.mat'));
 S = [380 5 81];
 coneParams = DefaultConeParams('cie_asano');
 coneParams.ageYears = 32;
-coneParams.fieldSizeDegrees = 4;
+coneParams.fieldSizeDegrees = 2;
 
 % Load ss2 fundamentals
 load T_cones_ss2
 
 % Outer loop over Asano parameters
 theAngles = 80:0.05:100;
-nAsanoBoots = 10000;
-CHECK_NOMINAL = 0;
+nAsanoBoots = 10;
+CHECK_NOMINAL = 2;
 for aa = 1:nAsanoBoots
 
     % Draw 8 parameters with standard deviations as in comment above

@@ -10,7 +10,8 @@ if (~exist(figureDir,'dir'))
 end
 
 %% Load typical calibration file from the experiment
-whichExperiment = 'detectionIntended';
+whichExperiment = ['tracking' ...
+    ''];
 switch (whichExperiment)
     case 'tracking16'
         % Was used with 1024 levels, but hardware is 8-bit.
@@ -19,7 +20,8 @@ switch (whichExperiment)
         nDeviceBits = 16;
         whichCones = 'ss2';
         NOAMBIENT = false;
-        contrastDevLim = 5e-2;
+        contrastDevLim = 10e-2;
+        contrastDevLimS = 2*10e-2;
         contrastLim = 100;
         smallContrastLim = 25;
         angleDevLim = 1;
@@ -31,6 +33,7 @@ switch (whichExperiment)
         whichCones = 'ss2';
         NOAMBIENT = false;
         contrastDevLim = 2;
+        contrastDevLimS = 4;
         contrastLim = 100;
         smallContrastLim = 25;
         angleDevLim = 4;
@@ -39,9 +42,10 @@ switch (whichExperiment)
         whichCalFile = 'ViewSonicG220fb_670.mat';
         whichCalNumber = 4;
         nDeviceBits = 12;
-        whichCones = 'asano';
+        whichCones = 'asano30yo';
         NOAMBIENT = true;
         contrastDevLim = 10e-2;
+        contrastDevLimS = 10*10e-2;
         contrastLim = 100;
         smallContrastLim = 25;
         angleDevLim = 1;
@@ -52,6 +56,7 @@ switch (whichExperiment)
         whichCones = 'ss2';
         NOAMBIENT = false;
         contrastDevLim = 10e-2;
+        contrastDevLimS = 10*10e-2;
         contrastLim = 100;
         smallContrastLim = 25;
         angleDevLim = 1;
@@ -91,7 +96,7 @@ end
 % it was ComputeObserverFundamentals with parameters below, which
 % are not quite T_cones_ss2.
 switch (whichCones)
-    case 'asano'
+    case 'asano30yo'
         psiParamsStruct.coneParams = DefaultConeParams('cie_asano');
         psiParamsStruct.coneParams.fieldSizeDegrees = 2;
         psiParamsStruct.coneParams.ageYears = 30;
@@ -644,7 +649,7 @@ plot(100*SConeTargetContrast(:),100*SConeContrastDeviation1(:),'ro','MarkerFaceC
 plot(100*SConeTargetContrast(index),100*SConeContrastDeviation1(index),'ko','MarkerFaceColor','k','MarkerSize',10);
 plot([-90 90],[0 0],'k');
 xlim([-90 90]);
-ylim([-contrastDevLim contrastDevLim]);
+ylim([-contrastDevLimS contrastDevLimS]);
 axis('square');
 xlabel('S Cone Target Contrast (%)'); ylabel('S Cone Contrast Deviation (%)');
 

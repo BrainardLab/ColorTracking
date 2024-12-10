@@ -177,7 +177,7 @@ plot(pcFromFitParams.values,'r','LineWidth',2,'LineStyle','--');
 
 % Isoresponse contour and summary evaluation of fit to non-linearity
 plotIsoContLSD(pcParams,'thePacket',thePacket,'plotInfo',plotInfo, ...
-    'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25);
+    'desiredEqContrast',1,'ellipseXLim',1,'ellipseYLim',1.25);
 
 % Montage of psychometric functions
 uniqColorDirs = unique(thePacket.metaData.stimDirections)';

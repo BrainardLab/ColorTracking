@@ -25,7 +25,7 @@ function [tcHndlCont,tcHndlNonlin] = plotIsoContAndNonLin(paramsCTM, varargin)
 p = inputParser; p.KeepUnmatched = true; p.PartialMatching = false;
 p.addRequired('paramsCTM',@isstruct);
 p.addParameter('targetLag',.400,@isnumeric);
-p.addParameter('nPoints',100,@isnumeric);
+p.addParameter('nPoints',1000,@isnumeric);
 p.addParameter('elPlotColor',[0.4 0.4 0.4],@isvector);
 p.addParameter('xSampleBase',[],@isvector);
 p.addParameter('lSampleBase',[-.5:0.01:.5],@isvector);

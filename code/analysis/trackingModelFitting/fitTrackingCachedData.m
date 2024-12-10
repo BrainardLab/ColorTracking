@@ -15,7 +15,7 @@ close all;
 %
 % The bootstrap fitting is slow, and doesn't affect the figures.  So you
 % can set that to false if you're just fussing with figures.
-doBootstrapFits = false;
+doBootstrapFits = true;
 fitOneMechanism = false;
 doDiagnosticBootPlots = false;
 saveFigures = true;

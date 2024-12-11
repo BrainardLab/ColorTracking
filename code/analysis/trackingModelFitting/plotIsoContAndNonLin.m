@@ -75,8 +75,8 @@ ylim([-p.Results.ellipseYLim p.Results.ellipseYLim]);
 axh = gca;
 
 % plot axes
-line([-1.25 1.25], [0 0], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
-line([0 0], [-1.25 1.25], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
+line([-p.Results.ellipseXLim p.Results.ellipseXLim], [0 0], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
+line([0 0], [-p.Results.ellipseYLim p.Results.ellipseYLim], 'Color', [.3 .3 .3], 'LineStyle', ':','LineWidth', 2);
 
 % plot ellipse
 if paramsCTM.minAxisRatio < 10^-5 % one mech case

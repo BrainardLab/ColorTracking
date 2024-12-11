@@ -15,7 +15,7 @@ close all;
 %
 % The bootstrap fitting is slow, and doesn't affect the figures.  So you
 % can set that to false if you're just fussing with figures.
-doBootstrapFits = true;
+doBootstrapFits = false;
 fitOneMechanism = false;
 doDiagnosticBootPlots = false;
 saveFigures = true;
@@ -297,7 +297,7 @@ end
 
 %% Plots ellipse and summary fit plot 
 [tcHndlCont,tcHndlNonlin] = plotIsoContAndNonLin(rotMTwoMechParams,'thePacket',thePacket,'plotInfo',plotInfo, ...
-    'desiredEqContrast',1,'ellipseXLim',0.2,'ellipseYLim',1.25,'saveFigure',saveFigures);
+    'desiredEqContrast',1,'ellipseXLim',1.25,'ellipseYLim',1.25,'saveFigure',saveFigures);
 
 %% Plot montage of lag vs contrast for each direction
 %
